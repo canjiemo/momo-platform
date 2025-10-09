@@ -207,3 +207,14 @@ COMMENT ON COLUMN sys_user_role.id IS '主键ID';
 COMMENT ON COLUMN sys_user_role.user_id IS '用户ID(关联sys_user.id)';
 COMMENT ON COLUMN sys_user_role.role_id IS '角色ID(关联sys_role.id)';
 COMMENT ON COLUMN sys_user_role.created_at IS '创建时间';
+
+
+-- 1. 添加 user_type 字段
+ALTER TABLE sys_user
+    ADD COLUMN user_type SMALLINT DEFAULT 0;
+
+COMMENT ON COLUMN sys_user.user_type IS '用户类型: 0-运维人员 1-教师 2-学生';
+
+-- 2. 更新现有数据 (所有现有用户默认为运维人员)
+UPDATE sys_user SET user_type = 0 WHERE user_type IS NULL;
+
