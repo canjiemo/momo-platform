@@ -1,0 +1,8 @@
+# 测试生成的报告文件
+security_test_report.md
+test_output.log
+*.log
+
+# 临时文件
+*.tmp
+*.bak

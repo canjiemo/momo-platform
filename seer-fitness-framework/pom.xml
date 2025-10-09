@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.seer</groupId>
+        <artifactId>seer-fitness-edu</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>seer-fitness-framework</artifactId>
+
+    <description>
+        框架层模块，提供系统级通用功能：字典管理、认证授权基础、菜单类型等
+        可独立作为其他项目的基础框架使用
+    </description>
+
+    <properties>
+
+    </properties>
+
+    <dependencies>
+        <!-- MyJPA Spring Boot Starter -->
+        <dependency>
+            <groupId>io.github.mocanjie</groupId>
+            <artifactId>myjpa-spring-boot-starter</artifactId>
+            <version>spring3.jsql</version>
+        </dependency>
+
+        <!-- Spring Boot Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- JSON Processing -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

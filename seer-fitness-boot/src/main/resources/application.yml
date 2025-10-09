@@ -1,0 +1,135 @@
+spring:
+  application:
+    name: seer-fitness-edu
+  profiles:
+    active: local
+
+  # PostgreSQL Database Configuration
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/fitness-edu?currentSchema=public&stringtype=unspecified
+    username: admin
+    password: 123456
+
+    # Druid Connection Pool Configuration
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall
+      validation-query-timeout: 3
+
+      # Druid Web Monitor
+      web-stat-filter:
+        enabled: true
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: admin123
+  data:
+    redis:
+      host: localhost
+      database: 0
+      timeout: 3000ms
+      port: 30069
+      password: Seer@bigdata
+
+# Server Configuration
+server:
+  port: 8080
+  undertow:
+    threads:
+      io: 4
+      worker: 20
+    buffer-size: 1024
+    direct-buffers: true
+
+# Security Configuration (安全配置)
+security:
+  # 验证码配置
+  captcha:
+    enabled: true                        # 是否启用验证码
+    type: DIGIT                          # 验证码类型: DIGIT(纯数字) | LETTER(纯字母) | MIXED(数字+字母,推荐)
+    length: 4                            # 验证码长度
+    width: 120                           # 图片宽度(像素)
+    height: 40                           # 图片高度(像素)
+    line-count: 0                        # 干扰线数量
+    expire-seconds: 300                  # 过期时间(秒)
+
+  # 密码策略配置
+  password:
+    initial-password: "Aa123456!"        # 管理员初始化用户时的默认密码
+    policy:
+      min-length: 8                      # 最小长度
+      max-length: 15                     # 最大长度
+      require-lowercase: true            # 是否必须包含小写字母
+      require-uppercase: true            # 是否必须包含大写字母
+      require-digit: true                # 是否必须包含数字
+      require-special: true              # 是否必须包含特殊字符
+      special-chars: "!@#$%^&*()_+-=[]{}|;:,.<>?"  # 允许的特殊字符
+    backend:
+      bcrypt-strength: 12                # BCrypt加密强度(4-15)
+
+  # 账户锁定策略
+  account-lock:
+    enabled: true                        # 是否启用账户锁定
+    attempts:
+      max-fail-count: 5                  # 最大失败次数(超过后锁定账户)
+      auto-reset-hours: 24               # 失败次数自动重置时间(小时)
+    lock-time:
+      strategy: PROGRESSIVE              # 锁定策略: FIXED(固定时间) | PROGRESSIVE(渐进式) | CUSTOM(自定义)
+      progressive:
+        base-minutes: 30                 # 基础锁定时间(分钟)
+        multiplier: 2.0                  # 递增倍数
+        max-minutes: 1440                # 最大锁定时间(分钟,24小时)
+    reset:
+      on-success: true                   # 登录成功后是否重置失败计数
+      time-based: true                   # 是否启用基于时间的自动重置
+    ip-lock:
+      enabled: true                      # 是否启用IP锁定
+      max-attempts: 20                   # 同一IP最大失败次数
+      lock-minutes: 60                   # IP锁定时间(分钟)
+      record-hours: 2                    # IP失败记录保存时间(小时)
+    whitelist:
+      users:                             # 用户白名单(不受锁定限制)
+        - "admin"
+        - "system"
+      ips:                               # IP白名单(不受锁定限制)
+        - "127.0.0.1"
+        - "192.168.1.0/24"
+    messages:
+      fail-template: "用户名或密码错误，还有{remaining}次机会"
+      lock-template: "账户已被锁定{minutes}分钟，解锁时间：{unlock-time}"
+      ip-lock-message: "IP地址访问频繁，已被临时锁定，请稍后再试"
+
+# JWT Configuration (JWT配置)
+jwt:
+  secret: "9F922B9833DEDAC0176412709F157797"  # JWT密钥(256位)
+  expiration: 86400000                   # Token过期时间(毫秒,24小时)
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.seer.fitness: DEBUG
+    org.springframework.web: INFO
+    com.alibaba.druid: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/seer-fitness-edu.log
+    max-size: 10MB
+    max-history: 30

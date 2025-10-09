@@ -1,0 +1,73 @@
+package com.seer.fitness.system.util;
+
+import com.seer.fitness.system.service.DictDataService;
+import com.seer.fitness.system.service.OrganizationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+/**
+ * 字典工具类
+ * 提供字典值到标签的转换功能
+ *
+ * @author seer-fitness
+ */
+@Component
+public class DictUtil {
+
+    private static DictDataService dictDataService;
+    private static OrganizationService organizationService;
+
+    @Autowired
+    public void setDictDataService(DictDataService dictDataService) {
+        DictUtil.dictDataService = dictDataService;
+    }
+
+    @Autowired
+    public void setOrganizationService(OrganizationService organizationService) {
+        DictUtil.organizationService = organizationService;
+    }
+
+    /**
+     * 根据字典类型和值获取字典标签
+     *
+     * @param dictType 字典类型
+     * @param dictValue 字典值
+     * @return 字典标签，如果未找到返回原值
+     */
+    public static String getLabel(String dictType, Object dictValue) {
+        if (!StringUtils.hasText(dictType) || dictValue == null) {
+            return dictValue == null ? "" : String.valueOf(dictValue);
+        }
+
+        try {
+            String label = dictDataService.getDesc(dictType, dictValue);
+            return StringUtils.hasText(label) ? label : String.valueOf(dictValue);
+        } catch (Exception e) {
+            // 如果获取字典标签失败，返回原值
+            return String.valueOf(dictValue);
+        }
+    }
+
+    /**
+     * 根据组织ID获取组织名称
+     *
+     * @param organizationId 组织ID
+     * @return 组织名称，如果未找到返回原值
+     */
+    public static String getOrganizationName(String organizationId) {
+        if (!StringUtils.hasText(organizationId)) {
+            return "";
+        }
+
+        try {
+            // 先尝试转换为Long类型
+            Long orgId = Long.valueOf(organizationId);
+            var org = organizationService.getById(orgId);
+            return org != null && StringUtils.hasText(org.getOrgName()) ? org.getOrgName() : organizationId;
+        } catch (Exception e) {
+            // 如果获取组织名称失败，返回原值
+            return organizationId;
+        }
+    }
+}

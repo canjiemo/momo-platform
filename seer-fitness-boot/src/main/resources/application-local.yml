@@ -1,0 +1,33 @@
+# Development Environment Configuration
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:postgresql://localhost:5432/fitness-edu?currentSchema=public&stringtype=unspecified
+    username: admin
+    password: 123456
+    druid:
+      stat-view-servlet:
+        enabled: true
+        login-username: admin
+        login-password: admin123
+
+  data:
+    redis:
+      host: localhost
+      port: 30069
+      password: Seer@bigdata
+
+# Server Configuration
+server:
+  port: 8080
+
+# Logging - More verbose in development
+logging:
+  level:
+    root: INFO
+    com.seer.fitness: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.jdbc: DEBUG
+    com.alibaba.druid: DEBUG
+    io.github.mocanjie: DEBUG
