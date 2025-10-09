@@ -8,7 +8,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/fitness-edu?currentSchema=public&stringtype=unspecified
+    url: jdbc:postgresql://localhost:5432/fitness-edu?currentSchema=school_seer&stringtype=unspecified
     username: admin
     password: 123456
 
