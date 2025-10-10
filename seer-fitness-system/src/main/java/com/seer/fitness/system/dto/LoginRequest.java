@@ -11,6 +11,9 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
+    @NotBlank(message = "租户编码不能为空")
+    private String tenantCode;  // 租户编码（必填）
+
     @NotBlank(message = "用户名不能为空")
     private String username;
 

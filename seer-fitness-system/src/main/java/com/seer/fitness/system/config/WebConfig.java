@@ -29,13 +29,33 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AuthInterceptor authInterceptor;
 
+    @Autowired(required = false)
+    private com.seer.fitness.system.interceptor.TenantInterceptor tenantInterceptor;
+
     /**
      * 添加拦截器
+     * 注意顺序：
+     * 1. TenantInterceptor - 先设置租户上下文
+     * 2. AuthInterceptor - 再进行认证鉴权
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 1. 租户拦截器（阶段5新增）
+        if (tenantInterceptor != null) {
+            registry.addInterceptor(tenantInterceptor)
+                    .addPathPatterns("/**")
+                    .excludePathPatterns(
+                            "/auth/login",    // 排除登录接口
+                            "/auth/captcha",  // 排除验证码接口
+                            "/error"          // 排除错误页面
+                    )
+                    .order(1);  // 优先级：1（最先执行）
+        }
+
+        // 2. 认证拦截器
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/**");
+                .addPathPatterns("/**")
+                .order(2);  // 优先级：2（在租户拦截器之后）
     }
 
     /**
