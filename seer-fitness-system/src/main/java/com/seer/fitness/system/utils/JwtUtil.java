@@ -28,24 +28,48 @@ public class JwtUtil {
     private JwtConfig jwtConfig;
 
     /**
-     * 生成JWT Token
+     * 生成JWT Token（不含租户信息，用于平台管理员）
      */
     public String generateToken(String username, Long userId) {
+        return generateTokenWithTenant(username, userId, null, null, null);
+    }
+
+    /**
+     * 生成JWT Token（包含租户信息）
+     * 阶段5新增：支持多租户隔离
+     *
+     * @param username   用户名
+     * @param userId     用户ID
+     * @param tenantId   租户ID
+     * @param tenantCode 租户编码
+     * @param schemaName Schema名称
+     * @return JWT Token
+     */
+    public String generateTokenWithTenant(String username, Long userId,
+                                         Long tenantId, String tenantCode, String schemaName) {
         String tokenId = UUID.randomUUID().toString();
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtConfig.getExpiration());
 
         SecretKey key = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
 
-        return Jwts.builder()
+        // 构建JWT
+        var builder = Jwts.builder()
                 .setId(tokenId)
                 .setSubject(username)
                 .claim("userId", userId)
                 .claim("tokenId", tokenId)
                 .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(key)
-                .compact();
+                .setExpiration(expiration);
+
+        // 如果有租户信息，添加到JWT中
+        if (tenantId != null && tenantCode != null && schemaName != null) {
+            builder.claim("tenantId", tenantId);
+            builder.claim("tenantCode", tenantCode);
+            builder.claim("schemaName", schemaName);
+        }
+
+        return builder.signWith(key).compact();
     }
 
     /**
@@ -91,6 +115,53 @@ public class JwtUtil {
     public String getTokenIdFromToken(String token) {
         Claims claims = parseToken(token);
         return claims.get("tokenId", String.class);
+    }
+
+    /**
+     * 从Token中获取租户ID
+     * 阶段5新增
+     */
+    public Long getTenantIdFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            return claims.get("tenantId", Long.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 从Token中获取租户编码
+     * 阶段5新增
+     */
+    public String getTenantCodeFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            return claims.get("tenantCode", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 从Token中获取Schema名称
+     * 阶段5新增
+     */
+    public String getSchemaNameFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            return claims.get("schemaName", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 检查Token是否包含租户信息
+     * 阶段5新增
+     */
+    public boolean hasTenantInfo(String token) {
+        return getTenantIdFromToken(token) != null;
     }
 
     /**

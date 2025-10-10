@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,42 +51,85 @@ public class AuthService {
     @Autowired
     private CaptchaService captchaService;
 
+    @Autowired(required = false)
+    private ITenantService tenantService;
+
     /**
      * 用户登录
+     * 阶段5改造：支持多租户隔离
      */
     public LoginResponse login(LoginRequest request, String ip) {
         String username = request.getUsername();
         String password = request.getPassword();
+        String tenantCode = request.getTenantCode();
 
         // 1. 验证验证码
         if (!captchaService.verifyCaptcha(request.getCaptchaId(), request.getCaptcha())) {
             throw new BusinessException("验证码错误或已过期");
         }
 
-        // 2. 查询用户
-        SysUser user = userService.findByUsername(username);
-        if (user == null) {
-            throw new BusinessException("用户名或密码错误");
+        // 2. 查询租户信息
+        com.seer.fitness.system.dto.TenantDTO tenant = null;
+        if (tenantService != null) {
+            tenant = tenantService.getByCode(tenantCode);
+            if (tenant == null) {
+                throw new BusinessException("租户不存在或已被禁用");
+            }
+
+            // 检查租户状态
+            if (tenant.getStatus() != 1) { // 1=正常
+                throw new BusinessException("租户已被禁用，请联系平台管理员");
+            }
+
+            // 检查租户是否过期
+            if (tenant.getExpiredAt() != null && tenant.getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
+                throw new BusinessException("租户已过期，请联系平台管理员");
+            }
+
+            // 设置租户上下文（用于查询用户）
+            com.seer.fitness.system.tenant.TenantContext.setTenant(
+                tenant.getId(),
+                tenant.getTenantCode(),
+                tenant.getSchemaName()
+            );
         }
 
-        // 3. 检查用户状态
-        if (user.getStatus() != 1) {
-            throw new BusinessException("账户已被禁用");
-        }
+        try {
+            // 3. 查询用户（此时会自动路由到租户Schema）
+            SysUser user = userService.findByUsername(username);
+            if (user == null) {
+                throw new BusinessException("用户名或密码错误");
+            }
 
-        // 4. 验证密码
-        if (!passwordUtil.verifyPassword(password, user.getPassword())) {
-            // 记录登录失败
-            accountLockService.recordFailedAttempt(username, ip);
-            throw new BusinessException("用户名或密码错误");
-        }
+            // 4. 检查用户状态
+            if (user.getStatus() != 1) {
+                throw new BusinessException("账户已被禁用");
+            }
 
-        // 5. 登录成功，重置失败记录
-        accountLockService.onLoginSuccess(username, ip);
+            // 5. 验证密码
+            if (!passwordUtil.verifyPassword(password, user.getPassword())) {
+                // 记录登录失败
+                accountLockService.recordFailedAttempt(username, ip);
+                throw new BusinessException("用户名或密码错误");
+            }
 
-        // 6. 生成JWT Token
-        String token = jwtUtil.generateToken(username, user.getId());
-        String tokenId = jwtUtil.getTokenIdFromToken(token);
+            // 6. 登录成功，重置失败记录
+            accountLockService.onLoginSuccess(username, ip);
+
+            // 7. 生成JWT Token（包含租户信息）
+            String token;
+            if (tenant != null) {
+                token = jwtUtil.generateTokenWithTenant(
+                    username,
+                    user.getId(),
+                    tenant.getId(),
+                    tenant.getTenantCode(),
+                    tenant.getSchemaName()
+                );
+            } else {
+                token = jwtUtil.generateToken(username, user.getId());
+            }
+            String tokenId = jwtUtil.getTokenIdFromToken(token);
 
         // 7. 获取用户角色和权限
         List<RoleDTO> roles = roleService.getUserRoles(user.getId());
@@ -107,11 +151,15 @@ public class AuthService {
         redisUtil.set("user:token:" + tokenId, userCacheInfo, 24, TimeUnit.HOURS);
 
 
-        LoginResponse result = new LoginResponse(token);
+            LoginResponse result = new LoginResponse(token);
 
-        log.info("用户登录成功: username={}, ip={}", username, ip);
-        return result;
+            log.info("用户登录成功: username={}, tenantCode={}, ip={}", username, tenantCode, ip);
+            return result;
 
+        } finally {
+            // 清理租户上下文
+            com.seer.fitness.system.tenant.TenantContext.clear();
+        }
     }
 
     /**
