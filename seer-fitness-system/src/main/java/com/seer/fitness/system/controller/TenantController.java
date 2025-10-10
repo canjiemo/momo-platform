@@ -32,6 +32,9 @@ public class TenantController extends MyBaseController {
     @Autowired
     private ITenantService tenantService;
 
+    @Autowired(required = false)
+    private com.seer.fitness.system.tenant.DynamicTenantDataSourceManager dataSourceManager;
+
     /**
      * 分页查询租户
      *
@@ -204,5 +207,72 @@ public class TenantController extends MyBaseController {
     public MyResponseResult<Boolean> checkSchemaName(@PathVariable String schemaName) {
         boolean exists = tenantService.existsBySchemaName(schemaName);
         return super.doJsonOut(!exists); // 返回是否可用（不存在则可用）
+    }
+
+    // ==================== 数据源管理端点（运维功能）====================
+
+    /**
+     * 获取已加载的租户连接池信息
+     * 用于监控和运维
+     *
+     * @return 租户连接池统计信息
+     */
+    @GetMapping("/datasource/stats")
+    @RequireAuth(permissions = {"tenant:view"})
+    public MyResponseResult<java.util.Map<String, Object>> getDataSourceStats() {
+        if (dataSourceManager == null) {
+            return super.doJsonOut(java.util.Collections.singletonMap("message", "多租户模式未启用"));
+        }
+
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        stats.put("tenantCount", dataSourceManager.getTenantCount());
+        stats.put("loadedTenants", dataSourceManager.getLoadedTenants());
+        stats.put("multiTenantEnabled", true);
+
+        return super.doJsonOut(stats);
+    }
+
+    /**
+     * 预热租户连接池
+     * 提前创建连接池，避免首次访问延迟
+     *
+     * @param schemaName 租户Schema名称
+     * @return 操作结果
+     */
+    @PostMapping("/datasource/warmup/{schemaName}")
+    @RequireAuth(permissions = {"tenant:update"})
+    public MyResponseResult warmUpDataSource(@PathVariable String schemaName) {
+        if (dataSourceManager == null) {
+            return super.doJsonDefaultMsg("多租户模式未启用");
+        }
+
+        try {
+            dataSourceManager.warmUp(schemaName);
+            return super.doJsonDefaultMsg("租户连接池预热成功");
+        } catch (Exception e) {
+            return super.doJsonDefaultMsg("租户连接池预热失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 移除租户连接池
+     * 租户下线或删除时使用
+     *
+     * @param schemaName 租户Schema名称
+     * @return 操作结果
+     */
+    @PostMapping("/datasource/remove/{schemaName}")
+    @RequireAuth(permissions = {"tenant:delete"})
+    public MyResponseResult removeDataSource(@PathVariable String schemaName) {
+        if (dataSourceManager == null) {
+            return super.doJsonDefaultMsg("多租户模式未启用");
+        }
+
+        try {
+            dataSourceManager.removeTenant(schemaName);
+            return super.doJsonDefaultMsg("租户连接池已移除");
+        } catch (Exception e) {
+            return super.doJsonDefaultMsg("移除租户连接池失败：" + e.getMessage());
+        }
     }
 }
