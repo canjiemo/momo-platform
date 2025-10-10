@@ -85,8 +85,13 @@ public class TenantController extends MyBaseController {
 
     /**
      * 创建租户
-     * 阶段2：只创建租户记录，状态为待激活
-     * 阶段3：将自动创建Schema并激活
+     * 阶段3：自动创建租户记录 + Schema初始化
+     * 完整流程：
+     * 1. 创建租户记录
+     * 2. 自动创建Schema
+     * 3. 初始化表结构和数据
+     * 4. 创建管理员账号
+     * 5. 激活租户
      *
      * @param request 创建请求参数
      * @return 操作结果
@@ -100,7 +105,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult create(@Valid @RequestBody TenantCreateRequest request) {
         tenantService.create(request);
-        return super.doJsonDefaultMsg("租户创建成功（待激活状态）");
+        return super.doJsonDefaultMsg("租户创建成功，Schema已自动初始化并激活");
     }
 
     /**

@@ -11,6 +11,7 @@ import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,6 +34,9 @@ import java.util.Map;
 public class TenantService extends BaseServiceImpl implements ITenantService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @Autowired
+    private ITenantSchemaService tenantSchemaService;
 
     /**
      * 分页查询租户
@@ -169,8 +173,12 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     /**
      * 创建租户
-     * 阶段2：只创建租户记录，状态为待激活
-     * 阶段3：将增加Schema自动创建并激活
+     * 阶段3：创建租户记录 + 自动创建Schema并初始化
+     * 完整流程：
+     * 1. 创建租户记录（状态：待激活）
+     * 2. 自动创建Schema并初始化表结构和数据
+     * 3. 更新租户状态为正常（已激活）
+     * 4. 失败时自动回滚
      */
     @Override
     @Transactional(readOnly = false)
@@ -183,6 +191,11 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         // 检查Schema名称是否已存在
         if (existsBySchemaName(request.getSchemaName())) {
             throw new BusinessException("Schema名称已存在：" + request.getSchemaName());
+        }
+
+        // 检查Schema是否在数据库中已存在
+        if (tenantSchemaService.schemaExists(request.getSchemaName())) {
+            throw new BusinessException("数据库中已存在该Schema：" + request.getSchemaName());
         }
 
         // 创建租户实体
@@ -212,10 +225,49 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             }
         }
 
+        // 先插入租户记录（待激活状态）
         baseDao.insertPO(tenant, true);
 
-        log.info("创建租户成功（待激活状态）: tenantCode={}, schemaName={}, id={}",
+        log.info("租户记录创建成功（待激活状态）: tenantCode={}, schemaName={}, id={}",
                 request.getTenantCode(), request.getSchemaName(), tenant.getId());
+
+        // 自动创建Schema并初始化
+        try {
+            // 生成默认管理员密码（使用租户编码作为初始密码）
+            String defaultPassword = request.getAdminPassword() != null ?
+                    request.getAdminPassword() : request.getTenantCode() + "123456";
+
+            // 调用Schema创建服务
+            tenantSchemaService.createSchemaAndInitTables(
+                    tenant.getId(),
+                    request.getSchemaName(),
+                    request.getAdminUsername(),
+                    request.getAdminRealName(),
+                    defaultPassword
+            );
+
+            // Schema创建成功，更新租户状态为正常（已激活）
+            tenant.setStatus(TenantStatus.ACTIVE.getCode());
+            tenant.setActivatedAt(LocalDateTime.now());
+            tenant.setUpdatedAt(LocalDateTime.now());
+            baseDao.updatePO(tenant);
+
+            log.info("租户Schema初始化成功，租户已激活: tenantCode={}, schemaName={}",
+                    request.getTenantCode(), request.getSchemaName());
+
+        } catch (Exception e) {
+            // Schema创建失败，删除租户记录（回滚）
+            log.error("Schema创建失败，删除租户记录: tenantId={}, schemaName={}",
+                    tenant.getId(), request.getSchemaName(), e);
+
+            try {
+                baseDao.delByIds(SysTenant.class, new String[]{String.valueOf(tenant.getId())});
+            } catch (Exception deleteError) {
+                log.error("删除租户记录失败: tenantId={}", tenant.getId(), deleteError);
+            }
+
+            throw new BusinessException("租户创建失败：Schema初始化失败 - " + e.getMessage(), e);
+        }
     }
 
     /**
