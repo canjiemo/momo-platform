@@ -87,10 +87,8 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             sql += " WHERE " + String.join(" AND ", conditions);
         }
 
-        // 排序
-        String sortField = StringUtils.hasText(param.getSortField()) ? param.getSortField() : "created_at";
-        String sortOrder = "asc".equalsIgnoreCase(param.getSortOrder()) ? "ASC" : "DESC";
-        sql += " ORDER BY " + sortField + " " + sortOrder;
+        // 默认按创建时间降序排序
+        sql += " ORDER BY created_at DESC";
 
         log.info("租户分页查询SQL: {}", sql);
 
@@ -266,7 +264,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
                 log.error("删除租户记录失败: tenantId={}", tenant.getId(), deleteError);
             }
 
-            throw new BusinessException("租户创建失败：Schema初始化失败 - " + e.getMessage(), e);
+            throw new BusinessException("租户创建失败：Schema初始化失败 - " + e.getMessage());
         }
     }
 

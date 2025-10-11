@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.mocanjie.base.mycommon.pager.PagerParam;
 import lombok.Data;
 
 /**
@@ -8,7 +9,7 @@ import lombok.Data;
  * @author seer-fitness
  */
 @Data
-public class TenantQueryParam {
+public class TenantQueryParam extends PagerParam {
 
     /**
      * 租户编码（模糊查询）
@@ -40,28 +41,4 @@ public class TenantQueryParam {
      */
     private String contactPhone;
 
-    /**
-     * 是否包含已删除的数据
-     */
-    private Boolean includeDeleted = false;
-
-    /**
-     * 分页参数：页码（从1开始）
-     */
-    private Integer page = 1;
-
-    /**
-     * 分页参数：每页大小
-     */
-    private Integer pageSize = 20;
-
-    /**
-     * 排序字段
-     */
-    private String sortField = "created_at";
-
-    /**
-     * 排序方向：asc/desc
-     */
-    private String sortOrder = "desc";
 }
