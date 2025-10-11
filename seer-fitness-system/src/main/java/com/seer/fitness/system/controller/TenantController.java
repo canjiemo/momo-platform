@@ -108,7 +108,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult create(@Valid @RequestBody TenantCreateRequest request) {
         tenantService.create(request);
-        return super.doJsonDefaultMsg("租户创建成功，Schema已自动初始化并激活");
+        return super.doJsonMsg("租户创建成功，Schema已自动初始化并激活");
     }
 
     /**
@@ -126,7 +126,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult update(@Valid @RequestBody TenantUpdateRequest request) {
         tenantService.update(request);
-        return super.doJsonDefaultMsg("租户更新成功");
+        return super.doJsonMsg("租户更新成功");
     }
 
     /**
@@ -144,7 +144,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult enable(@PathVariable Long id) {
         tenantService.enable(id);
-        return super.doJsonDefaultMsg("租户启用成功");
+        return super.doJsonMsg("租户启用成功");
     }
 
     /**
@@ -162,7 +162,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult disable(@PathVariable Long id) {
         tenantService.disable(id);
-        return super.doJsonDefaultMsg("租户禁用成功");
+        return super.doJsonMsg("租户禁用成功");
     }
 
     /**
@@ -180,7 +180,7 @@ public class TenantController extends MyBaseController {
     )
     public MyResponseResult delete(@PathVariable Long id) {
         tenantService.delete(id);
-        return super.doJsonDefaultMsg("租户删除成功（逻辑删除，Schema未删除）");
+        return super.doJsonMsg("租户删除成功（逻辑删除，Schema未删除）");
     }
 
     /**
@@ -243,14 +243,14 @@ public class TenantController extends MyBaseController {
     @RequireAuth(permissions = {"tenant:update"})
     public MyResponseResult warmUpDataSource(@PathVariable String schemaName) {
         if (dataSourceManager == null) {
-            return super.doJsonDefaultMsg("多租户模式未启用");
+            return super.doJsonMsg("多租户模式未启用");
         }
 
         try {
             dataSourceManager.warmUp(schemaName);
-            return super.doJsonDefaultMsg("租户连接池预热成功");
+            return super.doJsonMsg("租户连接池预热成功");
         } catch (Exception e) {
-            return super.doJsonDefaultMsg("租户连接池预热失败：" + e.getMessage());
+            return super.doJsonMsg("租户连接池预热失败：" + e.getMessage());
         }
     }
 
@@ -265,14 +265,14 @@ public class TenantController extends MyBaseController {
     @RequireAuth(permissions = {"tenant:delete"})
     public MyResponseResult removeDataSource(@PathVariable String schemaName) {
         if (dataSourceManager == null) {
-            return super.doJsonDefaultMsg("多租户模式未启用");
+            return super.doJsonMsg("多租户模式未启用");
         }
 
         try {
             dataSourceManager.removeTenant(schemaName);
-            return super.doJsonDefaultMsg("租户连接池已移除");
+            return super.doJsonMsg("租户连接池已移除");
         } catch (Exception e) {
-            return super.doJsonDefaultMsg("移除租户连接池失败：" + e.getMessage());
+            return super.doJsonMsg("移除租户连接池失败：" + e.getMessage());
         }
     }
 }

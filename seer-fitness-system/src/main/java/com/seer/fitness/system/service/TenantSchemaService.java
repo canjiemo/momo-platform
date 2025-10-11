@@ -6,7 +6,9 @@ import com.seer.fitness.system.enums.InitStepType;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,9 @@ import java.util.Map;
 @Service
 @Slf4j
 public class TenantSchemaService extends BaseServiceImpl implements ITenantSchemaService {
+
+    @Autowired
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
@@ -95,7 +100,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
             }
 
             log.error("租户Schema创建失败: schemaName={}", schemaName, e);
-            throw new BusinessException("Schema初始化失败：" + e.getMessage(), e);
+            throw new BusinessException("Schema初始化失败：" + e.getMessage());
         }
     }
 
@@ -104,7 +109,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
      */
     private void createSchema(String schemaName) {
         String sql = "CREATE SCHEMA " + schemaName;
-        baseDao.executeSQL(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
         log.info("Schema创建成功: {}", schemaName);
     }
 
@@ -171,7 +176,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
             params.put("realName", realName);
             params.put("now", LocalDateTime.now());
 
-            baseDao.executeSQLWithParam(insertUserSql, params);
+            jdbcTemplate.update(insertUserSql, params);
 
             // 切换回public schema
             resetSearchPath();
@@ -180,7 +185,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
 
         } catch (Exception e) {
             resetSearchPath(); // 确保切换回public
-            throw new BusinessException("创建管理员账号失败：" + e.getMessage(), e);
+            throw new BusinessException("创建管理员账号失败：" + e.getMessage());
         }
     }
 
@@ -189,7 +194,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
      */
     private void setSearchPath(String schemaName) {
         String sql = "SET search_path TO " + schemaName;
-        baseDao.executeSQL(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
     /**
@@ -197,7 +202,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
      */
     private void resetSearchPath() {
         String sql = "SET search_path TO public";
-        baseDao.executeSQL(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
     }
 
     /**
@@ -214,7 +219,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
                 continue;
             }
             // 执行SQL
-            baseDao.executeSQL(trimmedSql);
+            jdbcTemplate.getJdbcTemplate().execute(trimmedSql);
         }
     }
 
@@ -247,7 +252,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
             log.setStepName(stepType.getDescription());
             log.setStepType(stepType.getCode());
             log.setStatus(status);
-            log.setMessage(message);
+            log.setErrorMessage(message);
             log.setCreatedAt(LocalDateTime.now());
 
             baseDao.insertPO(log, true);
@@ -270,7 +275,7 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
         }
 
         String sql = "DROP SCHEMA " + schemaName + " CASCADE";
-        baseDao.executeSQL(sql);
+        jdbcTemplate.getJdbcTemplate().execute(sql);
         log.warn("Schema已删除: {}", schemaName);
     }
 
