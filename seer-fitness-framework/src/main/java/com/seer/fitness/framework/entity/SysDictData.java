@@ -1,5 +1,6 @@
 package com.seer.fitness.framework.entity;
 
+import com.seer.fitness.framework.annotation.PublicSchema;
 import io.github.mocanjie.base.myjpa.annotation.MyTable;
 import lombok.Data;
 
@@ -8,9 +9,13 @@ import java.time.LocalDateTime;
 /**
  * 字典数据实体类
  * 对应数据库表 sys_dict_data
+ * <p>
+ * 注意：该实体标记了 @PublicSchema 注解，所有数据库操作将路由到 public schema
+ * 原因：字典数据在所有租户间共享，统一存储在 public schema 中
  *
  * @author seer-fitness
  */
+@PublicSchema(reason = "字典数据所有租户共享，统一存储在public schema")
 @Data
 @MyTable("sys_dict_data")
 public class SysDictData {
