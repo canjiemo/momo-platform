@@ -238,3 +238,23 @@ FROM public.sys_dict_type dt
 LEFT JOIN public.sys_dict_data dd ON dt.dict_type = dd.dict_type
 GROUP BY dt.dict_type, dt.dict_name
 ORDER BY dt.sort_order;
+
+-- ========================================
+-- 第四部分：项目管理字典
+-- ========================================
+
+-- 11. 单位字典类型
+INSERT INTO public.sys_dict_type (id, dict_name, dict_type, dict_description, status, sort_order, create_by)
+VALUES (6001, '计量单位', 'unit_type', '体育项目计量单位：次、厘米、秒、米等', 1, 20, 'system')
+ON CONFLICT (dict_type) DO NOTHING;
+
+-- 单位字典数据
+INSERT INTO public.sys_dict_data (id, dict_type, dict_label, dict_value, dict_description, css_class, list_class, status, sort_order, create_by)
+VALUES
+  (60001, 'unit_type', '次', '1', '计数单位（如跳绳次数）', '', '', 1, 1, 'system'),
+  (60002, 'unit_type', '厘米', '2', '长度单位（如跳远距离）', '', '', 1, 2, 'system'),
+  (60003, 'unit_type', '秒', '3', '时间单位（如跑步时间）', '', '', 1, 3, 'system'),
+  (60004, 'unit_type', '米', '4', '距离单位（如跑步距离）', '', '', 1, 4, 'system'),
+  (60005, 'unit_type', '分钟', '5', '时间单位（如训练时长）', '', '', 1, 5, 'system'),
+  (60006, 'unit_type', '千克', '6', '重量单位（如杠铃重量）', '', '', 1, 6, 'system')
+ON CONFLICT (id) DO NOTHING;

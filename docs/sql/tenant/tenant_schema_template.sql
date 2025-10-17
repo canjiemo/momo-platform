@@ -309,3 +309,34 @@ COMMENT ON COLUMN sys_user.user_type IS '用户类型: 0-运维人员 1-教师 2
 -- 2. 更新现有数据 (所有现有用户默认为运维人员)
 UPDATE sys_user SET user_type = 0 WHERE user_type IS NULL;
 
+-- ----------------------------
+-- Table structure for seer_project_info
+-- ----------------------------
+DROP TABLE IF EXISTS seer_project_info;
+CREATE TABLE seer_project_info (
+  id BIGINT PRIMARY KEY,
+  project_code VARCHAR(50) NOT NULL,
+  project_name VARCHAR(100) NOT NULL,
+  unit INT NOT NULL,
+  training_duration INT,
+  is_higher_better INT DEFAULT 1,
+  sort_order INT DEFAULT 0,
+  status INT DEFAULT 1,
+  created_by BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_by BIGINT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  remark VARCHAR(500),
+  UNIQUE(project_code)
+);
+
+COMMENT ON TABLE seer_project_info IS '项目信息表（学校实际使用的项目，由平台分配）';
+COMMENT ON COLUMN seer_project_info.id IS '项目ID';
+COMMENT ON COLUMN seer_project_info.project_code IS '项目编号（在本学校唯一）';
+COMMENT ON COLUMN seer_project_info.project_name IS '项目名称';
+COMMENT ON COLUMN seer_project_info.unit IS '单位（字典：unit_type，1=次，2=厘米，3=秒，4=米）';
+COMMENT ON COLUMN seer_project_info.training_duration IS '训练时长（秒）';
+COMMENT ON COLUMN seer_project_info.is_higher_better IS '成绩越大越好（字典：yes_no，1=是，0=否）';
+COMMENT ON COLUMN seer_project_info.sort_order IS '排序';
+COMMENT ON COLUMN seer_project_info.status IS '状态（字典：enable_status，0=禁用，1=启用）';
+
