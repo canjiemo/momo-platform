@@ -1,4 +1,4 @@
-package com.seer.fitness.system.dto;
+package com.seer.fitness.business.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

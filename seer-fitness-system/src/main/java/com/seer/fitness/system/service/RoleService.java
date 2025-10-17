@@ -229,9 +229,24 @@ public class RoleService extends BaseServiceImpl {
     }
 
     /**
-     * 根据用户ID获取角色列表
+     * 根据用户ID获取角色列表（租户用户）
      */
     public List<RoleDTO> getUserRoles(Long userId) {
+        String sql = "SELECT r.* FROM sys_role r " +
+                    "INNER JOIN sys_user_role ur ON r.id = ur.role_id " +
+                    "WHERE ur.user_id = :userId AND r.status = 1";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("userId", userId);
+
+        return baseDao.queryListForSqlWithDeleteCondition(sql, params, RoleDTO.class);
+    }
+
+    /**
+     * 根据用户ID获取平台管理员角色列表
+     * 使用 @PublicSchema 注解确保查询 public.sys_role
+     */
+    @com.seer.fitness.framework.annotation.PublicSchema(reason = "平台管理员角色查询")
+    public List<RoleDTO> getPlatformUserRoles(Long userId) {
         String sql = "SELECT r.* FROM sys_role r " +
                     "INNER JOIN sys_user_role ur ON r.id = ur.role_id " +
                     "WHERE ur.user_id = :userId AND r.status = 1";

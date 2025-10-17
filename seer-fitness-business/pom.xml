@@ -9,36 +9,30 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>seer-fitness-framework</artifactId>
+    <artifactId>seer-fitness-business</artifactId>
 
     <description>
-        框架层模块，提供系统级通用功能：字典管理、认证授权基础、菜单类型等
-        可独立作为其他项目的基础框架使用
+        业务模块，体育项目管理、训练管理等核心业务功能
     </description>
 
     <dependencies>
-        <!-- MyJPA Spring Boot Starter -->
+        <!-- System模块依赖（传递 framework） -->
         <dependency>
-            <groupId>io.github.mocanjie</groupId>
-            <artifactId>myjpa-spring-boot-starter</artifactId>
+            <groupId>com.seer</groupId>
+            <artifactId>seer-fitness-system</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
-        <!-- MyMVC Spring Boot Starter -->
-        <dependency>
-            <groupId>io.github.mocanjie</groupId>
-            <artifactId>mymvc-spring-boot-starter</artifactId>
-        </dependency>
-
-        <!-- Spring Boot Starter（基础） -->
+        <!-- 参数校验 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- JSON Processing -->
+        <!-- Guava（已经通过system传递，但为了明确声明还是保留） -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <!-- Lombok -->

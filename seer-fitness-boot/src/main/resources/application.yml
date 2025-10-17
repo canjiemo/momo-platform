@@ -4,17 +4,11 @@ spring:
   profiles:
     active: dev
 
-# Tenant Configuration (租户配置)
-tenant:
-  multi-tenant:
-    enabled: true                        # 启用多租户模式
-    default-schema: public               # 默认Schema（平台管理）
-
   # PostgreSQL Database Configuration
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/fitness-edu?currentSchema=school_seer&stringtype=unspecified
+    url: jdbc:postgresql://localhost:5432/fitness-edu?stringtype=unspecified
     username: admin
     password: 123456
 
@@ -44,6 +38,7 @@ tenant:
         reset-enable: false
         login-username: admin
         login-password: admin123
+
   data:
     redis:
       host: localhost
@@ -51,6 +46,12 @@ tenant:
       timeout: 3000ms
       port: 30069
       password: Seer@bigdata
+
+# Tenant Configuration (租户配置)
+tenant:
+  multi-tenant:
+    enabled: true                        # 启用多租户模式
+    default-schema: public               # 默认Schema（平台管理）
 
 # Server Configuration
 server:

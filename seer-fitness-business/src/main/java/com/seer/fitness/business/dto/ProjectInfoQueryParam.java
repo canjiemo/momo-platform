@@ -1,4 +1,4 @@
-package com.seer.fitness.system.dto;
+package com.seer.fitness.business.dto;
 
 import io.github.mocanjie.base.mycommon.pager.PagerParam;
 import lombok.Data;

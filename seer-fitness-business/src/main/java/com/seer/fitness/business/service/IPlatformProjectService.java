@@ -1,6 +1,6 @@
-package com.seer.fitness.system.service;
+package com.seer.fitness.business.service;
 
-import com.seer.fitness.system.dto.*;
+import com.seer.fitness.business.dto.*;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 
 /**

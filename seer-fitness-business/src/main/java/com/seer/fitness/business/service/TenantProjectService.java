@@ -1,9 +1,9 @@
-package com.seer.fitness.system.service;
+package com.seer.fitness.business.service;
 
 import com.google.common.collect.Maps;
 import com.seer.fitness.framework.annotation.PublicSchema;
-import com.seer.fitness.system.dto.*;
-import com.seer.fitness.system.entity.SeerProjectInfo;
+import com.seer.fitness.business.dto.*;
+import com.seer.fitness.business.entity.SeerProjectInfo;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
@@ -18,22 +18,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 平台项目服务实现
- * 管理 public.seer_project_info 中的平台项目库
+ * 租户项目服务实现
+ * 管理租户 schema 中的 seer_project_info（学校实际使用的项目）
  * <p>
- * 所有方法使用 @PublicSchema 注解，确保操作路由到 public schema
+ * 默认操作租户 schema，除了查询平台项目的方法使用 @PublicSchema
  *
  * @author seer-fitness
  */
 @Service
 @Slf4j
-public class PlatformProjectService extends BaseServiceImpl implements IPlatformProjectService {
+public class TenantProjectService extends BaseServiceImpl implements ITenantProjectService {
 
     /**
-     * 分页查询平台项目
+     * 分页查询租户项目
      */
     @Override
-    @PublicSchema(reason = "查询平台项目库")
     public Pager<ProjectInfoDTO> search(ProjectInfoQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
@@ -64,7 +63,7 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
 
         sql += " ORDER BY sort_order ASC, created_at DESC";
 
-        log.info("平台项目分页查询SQL: {}", sql);
+        log.info("租户项目分页查询SQL: {}", sql);
 
         return baseDao.queryPageForSql(sql, queryMap, pager, ProjectInfoDTO.class);
     }
@@ -73,7 +72,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      * 根据ID获取项目详情
      */
     @Override
-    @PublicSchema(reason = "查询平台项目详情")
     public ProjectInfoDTO getById(Long id) {
         if (id == null) {
             throw new BusinessException("项目ID不能为空");
@@ -88,11 +86,10 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
     }
 
     /**
-     * 创建平台项目
+     * 创建租户项目（学校自定义项目）
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "创建平台项目")
     public void create(ProjectInfoCreateRequest request) {
         // 检查项目编号是否已存在
         if (isProjectCodeExists(request.getProjectCode())) {
@@ -113,15 +110,14 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
 
         baseDao.insertPO(project, true);
 
-        log.info("创建平台项目成功: projectCode={}, id={}", request.getProjectCode(), project.getId());
+        log.info("创建租户项目成功: projectCode={}, id={}", request.getProjectCode(), project.getId());
     }
 
     /**
-     * 更新平台项目
+     * 更新租户项目
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "更新平台项目")
     public void update(ProjectInfoUpdateRequest request) {
         SeerProjectInfo project = baseDao.queryById(request.getId(), SeerProjectInfo.class);
         if (project == null) {
@@ -147,15 +143,14 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
 
         baseDao.updatePO(project);
 
-        log.info("更新平台项目成功: id={}, projectName={}", request.getId(), request.getProjectName());
+        log.info("更新租户项目成功: id={}, projectName={}", request.getId(), request.getProjectName());
     }
 
     /**
-     * 删除平台项目
+     * 删除租户项目
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "删除平台项目")
     public void delete(String[] ids) {
         if (ids == null || ids.length == 0) {
             throw new BusinessException("删除的项目ID不能为空");
@@ -170,13 +165,95 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
         // 物理删除
         baseDao.delByIds(SeerProjectInfo.class, ids);
 
-        log.info("删除平台项目成功: ids={}", java.util.Arrays.toString(ids));
+        log.info("删除租户项目成功: ids={}", java.util.Arrays.toString(ids));
     }
 
     /**
-     * 检查项目编号是否已存在
+     * 从平台分配项目到租户
+     * 将选中的平台项目复制到当前租户的项目表
      */
-    @PublicSchema(reason = "检查平台项目编号")
+    @Override
+    @Transactional(readOnly = false)
+    public void assignFromPlatform(ProjectAssignRequest request) {
+        if (request.getProjectIds() == null || request.getProjectIds().isEmpty()) {
+            throw new BusinessException("项目ID列表不能为空");
+        }
+
+        // 获取平台项目（从 public schema）
+        List<SeerProjectInfo> platformProjects = getPlatformProjectsByIds(request.getProjectIds());
+
+        if (platformProjects.isEmpty()) {
+            throw new BusinessException("未找到指定的平台项目");
+        }
+
+        int successCount = 0;
+        int skipCount = 0;
+
+        for (SeerProjectInfo platformProject : platformProjects) {
+            // 检查项目编号是否已存在于租户表
+            if (isProjectCodeExists(platformProject.getProjectCode())) {
+                log.warn("项目编号已存在，跳过: projectCode={}", platformProject.getProjectCode());
+                skipCount++;
+                continue;
+            }
+
+            // 复制到租户项目表
+            SeerProjectInfo tenantProject = new SeerProjectInfo();
+            tenantProject.setProjectCode(platformProject.getProjectCode());
+            tenantProject.setProjectName(platformProject.getProjectName());
+            tenantProject.setUnit(platformProject.getUnit());
+            tenantProject.setTrainingDuration(platformProject.getTrainingDuration());
+            tenantProject.setIsHigherBetter(platformProject.getIsHigherBetter());
+            tenantProject.setSortOrder(platformProject.getSortOrder());
+            tenantProject.setStatus(platformProject.getStatus());
+            tenantProject.setRemark(platformProject.getRemark());
+            tenantProject.setCreatedAt(LocalDateTime.now());
+            tenantProject.setUpdatedAt(LocalDateTime.now());
+
+            baseDao.insertPO(tenantProject, true);
+            successCount++;
+
+            log.info("分配项目成功: projectCode={}, newId={}", platformProject.getProjectCode(), tenantProject.getId());
+        }
+
+        log.info("项目分配完成: 成功={}, 跳过={}", successCount, skipCount);
+    }
+
+    /**
+     * 获取所有平台项目（供租户选择分配）
+     * 从 public schema 查询
+     */
+    @Override
+    @PublicSchema(reason = "查询平台项目列表供租户选择")
+    public List<ProjectInfoDTO> getPlatformProjects() {
+        String sql = "SELECT id, project_code, project_name, unit, training_duration, " +
+                    "is_higher_better, sort_order, status, remark, created_at, updated_at " +
+                    "FROM seer_project_info " +
+                    "WHERE status = 1 " +
+                    "ORDER BY sort_order ASC, created_at DESC";
+
+        return baseDao.queryListForSql(sql, Maps.newHashMap(), ProjectInfoDTO.class);
+    }
+
+    /**
+     * 根据ID列表查询平台项目（从 public schema）
+     */
+    @PublicSchema(reason = "查询平台项目用于分配")
+    private List<SeerProjectInfo> getPlatformProjectsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String sql = "SELECT * FROM seer_project_info WHERE id IN (:ids) AND status = 1";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("ids", ids);
+
+        return baseDao.queryListForSql(sql, params, SeerProjectInfo.class);
+    }
+
+    /**
+     * 检查项目编号是否已存在（在租户 schema）
+     */
     private boolean isProjectCodeExists(String projectCode) {
         String sql = "SELECT COUNT(*) FROM seer_project_info WHERE project_code = :projectCode";
         Map<String, Object> params = Maps.newHashMap();

@@ -1,10 +1,10 @@
-package com.seer.fitness.system.controller;
+package com.seer.fitness.business.controller;
 
 import com.seer.fitness.system.annotation.OperationLog;
-import com.seer.fitness.system.dto.*;
+import com.seer.fitness.business.dto.*;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.IPlatformProjectService;
+import com.seer.fitness.business.service.IPlatformProjectService;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.mycommon.pager.PagerHandler;
 import io.github.mocanjie.base.mymvc.controller.MyBaseController;

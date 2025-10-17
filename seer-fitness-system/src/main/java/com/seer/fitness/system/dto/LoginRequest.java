@@ -11,8 +11,12 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
-    @NotBlank(message = "租户编码不能为空")
-    private String tenantCode;  // 租户编码（必填）
+    /**
+     * 租户编码（可选）
+     * - 为空或不传：平台管理员登录（查询 public.sys_user）
+     * - 有值：租户用户登录（查询 tenant_schema.sys_user）
+     */
+    private String tenantCode;
 
     @NotBlank(message = "用户名不能为空")
     private String username;

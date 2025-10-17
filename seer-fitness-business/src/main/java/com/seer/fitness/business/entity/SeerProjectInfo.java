@@ -1,4 +1,4 @@
-package com.seer.fitness.system.entity;
+package com.seer.fitness.business.entity;
 
 import io.github.mocanjie.base.myjpa.annotation.MyTable;
 import lombok.Data;

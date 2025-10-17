@@ -130,6 +130,10 @@ public class TenantDataSourceConfig {
         // 设置默认数据源（public schema）
         dynamicDataSource.setDefaultTargetDataSource(defaultDataSource());
 
+        // 设置目标数据源Map（初始为空，租户数据源会动态添加）
+        // AbstractRoutingDataSource要求必须设置此属性，即使是空Map
+        dynamicDataSource.setTargetDataSources(new java.util.HashMap<>());
+
         // 初始化
         dynamicDataSource.afterPropertiesSet();
 

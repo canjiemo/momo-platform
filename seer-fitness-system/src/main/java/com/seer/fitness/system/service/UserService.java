@@ -346,9 +346,22 @@ public class UserService extends BaseServiceImpl implements IUserService {
     }
 
     /**
-     * 根据用户名查询用户（用于登录）
+     * 根据用户名查询用户（用于租户用户登录）
      */
     public SysUser findByUsername(String username) {
+        String sql = "SELECT * FROM sys_user WHERE username = :username";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("username", username);
+
+        return baseDao.querySingleForSqlWithDeleteCondition(sql, params, SysUser.class);
+    }
+
+    /**
+     * 根据用户名查询平台管理员（用于平台管理员登录）
+     * 使用 @PublicSchema 注解确保查询 public.sys_user
+     */
+    @com.seer.fitness.framework.annotation.PublicSchema(reason = "平台管理员登录")
+    public SysUser findPlatformUserByUsername(String username) {
         String sql = "SELECT * FROM sys_user WHERE username = :username";
         Map<String, Object> params = Maps.newHashMap();
         params.put("username", username);
