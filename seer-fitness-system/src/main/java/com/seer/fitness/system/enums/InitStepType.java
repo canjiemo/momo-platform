@@ -33,6 +33,18 @@ public enum InitStepType {
     CREATE_ADMIN("CREATE_ADMIN", "创建管理员"),
 
     /**
+     * 初始化Flyway基线
+     * 为租户Schema建立Flyway版本管理基线
+     */
+    INIT_FLYWAY("INIT_FLYWAY", "初始化Flyway版本管理"),
+
+    /**
+     * 自动同步模板
+     * 自动同步菜单和角色模板到租户
+     */
+    SYNC_TEMPLATES("SYNC_TEMPLATES", "同步菜单和角色模板"),
+
+    /**
      * 回滚清理
      * 初始化失败时的回滚操作
      */

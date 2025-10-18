@@ -2,7 +2,7 @@ spring:
   application:
     name: seer-fitness-edu
   profiles:
-    active: dev
+    active: local
 
   # PostgreSQL Database Configuration
   datasource:
@@ -47,11 +47,31 @@ spring:
       port: 30069
       password: Seer@bigdata
 
+  # Flyway Database Migration (数据库版本管理)
+  flyway:
+    enabled: false                       # 禁用自动迁移（通过代码手动控制）
+    baseline-on-migrate: true            # 首次迁移时自动基线化
+    baseline-version: 1.0.0              # 基线版本号
+    locations: classpath:db/migration    # 迁移脚本位置
+    encoding: UTF-8                      # 脚本编码
+    validate-on-migrate: true            # 迁移前验证
+    out-of-order: false                  # 禁止乱序执行
+    placeholder-replacement: false       # 禁用占位符替换
+
 # Tenant Configuration (租户配置)
 tenant:
   multi-tenant:
     enabled: true                        # 启用多租户模式
     default-schema: public               # 默认Schema（平台管理）
+
+# Flyway Multi-tenant Configuration (Flyway多租户配置)
+flyway:
+  multi-tenant:
+    enabled: true                        # 启用多租户Flyway
+    auto-upgrade: false                  # 禁用自动升级（手动触发）
+    batch-size: 5                        # 批量升级租户数量
+    delay-between-batches: 10            # 批次间延迟(秒)
+    version-table: sys_schema_version    # 版本管理表
 
 # Server Configuration
 server:

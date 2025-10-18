@@ -25,10 +25,14 @@ import java.util.Map;
  * 核心流程：
  * 1. CREATE SCHEMA - 创建独立的Schema
  * 2. CREATE TABLE - 执行DDL脚本创建所有表
- * 3. INSERT DATA - 插入基础数据（字典、角色、菜单）
- * 4. CREATE ADMIN - 创建租户管理员账号
- * 5. LOG STEP - 记录每个步骤的执行日志
- * 6. ROLLBACK - 失败时自动回滚（删除Schema）
+ * 3. CREATE ADMIN - 创建租户管理员账号
+ * 4. LOG STEP - 记录每个步骤的执行日志
+ * 5. ROLLBACK - 失败时自动回滚（删除Schema）
+ *
+ * 注意 (2025-10-17 更新):
+ * - 菜单数据由平台分配，不在此处插入
+ * - 角色由租户管理员自行创建
+ * - 仅创建超级管理员账号
  *
  * @author seer-fitness
  */
@@ -39,17 +43,32 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private TenantTemplateAutoSyncService templateAutoSyncService;
+
+    @Autowired
+    private com.seer.fitness.system.config.FlywayMultiTenantConfig flywayMultiTenantConfig;
+
     private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     /**
      * SQL脚本路径（在resources目录下）
      */
     private static final String SCHEMA_TEMPLATE_SQL = "sql/tenant/tenant_schema_template.sql";
+
+    /**
+     * @deprecated 已废弃 (2025-10-17) - 新架构不再使用SQL脚本初始化数据
+     */
+    @Deprecated
     private static final String INIT_DATA_SQL = "sql/tenant/tenant_init_data.sql";
 
     /**
-     * 创建Schema并初始化表结构和数据
-     * 完整流程包含7个步骤，每个步骤都会记录日志
+     * 创建Schema并初始化表结构和超级管理员
+     * 完整流程包含4个步骤，每个步骤都会记录日志
+     *
+     * 注意：菜单和角色不在此处初始化
+     * - 菜单：通过平台分配接口分配
+     * - 角色：租户管理员自行创建
      */
     @Override
     @Transactional(readOnly = false)
@@ -74,17 +93,22 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
             executeDdlScript(schemaName);
             logStep(tenantId, InitStepType.CREATE_TABLE, "DDL脚本执行成功", 1);
 
-            // 步骤3：插入基础数据
-            logStep(tenantId, InitStepType.INSERT_DATA, "开始插入基础数据", 0);
-            executeInitDataScript(schemaName);
-            logStep(tenantId, InitStepType.INSERT_DATA, "基础数据插入成功", 1);
+            // 步骤2.5：初始化Flyway基线（2025-10-18新增）
+            logStep(tenantId, InitStepType.INIT_FLYWAY, "开始初始化Flyway版本管理基线", 0);
+            initFlywayBaseline(tenantId, schemaName);
+            logStep(tenantId, InitStepType.INIT_FLYWAY, "Flyway版本管理基线初始化成功", 1);
 
-            // 步骤4：创建管理员账号
+            // 步骤3：创建管理员账号
             logStep(tenantId, InitStepType.CREATE_ADMIN, "开始创建管理员账号", 0);
             createAdminUser(schemaName, adminUsername, adminRealName, adminPassword);
             logStep(tenantId, InitStepType.CREATE_ADMIN, "管理员账号创建成功", 1);
 
-            log.info("租户Schema创建成功: schemaName={}", schemaName);
+            // 步骤4：自动同步菜单和角色模板（2025-10-18新增）
+            logStep(tenantId, InitStepType.SYNC_TEMPLATES, "开始自动同步菜单和角色模板", 0);
+            autoSyncTemplates(tenantId);
+            logStep(tenantId, InitStepType.SYNC_TEMPLATES, "菜单和角色模板同步成功", 1);
+
+            log.info("租户Schema创建成功（含模板自动同步）: schemaName={}", schemaName);
 
         } catch (Exception e) {
             // 记录失败日志
@@ -134,21 +158,24 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
 
     /**
      * 执行基础数据脚本（插入角色、菜单等）
+     *
+     * @deprecated 已废弃 (2025-10-17)
+     * 原因：新架构不再通过SQL脚本初始化菜单和角色数据
+     * - 菜单：通过平台分配接口分配
+     * - 角色：租户管理员自行创建
+     *
+     * 保留此方法仅用于向后兼容，实际已不再调用
      */
+    @Deprecated
     private void executeInitDataScript(String schemaName) throws Exception {
-        // 1. 加载SQL脚本
-        String sqlScript = loadSqlScript(INIT_DATA_SQL);
+        // 此方法已废弃，不再使用
+        log.warn("executeInitDataScript 方法已废弃，新架构不再通过SQL初始化数据");
 
-        // 2. 切换到目标Schema
-        setSearchPath(schemaName);
-
-        // 3. 执行SQL脚本
-        executeSqlScript(sqlScript);
-
-        // 4. 切换回public schema
-        resetSearchPath();
-
-        log.info("基础数据插入成功: schemaName={}", schemaName);
+        // 原实现已注释
+        // String sqlScript = loadSqlScript(INIT_DATA_SQL);
+        // setSearchPath(schemaName);
+        // executeSqlScript(sqlScript);
+        // resetSearchPath();
     }
 
     /**
@@ -310,6 +337,97 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
         } catch (Exception e) {
             log.error("验证Schema失败: {}", schemaName, e);
             return false;
+        }
+    }
+
+    /**
+     * 自动同步菜单和角色模板到新租户
+     *
+     * @param tenantId 租户ID
+     */
+    private void autoSyncTemplates(Long tenantId) {
+        try {
+            // 查询租户的 feature_level（如果没有则使用默认值1=基础版）
+            String sql = "SELECT feature_level FROM sys_tenant WHERE id = :id";
+            Map<String, Object> params = Maps.newHashMap();
+            params.put("id", tenantId);
+
+            Integer featureLevel = baseDao.querySingleForSql(sql, params, Integer.class);
+            if (featureLevel == null || featureLevel < 1 || featureLevel > 3) {
+                log.warn("租户功能级别无效，使用默认基础版: tenantId={}, featureLevel={}", tenantId, featureLevel);
+                featureLevel = 1; // 默认基础版
+            }
+
+            log.info("开始自动同步模板到租户: tenantId={}, featureLevel={}", tenantId, featureLevel);
+
+            // 调用自动同步服务（使用系统管理员ID=1作为操作人）
+            Long systemAdminId = 1L;
+            templateAutoSyncService.autoSyncTemplates(tenantId, featureLevel, systemAdminId);
+
+            log.info("自动同步模板完成: tenantId={}", tenantId);
+
+        } catch (Exception e) {
+            log.error("自动同步模板失败: tenantId={}", tenantId, e);
+            throw new BusinessException("自动同步菜单和角色模板失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 初始化Flyway版本管理基线
+     * <p>
+     * 功能：
+     * 1. 使用FlywayMultiTenantConfig为租户Schema建立基线
+     * 2. 更新public.sys_schema_version表记录版本信息
+     * <p>
+     * 注意：
+     * - 基线版本号为1.0.0
+     * - 基线建立后，后续的迁移将从1.0.0版本开始
+     * - 此方法在表结构创建之后调用
+     *
+     * @param tenantId   租户ID
+     * @param schemaName Schema名称
+     */
+    private void initFlywayBaseline(Long tenantId, String schemaName) {
+        try {
+            log.info("开始为Schema初始化Flyway基线: tenantId={}, schemaName={}", tenantId, schemaName);
+
+            // 1. 使用FlywayMultiTenantConfig执行基线
+            String baselineVersion = flywayMultiTenantConfig.baselineSchema(schemaName);
+
+            // 2. 更新public.sys_schema_version表
+            String updateVersionSql = "INSERT INTO public.sys_schema_version " +
+                    "(tenant_id, schema_name, current_version, flyway_version, " +
+                    "is_baseline, baseline_version, baseline_description, " +
+                    "last_upgraded_at, last_upgraded_by, created_at, updated_at, delete_flag) " +
+                    "VALUES (:tenantId, :schemaName, :currentVersion, :flywayVersion, " +
+                    ":isBaseline, :baselineVersion, :baselineDescription, " +
+                    ":lastUpgradedAt, :lastUpgradedBy, :createdAt, :updatedAt, 0) " +
+                    "ON CONFLICT (schema_name, delete_flag) DO UPDATE SET " +
+                    "current_version = :currentVersion, " +
+                    "flyway_version = :flywayVersion, " +
+                    "last_upgraded_at = :lastUpgradedAt, " +
+                    "updated_at = :updatedAt";
+
+            Map<String, Object> params = Maps.newHashMap();
+            params.put("tenantId", tenantId);
+            params.put("schemaName", schemaName);
+            params.put("currentVersion", baselineVersion);
+            params.put("flywayVersion", baselineVersion);
+            params.put("isBaseline", true);
+            params.put("baselineVersion", baselineVersion);
+            params.put("baselineDescription", "租户初始基线版本");
+            params.put("lastUpgradedAt", LocalDateTime.now());
+            params.put("lastUpgradedBy", "SYSTEM");
+            params.put("createdAt", LocalDateTime.now());
+            params.put("updatedAt", LocalDateTime.now());
+
+            jdbcTemplate.update(updateVersionSql, params);
+
+            log.info("Flyway基线初始化成功: schemaName={}, version={}", schemaName, baselineVersion);
+
+        } catch (Exception e) {
+            log.error("Flyway基线初始化失败: schemaName={}", schemaName, e);
+            throw new BusinessException("Flyway基线初始化失败：" + e.getMessage());
         }
     }
 }
