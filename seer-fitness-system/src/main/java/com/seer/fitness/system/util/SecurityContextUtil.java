@@ -26,11 +26,19 @@ public class SecurityContextUtil {
     }
 
     /**
-     * 获取当前用户ID
+     * 获取当前用户ID（字符串格式）
      */
     public static String getCurrentUserId() {
         UserCacheInfo currentUser = getCurrentUser();
         return currentUser != null && currentUser.getUserId() != null ? String.valueOf(currentUser.getUserId()) : null;
+    }
+
+    /**
+     * 获取当前用户ID（Long格式）
+     */
+    public static Long getCurrentUserIdAsLong() {
+        UserCacheInfo currentUser = getCurrentUser();
+        return currentUser != null ? currentUser.getUserId() : null;
     }
 
     /**

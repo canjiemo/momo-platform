@@ -4,19 +4,24 @@ import com.seer.fitness.system.annotation.OperationLog;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.MenuService;
+import com.seer.fitness.system.service.TenantMenuService;
 import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mymvc.controller.MyBaseController;
 import io.github.mocanjie.base.mymvc.data.MyResponseResult;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * 菜单管理控制器
- * 提供菜单的增删改查、树形结构管理功能
+ * 租户菜单查询控制器（只读）
+ * 提供租户侧菜单的只读查询功能
+ * <p>
+ * 注意（2025-10-17 更新）：
+ * - 租户不能创建、更新、删除菜单
+ * - 菜单由平台分配后复制到租户schema
+ * - 租户可以通过角色管理控制菜单权限分配
+ * - 所有增删改接口已移除
  *
  * @author seer-fitness
  */
@@ -25,7 +30,7 @@ import java.util.List;
 public class MenuController extends MyBaseController {
 
     @Autowired
-    private MenuService menuService;
+    private TenantMenuService menuService;
 
     /**
      * 获取菜单树
@@ -54,7 +59,7 @@ public class MenuController extends MyBaseController {
     @GetMapping("/user-menus")
     @RequireAuth(login = true)
     public MyResponseResult<List<MenuTreeVO>> getUserMenus() {
-        String currentUserId = SecurityContextUtil.getCurrentUserId();
+        Long currentUserId = SecurityContextUtil.getCurrentUserIdAsLong();
         List<MenuTreeVO> userMenus = menuService.getUserMenuTree(currentUserId);
         return super.doJsonOut(userMenus);
     }
@@ -89,57 +94,19 @@ public class MenuController extends MyBaseController {
         return super.doJsonOut(menuService.getById(id));
     }
 
-    /**
-     * 创建菜单
-     *
-     * @param request 创建请求参数
-     * @return 操作结果
-     */
-    @PostMapping("/create")
-    @RequireAuth(permissions = {"menu:create"})
-    @OperationLog(
-        type = OperationType.CREATE,
-        module = "menu",
-        description = "创建菜单"
-    )
-    public MyResponseResult<Void> create(@Valid @RequestBody MenuCreateRequest request) {
-        menuService.create(request);
-        return super.doJsonDefaultMsg();
-    }
-
-    /**
-     * 更新菜单
-     *
-     * @param request 更新请求参数
-     * @return 操作结果
-     */
-    @PostMapping("/update")
-    @RequireAuth(permissions = {"menu:update"})
-    @OperationLog(
-        type = OperationType.UPDATE,
-        module = "menu",
-        description = "更新菜单"
-    )
-    public MyResponseResult<Void> update(@Valid @RequestBody MenuUpdateRequest request) {
-        menuService.update(request);
-        return super.doJsonDefaultMsg();
-    }
-
-    /**
-     * 删除菜单
-     *
-     * @param request 删除请求参数
-     * @return 操作结果
-     */
-    @PostMapping("/delete")
-    @RequireAuth(permissions = {"menu:delete"})
-    @OperationLog(
-        type = OperationType.DELETE,
-        module = "menu",
-        description = "删除菜单"
-    )
-    public MyResponseResult<Void> delete(@Valid @RequestBody MenuDeleteRequest request) {
-        menuService.delete(request.getIds());
-        return super.doJsonDefaultMsg();
-    }
+    // ========================================
+    // 以下接口已移除（2025-10-17）
+    // ========================================
+    //
+    // 租户不能创建、更新、删除菜单
+    // 菜单由平台通过菜单分配接口分配
+    // 已移除的接口：
+    // - POST /system/menu/create  (menu:create)
+    // - POST /system/menu/update  (menu:update)
+    // - POST /system/menu/delete  (menu:delete)
+    //
+    // 替代方案：
+    // - 平台菜单管理：使用 /platform/menu/*
+    // - 菜单分配：使用 /platform/tenant/menu/assign
+    // ========================================
 }

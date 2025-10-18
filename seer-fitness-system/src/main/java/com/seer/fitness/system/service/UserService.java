@@ -6,6 +6,8 @@ import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.entity.SysUserRole;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.*;
+import com.seer.fitness.system.security.TenantSecurityValidator;
+import com.seer.fitness.system.tenant.TenantContext;
 import com.seer.fitness.system.utils.PasswordUtil;
 import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -40,6 +42,9 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired(required = false)
+    private TenantSecurityValidator tenantSecurityValidator;
 
     /**
      * 分页查询用户
@@ -249,12 +254,32 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
             Long userId = Long.valueOf(id);
 
+            // 检查是否为超级管理员
+            SysUser user = baseDao.queryByIdWithDeleteCondition(userId, SysUser.class);
+            if (user == null) {
+                throw new BusinessException("用户不存在：ID=" + userId);
+            }
+
+            if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
+                throw new BusinessException("不能删除超级管理员账号");
+            }
+
             // 删除用户角色关联
             removeUserRoles(userId);
         }
 
         // 逻辑删除用户
         baseDao.delByIds(SysUser.class, ids);
+
+        // 清除用户验证缓存 (安全加固 - 2024-10-18)
+        String schemaName = TenantContext.getSchemaName();
+        if (schemaName != null && tenantSecurityValidator != null) {
+            for (String id : ids) {
+                Long userId = Long.valueOf(id);
+                tenantSecurityValidator.clearUserValidationCache(userId, schemaName);
+                log.info("已清除用户验证缓存: userId={}, schema={}", userId, schemaName);
+            }
+        }
 
         log.info("删除用户成功: ids={}", java.util.Arrays.toString(ids));
     }

@@ -49,6 +49,11 @@ public enum OperationType {
     EXPORT("EXPORT", "导出"),
 
     /**
+     * 同步操作
+     */
+    SYNC("SYNC", "同步"),
+
+    /**
      * 审核操作
      */
     AUDIT("AUDIT", "审核"),

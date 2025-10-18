@@ -142,14 +142,14 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-        <repository>
-            <id>company</id>
-            <name>maven-releases</name>
-            <url>http://172.20.186.161:9990/repository/maven-releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
+<!--        <repository>-->
+<!--            <id>company</id>-->
+<!--            <name>maven-releases</name>-->
+<!--            <url>http://172.20.186.161:9990/repository/maven-releases</url>-->
+<!--            <releases>-->
+<!--                <enabled>true</enabled>-->
+<!--            </releases>-->
+<!--        </repository>-->
     </repositories>
 
     <pluginRepositories>

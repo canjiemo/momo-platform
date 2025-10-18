@@ -35,6 +35,12 @@ public class MenuUpdateRequest {
     private Integer type;
 
     /**
+     * 菜单类型：1-平台菜单 2-租户模板菜单
+     * (2025-10-17 新增)
+     */
+    private Integer menuType;
+
+    /**
      * 权限字符，用于后端权限校验
      */
     @Size(max = 100, message = "权限字符长度不能超过100位")
@@ -50,6 +56,12 @@ public class MenuUpdateRequest {
      * 排序字段
      */
     private Integer sortOrder;
+
+    /**
+     * 功能级别：1-基础版 2-标准版 3-企业版
+     * (2025-10-17 新增)
+     */
+    private Integer featureLevel;
 
     @NotNull(message = "状态不能为空")
     private Integer status;

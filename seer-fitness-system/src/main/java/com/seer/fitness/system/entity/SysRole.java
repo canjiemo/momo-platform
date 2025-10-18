@@ -31,6 +31,23 @@ public class SysRole {
     private String description;
 
     /**
+     * 角色类型：1=平台角色 2=租户模板角色
+     */
+    private Integer roleType;
+
+    /**
+     * 功能级别：1=基础版 2=标准版 3=企业版
+     */
+    private Integer featureLevel;
+
+    /**
+     * 平台角色ID（仅租户Schema使用）
+     * 记录该角色由哪个平台角色同步而来，用于标识平台同步的角色（只读）
+     * public.sys_role 中此字段为 NULL
+     */
+    private Long platformRoleId;
+
+    /**
      * 状态：1启用 0禁用
      */
     private Integer status;

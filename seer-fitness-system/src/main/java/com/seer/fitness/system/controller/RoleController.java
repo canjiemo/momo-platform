@@ -16,8 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 角色管理控制器
+ * 角色管理控制器（租户侧）
  * 提供角色的增删改查、权限分配功能
+ * <p>
+ * 更新说明（2025-10-18）：
+ * - 平台同步的角色（platform_role_id 不为空）受服务层保护
+ * - 租户无法修改/删除平台同步的角色
+ * - 尝试修改/删除时会收到 BusinessException 错误
+ * - 这些角色由平台管理，租户只能查看和使用
  *
  * @author seer-fitness
  */

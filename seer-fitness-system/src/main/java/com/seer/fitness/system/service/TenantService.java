@@ -7,6 +7,7 @@ import com.seer.fitness.system.dto.TenantQueryParam;
 import com.seer.fitness.system.dto.TenantUpdateRequest;
 import com.seer.fitness.system.entity.SysTenant;
 import com.seer.fitness.system.enums.TenantStatus;
+import com.seer.fitness.system.security.TenantSecurityValidator;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
@@ -37,6 +38,9 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     @Autowired
     private ITenantSchemaService tenantSchemaService;
+
+    @Autowired(required = false)
+    private TenantSecurityValidator tenantSecurityValidator;
 
     /**
      * 分页查询租户
@@ -229,6 +233,13 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         log.info("租户记录创建成功（待激活状态）: tenantCode={}, schemaName={}, id={}",
                 request.getTenantCode(), request.getSchemaName(), tenant.getId());
 
+        // 立即更新为激活状态，准备初始化Schema
+        tenant.setStatus(TenantStatus.ACTIVE.getCode());
+        tenant.setUpdatedAt(LocalDateTime.now());
+        baseDao.updatePO(tenant);
+
+        log.info("租户状态已更新为激活，准备初始化Schema: tenantId={}", tenant.getId());
+
         // 自动创建Schema并初始化
         try {
             // 生成默认管理员密码（使用租户编码作为初始密码）
@@ -345,6 +356,12 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
         baseDao.updatePO(tenant);
 
+        // 清除租户状态缓存 (安全加固 - 2024-10-18)
+        if (tenantSecurityValidator != null) {
+            tenantSecurityValidator.clearTenantStatusCache(id);
+            log.info("已清除租户状态缓存: tenantId={}", id);
+        }
+
         log.info("启用租户成功: id={}, tenantCode={}", id, tenant.getTenantCode());
     }
 
@@ -367,6 +384,14 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         tenant.setUpdatedAt(LocalDateTime.now());
 
         baseDao.updatePO(tenant);
+
+        // 清除租户状态缓存 (安全加固 - 2024-10-18)
+        if (tenantSecurityValidator != null) {
+            tenantSecurityValidator.clearTenantStatusCache(id);
+            // 额外清除该租户下所有用户的验证缓存
+            tenantSecurityValidator.clearAllUserCacheInTenant(tenant.getSchemaName());
+            log.info("已清除租户状态和用户验证缓存: tenantId={}, schema={}", id, tenant.getSchemaName());
+        }
 
         log.info("禁用租户成功: id={}, tenantCode={}", id, tenant.getTenantCode());
     }

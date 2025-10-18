@@ -100,17 +100,74 @@ public class SchemaRoutingAspect {
 
     /**
      * 设置 PostgreSQL 的 search_path
+     * 修复SQL注入漏洞 - 2024-10-18
      *
      * @param schemaName schema 名称
      */
     private void setSearchPath(String schemaName) {
         try {
-            String sql = "SET search_path TO " + schemaName;
-            jdbcTemplate.getJdbcTemplate().execute(sql);
-            log.debug("search_path set to: {}", schemaName);
+            // 1. 白名单验证 - 防止SQL注入
+            if (!isValidSchemaName(schemaName)) {
+                log.error("非法的schema名称尝试: {}", schemaName);
+                throw new SecurityException("Invalid schema name: " + schemaName);
+            }
+
+            // 2. 额外验证：只允许public或已知的租户schema
+            if (!"public".equals(schemaName) && !isKnownTenantSchema(schemaName)) {
+                log.error("未知的租户schema尝试: {}", schemaName);
+                throw new SecurityException("Unknown tenant schema: " + schemaName);
+            }
+
+            // 3. 使用参数化方式设置search_path
+            // 使用PostgreSQL的set_config函数，避免直接拼接SQL
+            String sql = "SELECT set_config('search_path', ?, false)";
+            jdbcTemplate.getJdbcTemplate().queryForObject(sql, String.class, schemaName);
+
+            log.debug("search_path安全切换到: {}", schemaName);
+        } catch (SecurityException e) {
+            log.error("Schema切换被拒绝: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("Failed to set search_path to: {}", schemaName, e);
-            // 不抛出异常，允许查询继续执行（可能会使用之前的 search_path）
+            log.error("Schema切换失败: schemaName={}", schemaName, e);
+            throw new RuntimeException("Failed to switch schema: " + schemaName, e);
+        }
+    }
+
+    /**
+     * 验证schema名称是否符合PostgreSQL命名规范
+     * 防止SQL注入攻击
+     *
+     * @param schemaName schema名称
+     * @return 是否有效
+     */
+    private boolean isValidSchemaName(String schemaName) {
+        if (schemaName == null || schemaName.isEmpty()) {
+            return false;
+        }
+
+        // PostgreSQL schema命名规范：
+        // - 只允许小写字母、数字、下划线
+        // - 必须以字母开头
+        // - 长度不超过63字符
+        return schemaName.matches("^[a-z][a-z0-9_]{0,62}$") || "public".equals(schemaName);
+    }
+
+    /**
+     * 检查是否为已知的租户schema
+     * 从sys_tenant表验证，增加安全性
+     *
+     * @param schemaName schema名称
+     * @return 是否存在
+     */
+    private boolean isKnownTenantSchema(String schemaName) {
+        try {
+            // 切换到public schema查询租户表
+            String sql = "SELECT COUNT(*) FROM public.sys_tenant WHERE schema_name = ? AND status = 1";
+            Integer count = jdbcTemplate.getJdbcTemplate().queryForObject(sql, Integer.class, schemaName);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            log.warn("验证租户schema失败: {}", schemaName, e);
+            return false;
         }
     }
 }

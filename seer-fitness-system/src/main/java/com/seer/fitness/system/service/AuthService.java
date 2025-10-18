@@ -169,16 +169,36 @@ public class AuthService {
         }
 
         // 8. 缓存用户信息到Redis
-        UserCacheInfo userCacheInfo = new UserCacheInfo(
-                user.getId(),
-                user.getUsername(),
-                user.getRealName(),
-                roles,
-                permissions,
-                user.getAdminFlag(),
-                user.getUserType(),
-                tokenId
-        );
+        // 安全加固：包含租户信息，用于后续验证 - 2024-10-18
+        UserCacheInfo userCacheInfo;
+        if (!isPlatformAdmin && tenant != null) {
+            // 租户用户：包含租户信息
+            userCacheInfo = new UserCacheInfo(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getRealName(),
+                    roles,
+                    permissions,
+                    user.getAdminFlag(),
+                    user.getUserType(),
+                    tokenId,
+                    tenant.getId(),
+                    tenant.getTenantCode(),
+                    tenant.getSchemaName()
+            );
+        } else {
+            // 平台用户：不包含租户信息
+            userCacheInfo = new UserCacheInfo(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getRealName(),
+                    roles,
+                    permissions,
+                    user.getAdminFlag(),
+                    user.getUserType(),
+                    tokenId
+            );
+        }
 
         // 缓存24小时
         redisUtil.set("user:token:" + tokenId, userCacheInfo, 24, TimeUnit.HOURS);

@@ -296,6 +296,7 @@ public.sys_operation_log -- 平台操作日志
 
 ### 相关文档
 - [租户实施计划](./tenant-implementation-plan.md)
+- [租户创建流程时序](相关流程类文档/租户创建流程时序.md) 🆕
 - [@PublicSchema 使用指南](./public-schema-annotation-guide.md)
 - [多租户字典解决方案](./multi-tenant-dictionary-solution.md)
 
@@ -523,6 +524,253 @@ tenantService.createTenant(
 
 ---
 
+#### 0.5 平台菜单管理 (Platform Menu Management) 🆕
+**模块路径**: `/platform/menu`
+**存储位置**: `public.sys_menu`
+**核心功能**:
+- 平台菜单模板的统一管理
+- 菜单分类：平台专用菜单(menu_type=1) 和 租户模板菜单(menu_type=2)
+- 菜单版本控制：基础版(feature_level=1)、标准版(feature_level=2)、企业版(feature_level=3)
+- 菜单分配给租户使用
+- 菜单修改自动同步到已分配租户
+
+**权限点**:
+- `platform:menu:view` - 查看平台菜单
+- `platform:menu:create` - 创建菜单
+- `platform:menu:update` - 更新菜单
+- `platform:menu:delete` - 删除菜单
+- `tenant:assign-menu` - 分配菜单给租户
+
+**业务场景**:
+- 平台管理员创建"用户管理"菜单模板
+- 将菜单分配给租户A、租户B使用
+- 修改菜单权限字符，自动同步到所有已分配租户
+- 按订阅版本分配不同功能级别的菜单
+
+**架构说明**:
+
+**新架构（2025-10-17 更新）**：
+```
+平台管理员创建菜单模板 (public.sys_menu)
+        ↓
+通过分配接口分配给租户 (sys_tenant_menu 记录)
+        ↓
+菜单数据复制到租户 schema ({tenant}.sys_menu)
+        ↓
+租户用户使用菜单（只读）
+```
+
+**核心特点**：
+1. **统一管理**：所有菜单由平台统一创建和维护
+2. **数据复制**：分配时复制到租户schema，保持开发者编码透明性
+3. **自动同步**：平台菜单更新后自动同步到已分配租户
+4. **版本控制**：通过 platform_menu_id 关联平台模板
+
+**与旧架构对比**：
+| 特性 | 旧架构 | 新架构 |
+|------|--------|--------|
+| 菜单创建 | 租户自行创建 | 平台统一创建 |
+| 数据存储 | 仅租户schema | 平台 + 租户（复制） |
+| 菜单修改 | 租户可修改 | 租户只读，平台修改 |
+| 同步机制 | 无 | 自动同步到租户 |
+| 适用场景 | 私有化部署 | SaaS多租户 |
+
+**API 接口**：
+```bash
+# 平台菜单管理
+GET  /platform/menu/tree                    # 获取完整菜单树
+GET  /platform/menu/tree/platform           # 获取平台专用菜单树
+GET  /platform/menu/tree/tenant-template    # 获取租户模板菜单树
+POST /platform/menu/create                  # 创建菜单
+POST /platform/menu/update                  # 更新菜单（自动同步）
+DELETE /platform/menu/{id}                  # 删除菜单
+
+# 菜单分配
+POST /platform/tenant/menu/assign           # 分配单个菜单
+POST /platform/tenant/menu/assign-batch     # 批量分配菜单
+POST /platform/tenant/menu/unassign         # 取消分配
+GET  /platform/tenant/menu/assigned-ids/{tenantId}    # 已分配菜单ID
+GET  /platform/tenant/menu/assigned-menus/{tenantId}  # 已分配菜单详情
+```
+
+**技术实现**：
+```java
+// 平台菜单实体
+@PublicSchema(reason = "平台菜单管理")
+public class SysMenu {
+    private Long id;
+    private String menuName;
+    private Integer menuType;      // 1-平台菜单 2-租户模板菜单
+    private Integer featureLevel;  // 1-基础版 2-标准版 3-企业版
+    // ...
+}
+
+// 租户菜单实体
+public class SysMenu {
+    private Long platformMenuId;   // 关联平台菜单ID（用于同步）
+    // ...其他字段与平台菜单一致
+}
+
+// 分配菜单
+@Transactional
+public void assignMenu(Long tenantId, Long platformMenuId, Long currentUserId) {
+    // 1. 验证租户和菜单
+    // 2. 复制菜单到租户schema
+    // 3. 记录分配关系（sys_tenant_menu）
+}
+
+// 同步菜单更新
+@Transactional
+public void syncMenuToTenants(SysMenu platformMenu) {
+    // 查询已分配该菜单的所有租户
+    // 逐个更新租户schema中的菜单数据
+}
+```
+
+---
+
+#### 0.6 平台角色管理 (Platform Role Management) 🆕
+**模块路径**: `/platform/role`
+**存储位置**: `public.sys_role`
+**核心功能**:
+- 平台角色模板的统一管理
+- 角色分类：平台专用角色(role_type=1) 和 租户模板角色(role_type=2)
+- 角色版本控制：基础版(feature_level=1)、标准版(feature_level=2)、企业版(feature_level=3)
+- 角色分配给租户使用
+- 角色修改自动同步到已分配租户
+- 为角色配置菜单权限
+
+**权限点**:
+- `platform:role:view` - 查看平台角色
+- `platform:role:create` - 创建角色
+- `platform:role:update` - 更新角色
+- `platform:role:delete` - 删除角色
+- `platform:role:assign` - 配置角色菜单权限
+- `platform:tenant:role:sync` - 同步角色给租户
+
+**业务场景**:
+- 平台管理员创建"教师"角色模板
+- 将角色分配给租户A、租户B使用
+- 修改角色权限，自动同步到所有已分配租户
+- 按订阅版本分配不同功能级别的角色
+
+**架构说明**:
+
+**新架构（2025-10-18 更新）**：
+```
+平台管理员创建角色模板 (public.sys_role)
+        ↓
+通过同步接口同步给租户 (sys_tenant_role 记录)
+        ↓
+角色数据复制到租户 schema ({tenant}.sys_role)
+        ↓
+租户用户使用角色（只读）
+```
+
+**核心特点**：
+1. **统一管理**：所有角色由平台统一创建和维护
+2. **数据复制**：同步时复制到租户schema，保持开发者编码透明性
+3. **自动同步**：平台角色更新后自动同步到已分配租户
+4. **版本控制**：通过 platform_role_id 关联平台模板
+5. **权限级联**：角色-菜单关联关系同步复制
+
+**与旧架构对比**：
+| 特性 | 旧架构 | 新架构 |
+|------|--------|--------|
+| 角色创建 | 租户自行创建 | 平台统一创建 |
+| 数据存储 | 仅租户schema | 平台 + 租户（复制） |
+| 角色修改 | 租户可修改 | 租户只读，平台修改 |
+| 同步机制 | 无 | 自动同步到租户 |
+| 适用场景 | 私有化部署 | SaaS多租户 |
+
+**API 接口**：
+```bash
+# 平台角色管理
+POST /platform/role/search              # 分页查询角色
+GET  /platform/role/list                # 获取角色列表
+GET  /platform/role/list/{roleType}     # 按类型获取角色列表
+GET  /platform/role/{id}                # 获取角色详情
+POST /platform/role/create              # 创建角色
+POST /platform/role/update              # 更新角色（自动同步）
+DELETE /platform/role/{id}              # 删除角色
+POST /platform/role/{id}/assign-menus   # 配置角色菜单权限
+GET  /platform/role/{id}/menus          # 获取角色菜单权限
+
+# 角色同步
+POST /platform/tenant/role/sync         # 同步单个角色到租户
+POST /platform/tenant/role/sync/batch   # 批量同步角色
+POST /platform/tenant/role/sync/all     # 同步角色到所有租户
+```
+
+**技术实现**：
+```java
+// 平台角色实体
+@PublicSchema(reason = "平台角色管理")
+public class SysRole {
+    private Long id;
+    private String roleName;
+    private Integer roleType;      // 1-平台角色 2-租户模板角色
+    private Integer featureLevel;  // 1-基础版 2-标准版 3-企业版
+    // ...
+}
+
+// 租户角色实体
+public class SysRole {
+    private Long platformRoleId;   // 关联平台角色ID（用于同步和只读保护）
+    // ...其他字段与平台角色一致
+}
+
+// 同步角色
+@Transactional
+public void syncRole(Long tenantId, Long platformRoleId, Long currentUserId) {
+    // 1. 验证租户和角色
+    // 2. 复制角色到租户schema
+    // 3. 同步角色-菜单关联关系
+    // 4. 记录同步关系（sys_tenant_role）
+}
+
+// 同步角色更新
+@Transactional
+public void syncRoleToTenants(SysRole platformRole) {
+    // 查询已分配该角色的所有租户
+    // 逐个更新租户schema中的角色数据
+}
+
+// 租户侧只读保护
+@Service
+public class RoleService {
+    public void update(RoleUpdateRequest request) {
+        // 检查是否为平台同步的角色
+        if (isPlatformSyncedRole(request.getId())) {
+            throw new BusinessException("平台同步的角色不能修改，请联系平台管理员");
+        }
+        // 允许更新自建角色
+    }
+}
+```
+
+**租户创建时自动同步** 🆕：
+```java
+// 新租户创建时自动同步角色和菜单模板
+TenantSchemaService.createSchemaAndInitTables() {
+    // Step 1: CREATE_SCHEMA
+    // Step 2: CREATE_TABLE
+    // Step 3: CREATE_ADMIN
+    // Step 4: SYNC_TEMPLATES (自动同步，根据 feature_level 筛选)
+    autoSyncTemplates(tenantId, featureLevel);
+}
+
+// 根据租户功能级别筛选模板
+TenantTemplateAutoSyncService.autoSyncRoleTemplates() {
+    // 查询: WHERE role_type = 2 AND feature_level <= tenantFeatureLevel
+    // 基础版租户(1): 仅获得 feature_level = 1 的角色
+    // 标准版租户(2): 获得 feature_level <= 2 的角色
+    // 企业版租户(3): 获得所有角色模板
+}
+```
+
+---
+
 ### 1. 系统管理模块 (System Management)
 
 #### 1.1 用户管理 (User Management)
@@ -571,25 +819,48 @@ tenantService.createTenant(
 
 ---
 
-#### 1.3 菜单管理 (Menu Management)
+#### 1.3 菜单管理 (Menu Management) 🔄
 **模块路径**: `/system/menu`
 **模块位置**: `seer-fitness-system`
 **核心功能**:
-- 管理系统的菜单树结构
+- 查询租户已分配的菜单树结构
+- 查询当前用户的菜单权限
 - 支持三种类型: 目录(0)、菜单(1)、按钮(2)
-- 配置前端路由和权限字符
-- 菜单排序和图标配置
+- 前端根据菜单配置渲染路由和权限
+
+**⚠️ 重要变更（2025-10-17）**:
+- **租户不能创建、修改、删除菜单**
+- **所有菜单由平台管理员创建并分配**
+- **租户只能查看和使用已分配的菜单**
+- **菜单增删改接口已移除**
 
 **权限点**:
-- `menu:view` - 查看菜单树
-- `menu:create` - 创建菜单/按钮
-- `menu:update` - 编辑菜单配置
-- `menu:delete` - 删除菜单
+- `menu:view` - 查看菜单树（仅查询权限）
 
 **业务场景**:
-- 新增业务模块时,添加对应菜单
-- 调整菜单显示顺序
-- 配置按钮级权限控制
+- 租户用户登录后查看自己有权限的菜单
+- 前端根据菜单权限渲染导航栏
+- 角色管理时查看可分配的菜单列表
+
+**API 接口**:
+```bash
+GET /system/menu/tree           # 获取租户菜单树
+GET /system/menu/user-menus     # 获取当前用户菜单
+GET /system/menu/list           # 获取菜单列表（扁平）
+GET /system/menu/{id}           # 获取菜单详情
+```
+
+**如需修改菜单**:
+请联系平台管理员，通过以下接口操作：
+- `/platform/menu/create` - 创建新菜单模板
+- `/platform/menu/update` - 更新菜单模板
+- `/platform/tenant/menu/assign` - 分配菜单给租户
+
+**架构优势**:
+- ✅ 统一管理，避免租户菜单混乱
+- ✅ 版本控制，支持分级订阅
+- ✅ 自动同步，菜单更新无需租户操作
+- ✅ 权限清晰，职责分离
 
 ---
 
@@ -1033,6 +1304,7 @@ public class RoleService {
 ### 核心文档
 - **系统说明文档**: `docs/README.md` (本文档)
 - **租户实施计划**: `docs/tenant-implementation-plan.md`
+- **租户创建流程时序**: `docs/租户创建流程时序.md` 🆕
 - **@PublicSchema 使用指南**: `docs/public-schema-annotation-guide.md`
 - **多租户字典解决方案**: `docs/multi-tenant-dictionary-solution.md`
 
@@ -1101,25 +1373,35 @@ public class RoleService {
 ## 📊 数据统计 🆕
 
 ### 平台管理（Public Schema）
-- **平台菜单**: 30个 (1个目录 + 5个菜单 + 24个按钮)
+- **平台菜单**: 48个初始菜单模板
+  - 平台专用菜单 (menu_type=1): 30个 (1个目录 + 5个菜单 + 24个按钮)
+  - 租户模板菜单 (menu_type=2): 18个 (系统管理相关菜单)
 - **平台角色**: 3个
 - **平台管理员**: 4个初始账号
-- **平台权限点**: 20个
+- **平台权限点**: 25个 (新增 5个菜单管理权限)
 
 ### 租户管理（Tenant Schema）
-- **租户菜单**: 租户初始化时创建
+- **租户菜单**: 由平台分配，不再通过SQL初始化
 - **租户角色**: 租户初始化时创建
 - **租户用户**: 每个租户独立管理
+- **菜单关联**: platform_menu_id 关联平台模板
 
 ### 共享数据（Public Schema）
 - **字典类型**: 10+ 种
 - **字典数据**: 所有租户共享
+- **菜单模板**: 所有租户共享（通过分配机制）
 
 ### 核心模块
-- **平台管理**: 4个模块（租户、项目、用户、字典）
-- **系统管理**: 4个模块（用户、角色、菜单、组织）
+- **平台管理**: 5个模块（租户、项目、用户、字典、菜单）🆕
+- **系统管理**: 4个模块（用户、角色、菜单（只读）、组织）
 - **业务管理**: 2个模块（平台项目、租户项目）
 - **日志审计**: 1个模块
+
+### 菜单管理架构 🆕
+- **管理模式**: 平台统一管理 + 租户分配使用
+- **数据存储**: 平台 (public.sys_menu) + 租户 (复制到租户schema)
+- **同步机制**: 平台更新自动同步到已分配租户
+- **分配记录**: sys_tenant_menu (public schema)
 
 ---
 
