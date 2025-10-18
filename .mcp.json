@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "redis-mcp-server": {
+        "type": "stdio",
+        "command": "/Users/canjiemo/Library/Python/3.9/bin/uvx",
+        "args": [
+            "--from", "redis-mcp-server@latest",
+            "redis-mcp-server",
+            "--url", "redis://localhost:30069/0"
+        ]
+    }
+  }
+}
