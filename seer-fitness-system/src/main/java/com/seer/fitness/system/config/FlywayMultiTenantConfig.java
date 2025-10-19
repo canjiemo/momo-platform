@@ -61,6 +61,10 @@ public class FlywayMultiTenantConfig {
                 .locations("classpath:db/migration/tenant")
                 // 指定Schema
                 .schemas(schemaName)
+                // 设置默认Schema（SQL执行上下文）
+                .defaultSchema(schemaName)
+                // 允许Flyway创建schema（schema由Flyway管理）
+                .createSchemas(true)
                 // 基线配置
                 .baselineOnMigrate(true)
                 .baselineVersion(baselineVersion)
@@ -94,6 +98,10 @@ public class FlywayMultiTenantConfig {
                 .locations("classpath:db/migration/public")
                 // 指定Schema
                 .schemas("public")
+                // 设置默认Schema（SQL执行上下文）
+                .defaultSchema("public")
+                // public schema已存在，禁止Flyway自动创建
+                .createSchemas(false)
                 // 基线配置
                 .baselineOnMigrate(true)
                 .baselineVersion(baselineVersion)

@@ -77,33 +77,24 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
         log.info("开始创建租户Schema: tenantId={}, schemaName={}, adminUsername={}",
                 tenantId, schemaName, adminUsername);
 
-        // 检查Schema是否已存在
+        // 检查Schema是否已存在（Flyway会创建schema，这里提前检查避免冲突）
         if (schemaExists(schemaName)) {
             throw new BusinessException("Schema已存在：" + schemaName);
         }
 
         try {
-            // 步骤1：创建Schema
-            logStep(tenantId, InitStepType.CREATE_SCHEMA, "开始创建Schema", 0);
-            createSchema(schemaName);
-            logStep(tenantId, InitStepType.CREATE_SCHEMA, "Schema创建成功", 1);
-
-            // 步骤2：执行DDL脚本（创建表）
-            logStep(tenantId, InitStepType.CREATE_TABLE, "开始执行DDL脚本", 0);
-            executeDdlScript(schemaName);
-            logStep(tenantId, InitStepType.CREATE_TABLE, "DDL脚本执行成功", 1);
-
-            // 步骤2.5：初始化Flyway基线（2025-10-18新增）
-            logStep(tenantId, InitStepType.INIT_FLYWAY, "开始初始化Flyway版本管理基线", 0);
+            // 步骤1：初始化Flyway基线（负责创建Schema和所有表结构）
+            // Flyway会自动创建schema并执行V1.0.0__baseline.sql迁移脚本创建所有表
+            logStep(tenantId, InitStepType.INIT_FLYWAY, "开始Flyway初始化（创建Schema和表结构）", 0);
             initFlywayBaseline(tenantId, schemaName);
-            logStep(tenantId, InitStepType.INIT_FLYWAY, "Flyway版本管理基线初始化成功", 1);
+            logStep(tenantId, InitStepType.INIT_FLYWAY, "Flyway初始化成功（Schema和表已创建）", 1);
 
-            // 步骤3：创建管理员账号
+            // 步骤2：创建管理员账号
             logStep(tenantId, InitStepType.CREATE_ADMIN, "开始创建管理员账号", 0);
             createAdminUser(schemaName, adminUsername, adminRealName, adminPassword);
             logStep(tenantId, InitStepType.CREATE_ADMIN, "管理员账号创建成功", 1);
 
-            // 步骤4：自动同步菜单和角色模板（2025-10-18新增）
+            // 步骤3：自动同步菜单和角色模板（2025-10-18新增）
             logStep(tenantId, InitStepType.SYNC_TEMPLATES, "开始自动同步菜单和角色模板", 0);
             autoSyncTemplates(tenantId);
             logStep(tenantId, InitStepType.SYNC_TEMPLATES, "菜单和角色模板同步成功", 1);
@@ -389,10 +380,15 @@ public class TenantSchemaService extends BaseServiceImpl implements ITenantSchem
      */
     private void initFlywayBaseline(Long tenantId, String schemaName) {
         try {
-            log.info("开始为Schema初始化Flyway基线: tenantId={}, schemaName={}", tenantId, schemaName);
+            log.info("开始为Schema初始化Flyway并执行迁移: tenantId={}, schemaName={}", tenantId, schemaName);
 
-            // 1. 使用FlywayMultiTenantConfig执行基线
-            String baselineVersion = flywayMultiTenantConfig.baselineSchema(schemaName);
+            // 1. 使用Flyway migrate创建schema和表（而非baseline）
+            // migrate会执行V1.0.0__baseline.sql创建所有表
+            int migrationsExecuted = flywayMultiTenantConfig.migrateSchema(schemaName);
+            log.info("Flyway迁移完成: schemaName={}, 执行了{}个迁移", schemaName, migrationsExecuted);
+
+            // 2. 获取当前版本号
+            String baselineVersion = flywayMultiTenantConfig.getCurrentVersion(schemaName);
 
             // 2. 更新public.sys_schema_version表
             String updateVersionSql = "INSERT INTO public.sys_schema_version " +
