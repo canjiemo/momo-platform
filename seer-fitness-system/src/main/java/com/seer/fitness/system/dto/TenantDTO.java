@@ -29,6 +29,11 @@ public class TenantDTO {
     private String tenantName;
 
     /**
+     * 管理员真实姓名
+     */
+    private String realName;
+
+    /**
      * 联系电话
      */
     private String contactPhone;

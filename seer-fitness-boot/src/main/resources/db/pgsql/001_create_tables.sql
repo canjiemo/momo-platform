@@ -13,6 +13,7 @@ CREATE TABLE public.sys_tenant (
   id BIGSERIAL PRIMARY KEY,
   tenant_code VARCHAR(50) NOT NULL UNIQUE,
   tenant_name VARCHAR(100) NOT NULL,
+  real_name VARCHAR(50),
   contact_phone VARCHAR(20),
   contact_email VARCHAR(100),
   address VARCHAR(200),
@@ -34,7 +35,8 @@ CREATE INDEX idx_sys_tenant_status ON public.sys_tenant(status, delete_flag);
 COMMENT ON TABLE public.sys_tenant IS '租户表（学校表），平台级';
 COMMENT ON COLUMN public.sys_tenant.id IS '主键ID';
 COMMENT ON COLUMN public.sys_tenant.tenant_code IS '租户编码，全局唯一';
-COMMENT ON COLUMN public.sys_tenant.tenant_name IS '租户名称（学校名称）';
+COMMENT ON COLUMN public.sys_tenant.tenant_name IS '租户名称（学校名称），创建后不可修改';
+COMMENT ON COLUMN public.sys_tenant.real_name IS '管理员真实姓名';
 COMMENT ON COLUMN public.sys_tenant.status IS '状态：0-待激活 1-正常 2-已禁用 3-已过期';
 
 -- ----------------------------

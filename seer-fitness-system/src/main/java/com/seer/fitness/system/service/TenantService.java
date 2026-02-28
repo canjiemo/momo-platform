@@ -46,7 +46,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
     public Pager<TenantDTO> search(TenantQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
-        String sql = "SELECT id, tenant_code, tenant_name, contact_phone, contact_email, " +
+        String sql = "SELECT id, tenant_code, tenant_name, real_name, contact_phone, contact_email, " +
                     "address, description, status, activated_at, expired_at, " +
                     "max_users, created_at, updated_at, created_by, updated_by " +
                     "FROM sys_tenant";
@@ -131,6 +131,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         tenant.setContactEmail(request.getContactEmail());
         tenant.setAddress(request.getAddress());
         tenant.setDescription(request.getDescription());
+        tenant.setRealName(request.getRealName());
         tenant.setStatus(TenantStatus.ACTIVE.getCode());
         tenant.setActivatedAt(LocalDateTime.now());
         tenant.setMaxUsers(request.getMaxUsers() != null ? request.getMaxUsers() : 1000);
@@ -152,26 +153,27 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
         // 租户模式开启时，自动创建租户管理员账号
         if (tenantEnabled) {
-            createTenantAdmin(tenant, request.getAdminUsername());
+            createTenantAdmin(tenant);
         }
     }
 
     /**
      * 为新租户创建管理员用户
-     * admin_flag=1 表示租户内的管理员（非平台超管）
+     * - username 使用 tenant_name（学校名称即登录账号）
+     * - real_name 使用 sys_tenant.real_name（联系人姓名），不填则为空
+     * - admin_flag=1 表示租户内管理员（非平台超管）
      */
-    private void createTenantAdmin(SysTenant tenant, String adminUsername) {
-        String username = StringUtils.hasText(adminUsername)
-                ? adminUsername
-                : tenant.getTenantCode().toLowerCase() + "_admin";
+    private void createTenantAdmin(SysTenant tenant) {
+        String username = tenant.getTenantName();
 
-        // 检查用户名是否已存在
-        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND delete_flag = 0";
+        // 检查该租户下用户名是否已存在（tenant_id + username 联合唯一）
+        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND tenant_id = :tenantId AND delete_flag = 0";
         Map<String, Object> checkParams = Maps.newHashMap();
         checkParams.put("username", username);
+        checkParams.put("tenantId", tenant.getId());
         Long count = baseDao.querySingleForSql(checkSql, checkParams, Long.class);
         if (count != null && count > 0) {
-            log.warn("租户管理员账号已存在，跳过创建: username={}", username);
+            log.warn("租户管理员账号已存在，跳过创建: tenantId={}, username={}", tenant.getId(), username);
             return;
         }
 
@@ -183,7 +185,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         admin.setTenantId(tenant.getId());
         admin.setUsername(username);
         admin.setPassword(encodedPassword);
-        admin.setRealName(tenant.getTenantName() + " 管理员");
+        admin.setRealName(tenant.getRealName());
         admin.setStatus(1);
         admin.setAdminFlag(1);
         admin.setDeleteFlag(0);
@@ -201,7 +203,8 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         SysTenant tenant = baseDao.queryById(request.getId(), SysTenant.class);
         if (tenant == null) throw new BusinessException("租户不存在");
 
-        if (StringUtils.hasText(request.getTenantName())) tenant.setTenantName(request.getTenantName());
+        // tenant_name 创建后不可修改
+        if (StringUtils.hasText(request.getRealName())) tenant.setRealName(request.getRealName());
         if (StringUtils.hasText(request.getContactPhone())) tenant.setContactPhone(request.getContactPhone());
         if (StringUtils.hasText(request.getContactEmail())) tenant.setContactEmail(request.getContactEmail());
         if (StringUtils.hasText(request.getAddress())) tenant.setAddress(request.getAddress());
@@ -276,6 +279,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         dto.setId(tenant.getId());
         dto.setTenantCode(tenant.getTenantCode());
         dto.setTenantName(tenant.getTenantName());
+        dto.setRealName(tenant.getRealName());
         dto.setContactPhone(tenant.getContactPhone());
         dto.setContactEmail(tenant.getContactEmail());
         dto.setAddress(tenant.getAddress());

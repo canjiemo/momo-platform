@@ -16,8 +16,10 @@ public class TenantUpdateRequest {
     @NotNull(message = "租户ID不能为空")
     private Long id;
 
-    @Size(max = 100, message = "租户名称长度不能超过100位")
-    private String tenantName;
+    // tenant_name 创建后不可修改，此处不提供该字段
+
+    @Size(max = 50, message = "管理员姓名长度不能超过50位")
+    private String realName;
 
     @Size(max = 20, message = "联系电话长度不能超过20位")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "联系电话格式不正确", flags = Pattern.Flag.CASE_INSENSITIVE)
