@@ -21,6 +21,11 @@ public class SysRoleMenu {
     private Long id;
 
     /**
+     * 租户ID
+     */
+    private Long tenantId;
+
+    /**
      * 角色ID(关联sys_role.id)
      */
     private Long roleId;

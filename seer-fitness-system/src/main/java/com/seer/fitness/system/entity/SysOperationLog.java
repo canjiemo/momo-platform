@@ -21,6 +21,11 @@ public class SysOperationLog {
     private Long id;
 
     /**
+     * 租户ID，NULL表示平台操作日志
+     */
+    private Long tenantId;
+
+    /**
      * 操作用户ID
      */
     private Long userId;

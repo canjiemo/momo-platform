@@ -21,6 +21,11 @@ public class SysMenu {
     private Long id;
 
     /**
+     * 租户ID，NULL表示平台菜单模板
+     */
+    private Long tenantId;
+
+    /**
      * 菜单名称
      */
     private String menuName;
@@ -41,12 +46,6 @@ public class SysMenu {
     private Integer type;
 
     /**
-     * 菜单类型：1-平台菜单 2-租户模板菜单
-     * (2025-10-17 新增)
-     */
-    private Integer menuType;
-
-    /**
      * 权限字符，例如 user:create
      */
     private String permission;
@@ -60,12 +59,6 @@ public class SysMenu {
      * 排序字段，数值越小越靠前
      */
     private Integer sortOrder;
-
-    /**
-     * 功能级别：1-基础版 2-标准版 3-企业版
-     * (2025-10-17 新增)
-     */
-    private Integer featureLevel;
 
     /**
      * 状态：1启用 0禁用

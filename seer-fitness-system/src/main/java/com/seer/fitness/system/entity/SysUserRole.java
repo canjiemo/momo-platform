@@ -21,6 +21,11 @@ public class SysUserRole {
     private Long id;
 
     /**
+     * 租户ID
+     */
+    private Long tenantId;
+
+    /**
      * 用户ID(关联sys_user.id)
      */
     private Long userId;

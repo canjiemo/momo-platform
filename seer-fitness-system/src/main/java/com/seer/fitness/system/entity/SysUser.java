@@ -21,6 +21,11 @@ public class SysUser {
     private Long id;
 
     /**
+     * 租户ID，NULL表示平台管理员
+     */
+    private Long tenantId;
+
+    /**
      * 登录用户名
      */
     private String username;

@@ -22,6 +22,11 @@ public class SysOrganization {
     private Long id;
 
     /**
+     * 租户ID，必填
+     */
+    private Long tenantId;
+
+    /**
      * 组织编码，唯一标识
      * 用于系统内部标识，支持编码规则
      */
