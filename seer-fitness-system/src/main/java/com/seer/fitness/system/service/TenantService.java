@@ -1,16 +1,21 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.TenantCreateRequest;
 import com.seer.fitness.system.dto.TenantDTO;
 import com.seer.fitness.system.dto.TenantQueryParam;
 import com.seer.fitness.system.dto.TenantUpdateRequest;
 import com.seer.fitness.system.entity.SysTenant;
+import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.enums.TenantStatus;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -30,6 +35,12 @@ import java.util.Map;
 public class TenantService extends BaseServiceImpl implements ITenantService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @Value("${myjpa.tenant.enabled:false}")
+    private boolean tenantEnabled;
+
+    @Autowired
+    private PasswordPolicyConfig passwordConfig;
 
     @Override
     public Pager<TenantDTO> search(TenantQueryParam param, Pager pager) {
@@ -138,6 +149,50 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         baseDao.insertPO(tenant, true);
 
         log.info("租户创建成功: tenantCode={}, id={}", request.getTenantCode(), tenant.getId());
+
+        // 租户模式开启时，自动创建租户管理员账号
+        if (tenantEnabled) {
+            createTenantAdmin(tenant, request.getAdminUsername());
+        }
+    }
+
+    /**
+     * 为新租户创建管理员用户
+     * admin_flag=1 表示租户内的管理员（非平台超管）
+     */
+    private void createTenantAdmin(SysTenant tenant, String adminUsername) {
+        String username = StringUtils.hasText(adminUsername)
+                ? adminUsername
+                : tenant.getTenantCode().toLowerCase() + "_admin";
+
+        // 检查用户名是否已存在
+        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND delete_flag = 0";
+        Map<String, Object> checkParams = Maps.newHashMap();
+        checkParams.put("username", username);
+        Long count = baseDao.querySingleForSql(checkSql, checkParams, Long.class);
+        if (count != null && count > 0) {
+            log.warn("租户管理员账号已存在，跳过创建: username={}", username);
+            return;
+        }
+
+        String initialPassword = passwordConfig.getInitialPassword();
+        int bcryptStrength = passwordConfig.getBackend().getBcryptStrength();
+        String encodedPassword = BCrypt.hashpw(initialPassword, BCrypt.gensalt(bcryptStrength));
+
+        SysUser admin = new SysUser();
+        admin.setTenantId(tenant.getId());
+        admin.setUsername(username);
+        admin.setPassword(encodedPassword);
+        admin.setRealName(tenant.getTenantName() + " 管理员");
+        admin.setStatus(1);
+        admin.setAdminFlag(1);
+        admin.setDeleteFlag(0);
+        admin.setCreatedAt(LocalDateTime.now());
+        admin.setUpdatedAt(LocalDateTime.now());
+
+        baseDao.insertPO(admin, true);
+
+        log.info("租户管理员创建成功: tenantId={}, username={}", tenant.getId(), username);
     }
 
     @Override

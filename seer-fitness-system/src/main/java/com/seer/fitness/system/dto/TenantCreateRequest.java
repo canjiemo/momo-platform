@@ -47,4 +47,11 @@ public class TenantCreateRequest {
      * 格式：yyyy-MM-dd HH:mm:ss
      */
     private String expiredAt;
+
+    /**
+     * 租户管理员账号（可选，不填则自动生成 tenantCode_admin）
+     * 仅在 myjpa.tenant.enabled=true 时有效
+     */
+    @Size(min = 4, max = 50, message = "管理员账号长度为4-50位")
+    private String adminUsername;
 }
