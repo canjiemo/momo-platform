@@ -1,7 +1,6 @@
 package com.seer.fitness.business.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.framework.annotation.PublicSchema;
 import com.seer.fitness.business.dto.*;
 import com.seer.fitness.business.entity.SeerProjectInfo;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -21,7 +20,6 @@ import java.util.Map;
  * 租户项目服务实现
  * 管理租户 schema 中的 seer_project_info（学校实际使用的项目）
  * <p>
- * 默认操作租户 schema，除了查询平台项目的方法使用 @PublicSchema
  *
  * @author seer-fitness
  */
@@ -224,7 +222,6 @@ public class TenantProjectService extends BaseServiceImpl implements ITenantProj
      * 从 public schema 查询
      */
     @Override
-    @PublicSchema(reason = "查询平台项目列表供租户选择")
     public List<ProjectInfoDTO> getPlatformProjects() {
         String sql = "SELECT id, project_code, project_name, unit, training_duration, " +
                     "is_higher_better, sort_order, status, remark, created_at, updated_at " +
@@ -238,7 +235,6 @@ public class TenantProjectService extends BaseServiceImpl implements ITenantProj
     /**
      * 根据ID列表查询平台项目（从 public schema）
      */
-    @PublicSchema(reason = "查询平台项目用于分配")
     private List<SeerProjectInfo> getPlatformProjectsByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return new ArrayList<>();

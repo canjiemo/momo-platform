@@ -22,19 +22,9 @@ public class TenantQueryParam extends PagerParam {
     private String tenantName;
 
     /**
-     * Schema名称（精确查询）
-     */
-    private String schemaName;
-
-    /**
      * 状态：0-待激活 1-正常 2-已禁用 3-已过期
      */
     private Integer status;
-
-    /**
-     * 管理员用户名（模糊查询）
-     */
-    private String adminUsername;
 
     /**
      * 联系电话（模糊查询）

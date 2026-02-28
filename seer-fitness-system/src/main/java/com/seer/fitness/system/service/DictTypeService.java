@@ -71,7 +71,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
 
         log.info("字典类型分页查询SQL: {}", sql);
 
-        return baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, DictTypeDTO.class);
+        return baseDao.queryPageForSql(sql, queryMap, pager, DictTypeDTO.class);
     }
 
     /**
@@ -90,7 +90,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
                     "sort_order, remark, create_by, create_time, update_by, update_time " +
                     "FROM sys_dict_type WHERE status = 1 ORDER BY sort_order ASC, create_time DESC";
 
-        List<DictTypeDTO> list = baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), DictTypeDTO.class);
+        List<DictTypeDTO> list = baseDao.queryListForSql(sql, Maps.newHashMap(), DictTypeDTO.class);
 
         // 缓存结果
         if (list != null && !list.isEmpty()) {
@@ -116,7 +116,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", Long.valueOf(id));
 
-        DictTypeDTO dictType = baseDao.querySingleForSqlWithDeleteCondition(sql, params, DictTypeDTO.class);
+        DictTypeDTO dictType = baseDao.querySingleForSql(sql, params, DictTypeDTO.class);
         if (dictType == null) {
             throw new BusinessException("字典类型不存在");
         }
@@ -147,7 +147,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", dictType);
 
-        DictTypeDTO result = baseDao.querySingleForSqlWithDeleteCondition(sql, params, DictTypeDTO.class);
+        DictTypeDTO result = baseDao.querySingleForSql(sql, params, DictTypeDTO.class);
         if (result == null) {
             throw new BusinessException("字典类型不存在: " + dictType);
         }
@@ -198,7 +198,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
      */
     @Transactional(readOnly = false)
     public void update(DictTypeUpdateRequest request) {
-        SysDictType existingDict = baseDao.queryByIdWithDeleteCondition(request.getId(), SysDictType.class);
+        SysDictType existingDict = baseDao.queryById(request.getId(), SysDictType.class);
         if (existingDict == null) {
             throw new BusinessException("字典类型不存在");
         }
@@ -255,7 +255,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
             }
 
             Long dictTypeId = Long.valueOf(id);
-            SysDictType dictType = baseDao.queryByIdWithDeleteCondition(dictTypeId, SysDictType.class);
+            SysDictType dictType = baseDao.queryById(dictTypeId, SysDictType.class);
             if (dictType == null) {
                 throw new BusinessException("字典类型不存在");
             }
@@ -295,7 +295,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", dictType);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 }

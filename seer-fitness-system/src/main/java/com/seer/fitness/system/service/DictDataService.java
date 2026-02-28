@@ -74,7 +74,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
         log.info("字典数据分页查询SQL: {}", sql);
 
-        return baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, DictDataDTO.class);
+        return baseDao.queryPageForSql(sql, queryMap, pager, DictDataDTO.class);
     }
 
     /**
@@ -102,7 +102,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", dictType);
 
-        List<DictDataDTO> list = baseDao.queryListForSqlWithDeleteCondition(sql, params, DictDataDTO.class);
+        List<DictDataDTO> list = baseDao.queryListForSql(sql, params, DictDataDTO.class);
 
         // 缓存结果
         if (list != null) {
@@ -129,7 +129,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", Long.valueOf(id));
 
-        DictDataDTO dictData = baseDao.querySingleForSqlWithDeleteCondition(sql, params, DictDataDTO.class);
+        DictDataDTO dictData = baseDao.querySingleForSql(sql, params, DictDataDTO.class);
         if (dictData == null) {
             throw new BusinessException("字典数据不存在");
         }
@@ -160,7 +160,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         params.put("dictType", dictType);
         params.put("dictValue", dictValue);
 
-        String label = baseDao.querySingleForSqlWithDeleteCondition(sql, params, String.class);
+        String label = baseDao.querySingleForSql(sql, params, String.class);
         log.info("从数据库获取字典标签: {}={}", dictType + ":" + dictValue, label);
 
         return label;
@@ -214,7 +214,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      */
     @Transactional(readOnly = false)
     public void update(DictDataUpdateRequest request) {
-        SysDictData existingData = baseDao.queryByIdWithDeleteCondition(request.getId(), SysDictData.class);
+        SysDictData existingData = baseDao.queryById(request.getId(), SysDictData.class);
         if (existingData == null) {
             throw new BusinessException("字典数据不存在");
         }
@@ -274,7 +274,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             }
 
             Long dictDataId = Long.valueOf(id);
-            SysDictData dictData = baseDao.queryByIdWithDeleteCondition(dictDataId, SysDictData.class);
+            SysDictData dictData = baseDao.queryById(dictDataId, SysDictData.class);
             if (dictData == null) {
                 throw new BusinessException("字典数据不存在");
             }
@@ -308,7 +308,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             String id = ids.get(i);
             Integer sortOrder = sortOrders.get(i);
 
-            SysDictData dictData = baseDao.queryByIdWithDeleteCondition(Long.valueOf(id), SysDictData.class);
+            SysDictData dictData = baseDao.queryById(Long.valueOf(id), SysDictData.class);
             if (dictData == null) {
                 continue;
             }
@@ -340,7 +340,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", dictType);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 
@@ -356,7 +356,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", oldDictType);
 
-        List<SysDictData> dictDataList = baseDao.queryListForSqlWithDeleteCondition(sql, params, SysDictData.class);
+        List<SysDictData> dictDataList = baseDao.queryListForSql(sql, params, SysDictData.class);
 
         for (SysDictData dictData : dictDataList) {
             dictData.setDictType(newDictType);
@@ -379,7 +379,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         params.put("dictType", dictType);
         params.put("dictValue", dictValue);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 
@@ -394,7 +394,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         Map<String, Object> params = Maps.newHashMap();
         params.put("dictType", dictType);
 
-        List<SysDictData> dictDataList = baseDao.queryListForSqlWithDeleteCondition(sql, params, SysDictData.class);
+        List<SysDictData> dictDataList = baseDao.queryListForSql(sql, params, SysDictData.class);
 
         for (SysDictData dictData : dictDataList) {
             dictData.setIsDefault(0);

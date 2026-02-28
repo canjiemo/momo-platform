@@ -87,7 +87,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         log.info("组织架构分页查询SQL: {}", sql);
 
         // 由于SQL已经包含了所有扩展信息，不需要再调用enrichOrganizationData
-        return baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, OrganizationDTO.class);
+        return baseDao.queryPageForSql(sql, queryMap, pager, OrganizationDTO.class);
     }
 
     /**
@@ -106,7 +106,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.status = 1 ORDER BY o.sort_order ASC";
 
-        List<OrganizationDTO> allOrgs = baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), OrganizationDTO.class);
+        List<OrganizationDTO> allOrgs = baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class);
 
         return buildOrganizationTree(allOrgs, 0L);
     }
@@ -160,7 +160,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "ORDER BY o.sort_order ASC, o.created_at DESC";
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), OrganizationDTO.class);
+        return baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class);
     }
 
     /**
@@ -211,7 +211,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         // 验证父组织是否存在
         if (parentId != 0L) {
-            SysOrganization parentOrg = baseDao.queryByIdWithDeleteCondition(parentId, SysOrganization.class);
+            SysOrganization parentOrg = baseDao.queryById(parentId, SysOrganization.class);
             if (parentOrg == null) {
                 throw new BusinessException("父组织不存在");
             }
@@ -219,7 +219,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         // 验证负责人是否存在
         if (request.getLeaderId() != null) {
-            SysUser leader = baseDao.queryByIdWithDeleteCondition(request.getLeaderId(), SysUser.class);
+            SysUser leader = baseDao.queryById(request.getLeaderId(), SysUser.class);
             if (leader == null) {
                 throw new BusinessException("指定的负责人不存在");
             }
@@ -252,7 +252,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
     @Override
     @Transactional(readOnly = false)
     public void update(OrganizationUpdateRequest request) {
-        SysOrganization org = baseDao.queryByIdWithDeleteCondition(request.getId(), SysOrganization.class);
+        SysOrganization org = baseDao.queryById(request.getId(), SysOrganization.class);
         if (org == null) {
             throw new BusinessException("组织不存在");
         }
@@ -276,7 +276,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                 throw new BusinessException("不能将组织移动到其子组织下，会形成循环引用");
             }
 
-            SysOrganization parentOrg = baseDao.queryByIdWithDeleteCondition(parentId, SysOrganization.class);
+            SysOrganization parentOrg = baseDao.queryById(parentId, SysOrganization.class);
             if (parentOrg == null) {
                 throw new BusinessException("父组织不存在");
             }
@@ -284,7 +284,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         // 验证负责人是否存在
         if (request.getLeaderId() != null) {
-            SysUser leader = baseDao.queryByIdWithDeleteCondition(request.getLeaderId(), SysUser.class);
+            SysUser leader = baseDao.queryById(request.getLeaderId(), SysUser.class);
             if (leader == null) {
                 throw new BusinessException("指定的负责人不存在");
             }
@@ -352,7 +352,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
             throw new BusinessException("组织ID不能为空");
         }
 
-        SysOrganization org = baseDao.queryByIdWithDeleteCondition(orgId, SysOrganization.class);
+        SysOrganization org = baseDao.queryById(orgId, SysOrganization.class);
         if (org == null) {
             throw new BusinessException("组织不存在");
         }
@@ -370,7 +370,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                 throw new BusinessException("不能将组织移动到其子组织下，会形成循环引用");
             }
 
-            SysOrganization newParent = baseDao.queryByIdWithDeleteCondition(Long.parseLong(parentIdStr), SysOrganization.class);
+            SysOrganization newParent = baseDao.queryById(Long.parseLong(parentIdStr), SysOrganization.class);
             if (newParent == null) {
                 throw new BusinessException("新父组织不存在");
             }
@@ -408,14 +408,14 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         }
 
         List<OrganizationDTO> path = new ArrayList<>();
-        SysOrganization current = baseDao.queryByIdWithDeleteCondition(orgId, SysOrganization.class);
+        SysOrganization current = baseDao.queryById(orgId, SysOrganization.class);
 
         while (current != null) {
             OrganizationDTO dto = convertToDTO(current);
             path.add(0, dto); // 插入到开头
 
             if (current.getParentId() != null) {
-                current = baseDao.queryByIdWithDeleteCondition(current.getParentId(), SysOrganization.class);
+                current = baseDao.queryById(current.getParentId(), SysOrganization.class);
             } else {
                 break;
             }
@@ -438,7 +438,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
             params.put("excludeId", excludeId);
         }
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count == null || count == 0;
     }
 
@@ -470,7 +470,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         Map<String, Object> params = Maps.newHashMap();
         params.put("parentId", orgId);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 
@@ -506,7 +506,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         Map<String, Object> params = Maps.newHashMap();
         params.put("parentId", parentId);
 
-        List<Long> directChildren = baseDao.queryListForSqlWithDeleteCondition(sql, params, Long.class);
+        List<Long> directChildren = baseDao.queryListForSql(sql, params, Long.class);
         result.addAll(directChildren);
 
         // 递归查找子级的子级

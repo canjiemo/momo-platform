@@ -23,22 +23,6 @@ public class TenantCreateRequest {
     @Size(max = 100, message = "租户名称长度不能超过100位")
     private String tenantName;
 
-    @NotBlank(message = "Schema名称不能为空")
-    @Size(min = 3, max = 50, message = "Schema名称长度为3-50位")
-    @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "Schema名称必须以小写字母开头，只能包含小写字母、数字和下划线")
-    private String schemaName;
-
-    @NotBlank(message = "管理员用户名不能为空")
-    @Size(min = 3, max = 50, message = "管理员用户名长度为3-50位")
-    private String adminUsername;
-
-    @NotBlank(message = "管理员密码不能为空")
-    @Size(min = 8, max = 20, message = "管理员密码长度为8-20位")
-    private String adminPassword;
-
-    @Size(max = 50, message = "管理员真实姓名长度不能超过50位")
-    private String adminRealName;
-
     @Size(max = 20, message = "联系电话长度不能超过20位")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "联系电话格式不正确", flags = Pattern.Flag.CASE_INSENSITIVE)
     private String contactPhone;
@@ -57,11 +41,6 @@ public class TenantCreateRequest {
      * 最大用户数限制（可选，默认1000）
      */
     private Integer maxUsers;
-
-    /**
-     * 最大存储空间限制（GB，可选，默认100）
-     */
-    private Integer maxStorageGb;
 
     /**
      * 过期时间（可选，不填表示永不过期）

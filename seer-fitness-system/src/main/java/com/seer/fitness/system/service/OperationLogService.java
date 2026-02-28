@@ -164,7 +164,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
 
         log.info("操作日志分页查询SQL: {}", sql);
 
-        Pager<OperationLogDTO> result = baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, OperationLogDTO.class);
+        Pager<OperationLogDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, OperationLogDTO.class);
 
         // 补充扩展信息
         if (result.getPageData() != null && !result.getPageData().isEmpty()) {
@@ -183,7 +183,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
             return null;
         }
 
-        SysOperationLog operationLog = baseDao.queryByIdWithDeleteCondition(id, SysOperationLog.class);
+        SysOperationLog operationLog = baseDao.queryById(id, SysOperationLog.class);
         if (operationLog == null) {
             return null;
         }

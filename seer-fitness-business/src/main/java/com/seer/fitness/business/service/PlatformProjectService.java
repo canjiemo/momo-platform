@@ -1,7 +1,6 @@
 package com.seer.fitness.business.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.framework.annotation.PublicSchema;
 import com.seer.fitness.business.dto.*;
 import com.seer.fitness.business.entity.SeerProjectInfo;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -21,7 +20,6 @@ import java.util.Map;
  * 平台项目服务实现
  * 管理 public.seer_project_info 中的平台项目库
  * <p>
- * 所有方法使用 @PublicSchema 注解，确保操作路由到 public schema
  *
  * @author seer-fitness
  */
@@ -33,7 +31,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      * 分页查询平台项目
      */
     @Override
-    @PublicSchema(reason = "查询平台项目库")
     public Pager<ProjectInfoDTO> search(ProjectInfoQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
@@ -73,7 +70,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      * 根据ID获取项目详情
      */
     @Override
-    @PublicSchema(reason = "查询平台项目详情")
     public ProjectInfoDTO getById(Long id) {
         if (id == null) {
             throw new BusinessException("项目ID不能为空");
@@ -92,7 +88,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "创建平台项目")
     public void create(ProjectInfoCreateRequest request) {
         // 检查项目编号是否已存在
         if (isProjectCodeExists(request.getProjectCode())) {
@@ -121,7 +116,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "更新平台项目")
     public void update(ProjectInfoUpdateRequest request) {
         SeerProjectInfo project = baseDao.queryById(request.getId(), SeerProjectInfo.class);
         if (project == null) {
@@ -155,7 +149,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
      */
     @Override
     @Transactional(readOnly = false)
-    @PublicSchema(reason = "删除平台项目")
     public void delete(String[] ids) {
         if (ids == null || ids.length == 0) {
             throw new BusinessException("删除的项目ID不能为空");
@@ -176,7 +169,6 @@ public class PlatformProjectService extends BaseServiceImpl implements IPlatform
     /**
      * 检查项目编号是否已存在
      */
-    @PublicSchema(reason = "检查平台项目编号")
     private boolean isProjectCodeExists(String projectCode) {
         String sql = "SELECT COUNT(*) FROM seer_project_info WHERE project_code = :projectCode";
         Map<String, Object> params = Maps.newHashMap();

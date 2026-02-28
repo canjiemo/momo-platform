@@ -29,21 +29,6 @@ public class TenantDTO {
     private String tenantName;
 
     /**
-     * PostgreSQL Schema 名称
-     */
-    private String schemaName;
-
-    /**
-     * 管理员用户名
-     */
-    private String adminUsername;
-
-    /**
-     * 管理员真实姓名
-     */
-    private String adminRealName;
-
-    /**
      * 联系电话
      */
     private String contactPhone;
@@ -87,21 +72,6 @@ public class TenantDTO {
      * 最大用户数限制
      */
     private Integer maxUsers;
-
-    /**
-     * 当前用户数（统计数据，可选）
-     */
-    private Integer currentUsers;
-
-    /**
-     * 最大存储空间限制（GB）
-     */
-    private Integer maxStorageGb;
-
-    /**
-     * 当前存储占用（GB，统计数据，可选）
-     */
-    private Integer currentStorageGb;
 
     /**
      * 创建时间

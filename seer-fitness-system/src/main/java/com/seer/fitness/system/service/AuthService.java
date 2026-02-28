@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -56,9 +55,8 @@ public class AuthService {
 
     /**
      * 用户登录
-     * 支持平台管理员和租户用户登录
-     * - tenantCode 为空：平台管理员登录（查询 public.sys_user）
-     * - tenantCode 有值：租户用户登录（查询 tenant_schema.sys_user）
+     * - tenantCode 为空：平台管理员登录（tenant_id=NULL）
+     * - tenantCode 有值：租户用户登录（tenant_id=具体值）
      */
     public LoginResponse login(LoginRequest request, String ip) {
         String username = request.getUsername();
@@ -70,149 +68,75 @@ public class AuthService {
             throw new BusinessException("验证码错误或已过期");
         }
 
-        // 2. 判断登录类型：平台管理员 or 租户用户
+        // 2. 判断登录类型
         boolean isPlatformAdmin = (tenantCode == null || tenantCode.trim().isEmpty());
 
         com.seer.fitness.system.dto.TenantDTO tenant = null;
-
-        if (!isPlatformAdmin) {
-            // 租户用户登录
-            if (tenantService != null) {
-                tenant = tenantService.getByCode(tenantCode);
-                if (tenant == null) {
-                    throw new BusinessException("租户不存在或已被禁用");
-                }
-
-                // 检查租户状态
-                if (tenant.getStatus() != 1) { // 1=正常
-                    throw new BusinessException("租户已被禁用，请联系平台管理员");
-                }
-
-                // 检查租户是否过期
-                if (tenant.getExpiredAt() != null && tenant.getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
-                    throw new BusinessException("租户已过期，请联系平台管理员");
-                }
-
-                // 设置租户上下文（用于查询用户）
-                com.seer.fitness.system.tenant.TenantContext.setTenant(
-                    tenant.getId(),
-                    tenant.getTenantCode(),
-                    tenant.getSchemaName()
-                );
+        if (!isPlatformAdmin && tenantService != null) {
+            tenant = tenantService.getByCode(tenantCode);
+            if (tenant == null) {
+                throw new BusinessException("租户不存在或已被禁用");
+            }
+            if (tenant.getStatus() != 1) {
+                throw new BusinessException("租户已被禁用，请联系平台管理员");
+            }
+            if (tenant.getExpiredAt() != null && tenant.getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
+                throw new BusinessException("租户已过期，请联系平台管理员");
             }
         }
 
-        try {
-            // 3. 查询用户
-            SysUser user;
-            if (isPlatformAdmin) {
-                // 平台管理员登录：查询 public.sys_user（通过 @PublicSchema 注解）
-                user = userService.findPlatformUserByUsername(username);
-                if (user == null) {
-                    throw new BusinessException("平台管理员账号不存在");
-                }
-                log.info("平台管理员登录: username={}", username);
-            } else {
-                // 租户用户登录：查询租户 schema（会自动路由）
-                user = userService.findByUsername(username);
-                if (user == null) {
-                    throw new BusinessException("用户名或密码错误");
-                }
-            }
+        // 3. 查询用户（tenant_id 模式：同一张表，通过 tenantId 区分）
+        Long tenantId = (tenant != null) ? tenant.getId() : null;
+        SysUser user = userService.findByUsernameAndTenantId(username, tenantId);
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
 
-            // 4. 检查用户状态
-            if (user.getStatus() != 1) {
-                throw new BusinessException("账户已被禁用");
-            }
+        // 4. 检查用户状态
+        if (user.getStatus() != 1) {
+            throw new BusinessException("账户已被禁用");
+        }
 
-            // 5. 验证密码
-            if (!passwordUtil.verifyPassword(password, user.getPassword())) {
-                // 记录登录失败
-                accountLockService.recordFailedAttempt(username, ip);
-                throw new BusinessException("用户名或密码错误");
-            }
+        // 5. 验证密码
+        if (!passwordUtil.verifyPassword(password, user.getPassword())) {
+            accountLockService.recordFailedAttempt(username, ip);
+            throw new BusinessException("用户名或密码错误");
+        }
 
-            // 6. 登录成功，重置失败记录
-            accountLockService.onLoginSuccess(username, ip);
+        // 6. 登录成功，重置失败记录
+        accountLockService.onLoginSuccess(username, ip);
 
-            // 7. 生成JWT Token
-            String token;
-            if (isPlatformAdmin) {
-                // 平台管理员：不需要租户信息
-                token = jwtUtil.generateToken(username, user.getId());
-            } else if (tenant != null) {
-                // 租户用户：包含租户信息
-                token = jwtUtil.generateTokenWithTenant(
-                    username,
-                    user.getId(),
-                    tenant.getId(),
-                    tenant.getTenantCode(),
-                    tenant.getSchemaName()
-                );
-            } else {
-                token = jwtUtil.generateToken(username, user.getId());
-            }
-            String tokenId = jwtUtil.getTokenIdFromToken(token);
+        // 7. 生成JWT Token
+        String token;
+        if (tenant != null) {
+            token = jwtUtil.generateTokenWithTenant(username, user.getId(), tenant.getId(), tenant.getTenantCode());
+        } else {
+            token = jwtUtil.generateToken(username, user.getId());
+        }
+        String tokenId = jwtUtil.getTokenIdFromToken(token);
 
         // 8. 获取用户角色和权限
-        List<RoleDTO> roles;
-        List<String> permissions;
+        List<RoleDTO> roles = roleService.getUserRoles(user.getId());
+        List<String> permissions = menuService.getUserPermissions(user.getId());
 
-        if (isPlatformAdmin) {
-            // 平台管理员：查询 public schema 的角色和权限
-            roles = roleService.getPlatformUserRoles(user.getId());
-            permissions = menuService.getPlatformUserPermissions(user.getId());
-        } else {
-            // 租户用户：查询租户 schema 的角色和权限
-            roles = roleService.getUserRoles(user.getId());
-            permissions = menuService.getUserPermissions(user.getId());
-        }
-
-        // 8. 缓存用户信息到Redis
-        // 安全加固：包含租户信息，用于后续验证 - 2024-10-18
+        // 9. 缓存用户信息到Redis
         UserCacheInfo userCacheInfo;
-        if (!isPlatformAdmin && tenant != null) {
-            // 租户用户：包含租户信息
+        if (tenant != null) {
             userCacheInfo = new UserCacheInfo(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getRealName(),
-                    roles,
-                    permissions,
-                    user.getAdminFlag(),
-                    user.getUserType(),
-                    tokenId,
-                    tenant.getId(),
-                    tenant.getTenantCode(),
-                    tenant.getSchemaName()
+                    user.getId(), user.getUsername(), user.getRealName(),
+                    roles, permissions, user.getAdminFlag(), user.getUserType(), tokenId,
+                    tenant.getId(), tenant.getTenantCode()
             );
         } else {
-            // 平台用户：不包含租户信息
             userCacheInfo = new UserCacheInfo(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getRealName(),
-                    roles,
-                    permissions,
-                    user.getAdminFlag(),
-                    user.getUserType(),
-                    tokenId
+                    user.getId(), user.getUsername(), user.getRealName(),
+                    roles, permissions, user.getAdminFlag(), user.getUserType(), tokenId
             );
         }
-
-        // 缓存24小时
         redisUtil.set("user:token:" + tokenId, userCacheInfo, 24, TimeUnit.HOURS);
 
-
-            LoginResponse result = new LoginResponse(token);
-
-            log.info("用户登录成功: username={}, tenantCode={}, ip={}", username, tenantCode, ip);
-            return result;
-
-        } finally {
-            // 清理租户上下文
-            com.seer.fitness.system.tenant.TenantContext.clear();
-        }
+        log.info("用户登录成功: username={}, tenantCode={}, ip={}", username, tenantCode, ip);
+        return new LoginResponse(token);
     }
 
     /**

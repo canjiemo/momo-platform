@@ -63,29 +63,19 @@ public class UserCacheInfo implements Serializable {
 
     /**
      * 租户ID（仅租户用户有值，平台用户为null）
-     * 安全加固 - 2024-10-18
      */
     private Long tenantId;
 
     /**
      * 租户编码（仅租户用户有值，平台用户为null）
-     * 安全加固 - 2024-10-18
      */
     private String tenantCode;
-
-    /**
-     * Schema名称（仅租户用户有值，平台用户为null）
-     * 安全加固 - 2024-10-18
-     */
-    private String schemaName;
 
     public UserCacheInfo() {
     }
 
-    /**
-     * 平台用户构造函数（不包含租户信息）
-     */
-    public UserCacheInfo(Long userId, String username, String realName, List<RoleDTO> roles, List<String> permissions, Integer adminFlag, Integer userType, String tokenId) {
+    public UserCacheInfo(Long userId, String username, String realName, List<RoleDTO> roles, List<String> permissions,
+                         Integer adminFlag, Integer userType, String tokenId) {
         this.userId = userId;
         this.username = username;
         this.realName = realName;
@@ -97,24 +87,11 @@ public class UserCacheInfo implements Serializable {
         this.lastAccessTime = System.currentTimeMillis();
     }
 
-    /**
-     * 租户用户构造函数（包含租户信息）
-     * 安全加固 - 2024-10-18
-     */
     public UserCacheInfo(Long userId, String username, String realName, List<RoleDTO> roles, List<String> permissions,
-                        Integer adminFlag, Integer userType, String tokenId,
-                        Long tenantId, String tenantCode, String schemaName) {
-        this.userId = userId;
-        this.username = username;
-        this.realName = realName;
-        this.roles = roles;
-        this.permissions = permissions;
-        this.adminFlag = adminFlag;
-        this.userType = userType;
-        this.tokenId = tokenId;
+                         Integer adminFlag, Integer userType, String tokenId,
+                         Long tenantId, String tenantCode) {
+        this(userId, username, realName, roles, permissions, adminFlag, userType, tokenId);
         this.tenantId = tenantId;
         this.tenantCode = tenantCode;
-        this.schemaName = schemaName;
-        this.lastAccessTime = System.currentTimeMillis();
     }
 }

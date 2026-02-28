@@ -43,17 +43,8 @@ public interface ITenantService {
     TenantDTO getByCode(String tenantCode);
 
     /**
-     * 根据Schema名称获取租户信息
-     *
-     * @param schemaName Schema名称
-     * @return 租户信息，不存在则返回null
-     */
-    TenantDTO getBySchemaName(String schemaName);
-
-    /**
      * 创建租户
-     * 阶段2：只创建租户记录，不创建Schema
-     * 阶段3：将增加Schema自动创建功能
+     * 只在 sys_tenant 插入记录，无需创建 Schema
      *
      * @param request 创建请求参数
      */
@@ -96,11 +87,4 @@ public interface ITenantService {
      */
     boolean existsByCode(String tenantCode);
 
-    /**
-     * 检查Schema名称是否已存在
-     *
-     * @param schemaName Schema名称
-     * @return true表示已存在
-     */
-    boolean existsBySchemaName(String schemaName);
 }

@@ -6,8 +6,6 @@ import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.entity.SysUserRole;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.*;
-import com.seer.fitness.system.security.TenantSecurityValidator;
-import com.seer.fitness.system.tenant.TenantContext;
 import com.seer.fitness.system.utils.PasswordUtil;
 import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -42,9 +40,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
     @Autowired
     private MenuService menuService;
-
-    @Autowired(required = false)
-    private TenantSecurityValidator tenantSecurityValidator;
 
     /**
      * 分页查询用户
@@ -95,7 +90,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
         log.info("用户分页查询SQL: {}", sql);
 
-        Pager<UserDTO> result = baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, UserDTO.class);
+        Pager<UserDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, UserDTO.class);
 
         // 为每个用户查询角色信息
         if (result.getPageData() != null && !result.getPageData().isEmpty()) {
@@ -108,7 +103,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
                 Map<String, Object> roleParams = Maps.newHashMap();
                 roleParams.put("userId", userDTO.getId());
 
-                List<RoleDTO> roles = baseDao.queryListForSqlWithDeleteCondition(rolesSql, roleParams, RoleDTO.class);
+                List<RoleDTO> roles = baseDao.queryListForSql(rolesSql, roleParams, RoleDTO.class);
                 userDTO.setRoles(roles);
             }
         }
@@ -127,7 +122,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
         }
 
         // 查询用户基本信息
-        SysUser user = baseDao.queryByIdWithDeleteCondition(id, SysUser.class);
+        SysUser user = baseDao.queryById(id, SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -143,7 +138,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
         Map<String, Object> roleParams = Maps.newHashMap();
         roleParams.put("userId", id);
 
-        List<RoleDTO> roles = baseDao.queryListForSqlWithDeleteCondition(rolesSql, roleParams, RoleDTO.class);
+        List<RoleDTO> roles = baseDao.queryListForSql(rolesSql, roleParams, RoleDTO.class);
         userDTO.setRoles(roles);
 
         return userDTO;
@@ -166,7 +161,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
         // 验证组织ID是否存在（如果提供了）
         if (request.getOrgId() != null) {
-            SysOrganization org = baseDao.queryByIdWithDeleteCondition(request.getOrgId(), SysOrganization.class);
+            SysOrganization org = baseDao.queryById(request.getOrgId(), SysOrganization.class);
             if (org == null) {
                 throw new BusinessException("指定的组织不存在");
             }
@@ -200,14 +195,14 @@ public class UserService extends BaseServiceImpl implements IUserService {
     @Transactional(readOnly = false)
     public void update(UserUpdateRequest request) {
         // 查询现有用户
-        SysUser user = baseDao.queryByIdWithDeleteCondition(request.getId(), SysUser.class);
+        SysUser user = baseDao.queryById(request.getId(), SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
 
         // 验证组织ID是否存在（如果提供了）
         if (request.getOrgId() != null) {
-            SysOrganization org = baseDao.queryByIdWithDeleteCondition(request.getOrgId(), SysOrganization.class);
+            SysOrganization org = baseDao.queryById(request.getOrgId(), SysOrganization.class);
             if (org == null) {
                 throw new BusinessException("指定的组织不存在");
             }
@@ -255,7 +250,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
             Long userId = Long.valueOf(id);
 
             // 检查是否为超级管理员
-            SysUser user = baseDao.queryByIdWithDeleteCondition(userId, SysUser.class);
+            SysUser user = baseDao.queryById(userId, SysUser.class);
             if (user == null) {
                 throw new BusinessException("用户不存在：ID=" + userId);
             }
@@ -271,16 +266,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
         // 逻辑删除用户
         baseDao.delByIds(SysUser.class, ids);
 
-        // 清除用户验证缓存 (安全加固 - 2024-10-18)
-        String schemaName = TenantContext.getSchemaName();
-        if (schemaName != null && tenantSecurityValidator != null) {
-            for (String id : ids) {
-                Long userId = Long.valueOf(id);
-                tenantSecurityValidator.clearUserValidationCache(userId, schemaName);
-                log.info("已清除用户验证缓存: userId={}, schema={}", userId, schemaName);
-            }
-        }
-
         log.info("删除用户成功: ids={}", java.util.Arrays.toString(ids));
     }
 
@@ -291,7 +276,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = false)
     public void resetPassword(Long userId, String newPassword) {
-        SysUser user = baseDao.queryByIdWithDeleteCondition(userId, SysUser.class);
+        SysUser user = baseDao.queryById(userId, SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -317,7 +302,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = false)
     public void changePassword(Long currentUserId, String currentPassword, String newPassword) {
-        SysUser user = baseDao.queryByIdWithDeleteCondition(currentUserId, SysUser.class);
+        SysUser user = baseDao.queryById(currentUserId, SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -348,7 +333,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = false)
     public void initPassword(Long userId) {
-        SysUser user = baseDao.queryByIdWithDeleteCondition(userId, SysUser.class);
+        SysUser user = baseDao.queryById(userId, SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -371,27 +356,30 @@ public class UserService extends BaseServiceImpl implements IUserService {
     }
 
     /**
-     * 根据用户名查询用户（用于租户用户登录）
+     * 根据用户名和租户ID查询用户（用于登录）
+     * tenantId=NULL 表示平台管理员
+     */
+    public SysUser findByUsernameAndTenantId(String username, Long tenantId) {
+        String sql;
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("username", username);
+        if (tenantId == null) {
+            sql = "SELECT * FROM sys_user WHERE username = :username AND tenant_id IS NULL";
+        } else {
+            sql = "SELECT * FROM sys_user WHERE username = :username AND tenant_id = :tenantId";
+            params.put("tenantId", tenantId);
+        }
+        return baseDao.querySingleForSql(sql, params, SysUser.class);
+    }
+
+    /**
+     * 根据用户名查询用户
      */
     public SysUser findByUsername(String username) {
         String sql = "SELECT * FROM sys_user WHERE username = :username";
         Map<String, Object> params = Maps.newHashMap();
         params.put("username", username);
-
-        return baseDao.querySingleForSqlWithDeleteCondition(sql, params, SysUser.class);
-    }
-
-    /**
-     * 根据用户名查询平台管理员（用于平台管理员登录）
-     * 使用 @PublicSchema 注解确保查询 public.sys_user
-     */
-    @com.seer.fitness.framework.annotation.PublicSchema(reason = "平台管理员登录")
-    public SysUser findPlatformUserByUsername(String username) {
-        String sql = "SELECT * FROM sys_user WHERE username = :username";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("username", username);
-
-        return baseDao.querySingleForSqlWithDeleteCondition(sql, params, SysUser.class);
+        return baseDao.querySingleForSql(sql, params, SysUser.class);
     }
 
     /**
@@ -402,7 +390,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
         Map<String, Object> params = Maps.newHashMap();
         params.put("username", username);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 

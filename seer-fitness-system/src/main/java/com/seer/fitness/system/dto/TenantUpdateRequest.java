@@ -19,9 +19,6 @@ public class TenantUpdateRequest {
     @Size(max = 100, message = "租户名称长度不能超过100位")
     private String tenantName;
 
-    @Size(max = 50, message = "管理员真实姓名长度不能超过50位")
-    private String adminRealName;
-
     @Size(max = 20, message = "联系电话长度不能超过20位")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "联系电话格式不正确", flags = Pattern.Flag.CASE_INSENSITIVE)
     private String contactPhone;
@@ -40,11 +37,6 @@ public class TenantUpdateRequest {
      * 最大用户数限制
      */
     private Integer maxUsers;
-
-    /**
-     * 最大存储空间限制（GB）
-     */
-    private Integer maxStorageGb;
 
     /**
      * 过期时间

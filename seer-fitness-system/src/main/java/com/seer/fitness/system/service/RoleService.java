@@ -65,7 +65,7 @@ public class RoleService extends BaseServiceImpl {
 
         log.info("角色分页查询SQL: {}", sql);
 
-        return baseDao.queryPageForSqlWithDeleteCondition(sql, queryMap, pager, RoleDTO.class);
+        return baseDao.queryPageForSql(sql, queryMap, pager, RoleDTO.class);
     }
 
     /**
@@ -75,7 +75,7 @@ public class RoleService extends BaseServiceImpl {
         String sql = "SELECT id, role_name, description, platform_role_id, status, created_at, updated_at " +
                     "FROM sys_role WHERE status = 1 ORDER BY created_at DESC";
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), RoleDTO.class);
+        return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
     }
 
     /**
@@ -84,7 +84,7 @@ public class RoleService extends BaseServiceImpl {
     public RoleDTO getById(String idStr) {
         Long id = Long.parseLong(idStr);
 
-        SysRole role = baseDao.queryByIdWithDeleteCondition(id, SysRole.class);
+        SysRole role = baseDao.queryById(id, SysRole.class);
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
@@ -98,7 +98,7 @@ public class RoleService extends BaseServiceImpl {
 //        Map<String, Object> menuParams = Maps.newHashMap();
 //        menuParams.put("roleId", id);
 //
-//        List<MenuDTO> menus = baseDao.queryListForSqlWithDeleteCondition(menusSql, menuParams, MenuDTO.class);
+//        List<MenuDTO> menus = baseDao.queryListForSql(menusSql, menuParams, MenuDTO.class);
 //        roleDTO.setMenus(menus);
 
         return convertToDTO(role);
@@ -137,14 +137,9 @@ public class RoleService extends BaseServiceImpl {
      */
     @Transactional(readOnly = false)
     public void update(RoleUpdateRequest request) {
-        SysRole role = baseDao.queryByIdWithDeleteCondition(request.getId(), SysRole.class);
+        SysRole role = baseDao.queryById(request.getId(), SysRole.class);
         if (role == null) {
             throw new BusinessException("角色不存在");
-        }
-
-        // 平台同步的角色不允许修改
-        if (isPlatformSyncedRole(request.getId())) {
-            throw new BusinessException("平台同步的角色不能修改，请联系平台管理员");
         }
 
         // 如果修改了角色名，检查是否重复
@@ -186,11 +181,6 @@ public class RoleService extends BaseServiceImpl {
             }
 
             Long roleId = Long.valueOf(id);
-
-            // 平台同步的角色不允许删除
-            if (isPlatformSyncedRole(roleId)) {
-                throw new BusinessException("平台同步的角色不能删除，请联系平台管理员");
-            }
 
             // 检查是否有用户使用该角色
             if (hasUsersWithRole(roleId)) {
@@ -253,22 +243,7 @@ public class RoleService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("userId", userId);
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, params, RoleDTO.class);
-    }
-
-    /**
-     * 根据用户ID获取平台管理员角色列表
-     * 使用 @PublicSchema 注解确保查询 public.sys_role
-     */
-    @com.seer.fitness.framework.annotation.PublicSchema(reason = "平台管理员角色查询")
-    public List<RoleDTO> getPlatformUserRoles(Long userId) {
-        String sql = "SELECT r.* FROM sys_role r " +
-                    "INNER JOIN sys_user_role ur ON r.id = ur.role_id " +
-                    "WHERE ur.user_id = :userId AND r.status = 1";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("userId", userId);
-
-        return baseDao.queryListForSqlWithDeleteCondition(sql, params, RoleDTO.class);
+        return baseDao.queryListForSql(sql, params, RoleDTO.class);
     }
 
     /**
@@ -279,7 +254,7 @@ public class RoleService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("roleName", roleName);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 
@@ -310,22 +285,6 @@ public class RoleService extends BaseServiceImpl {
     }
 
     /**
-     * 检查角色是否为平台同步的角色
-     * 平台同步的角色不允许修改和删除
-     *
-     * @param roleId 角色ID
-     * @return true-平台同步的角色, false-租户自建角色
-     */
-    private boolean isPlatformSyncedRole(Long roleId) {
-        String sql = "SELECT platform_role_id FROM sys_role WHERE id = :roleId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-
-        Long platformRoleId = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
-        return platformRoleId != null;
-    }
-
-    /**
      * 转换为DTO
      */
     private RoleDTO convertToDTO(SysRole role) {
@@ -333,7 +292,6 @@ public class RoleService extends BaseServiceImpl {
         dto.setId(role.getId());
         dto.setRoleName(role.getRoleName());
         dto.setDescription(role.getDescription());
-        dto.setPlatformRoleId(role.getPlatformRoleId());
         dto.setStatus(role.getStatus());
         return dto;
     }

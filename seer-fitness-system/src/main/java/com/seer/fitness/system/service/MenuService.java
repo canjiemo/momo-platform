@@ -44,7 +44,7 @@ public class MenuService extends BaseServiceImpl {
         String sql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
                     "FROM sys_menu WHERE status = 1 ORDER BY sort_order";
 
-        List<MenuDTO> allMenus = baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), MenuDTO.class);
+        List<MenuDTO> allMenus = baseDao.queryListForSql(sql, Maps.newHashMap(), MenuDTO.class);
 
         return buildMenuTree(allMenus, null);
     }
@@ -59,12 +59,12 @@ public class MenuService extends BaseServiceImpl {
      */
     public List<MenuTreeVO> getUserMenuTree(String userId) {
         // 检查用户是否为超级管理员
-        SysUser user = baseDao.queryByIdWithDeleteCondition(Long.parseLong(userId), SysUser.class);
+        SysUser user = baseDao.queryById(Long.parseLong(userId), SysUser.class);
         if (user != null && user.getAdminFlag() != null && user.getAdminFlag() == 1) {
             // 超级管理员返回所有启用的菜单（目录+菜单，不含按钮）
             String allMenusSql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
                                 "FROM sys_menu WHERE status = 1 AND type IN (0, 1) ORDER BY sort_order";
-            List<MenuDTO> allMenus = baseDao.queryListForSqlWithDeleteCondition(allMenusSql, Maps.newHashMap(), MenuDTO.class);
+            List<MenuDTO> allMenus = baseDao.queryListForSql(allMenusSql, Maps.newHashMap(), MenuDTO.class);
             return buildMenuTree(allMenus, null);
         }
 
@@ -80,7 +80,7 @@ public class MenuService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("userId", userId);
 
-        List<MenuDTO> userMenus = baseDao.queryListForSqlWithDeleteCondition(sql, params, MenuDTO.class);
+        List<MenuDTO> userMenus = baseDao.queryListForSql(sql, params, MenuDTO.class);
 
         return buildMenuTree(userMenus, null);
     }
@@ -104,7 +104,7 @@ public class MenuService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("userId", userId);
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, params, MenuDTO.class);
+        return baseDao.queryListForSql(sql, params, MenuDTO.class);
     }
 
     /**
@@ -121,14 +121,14 @@ public class MenuService extends BaseServiceImpl {
         Map<String, Object> adminParams = Maps.newHashMap();
         adminParams.put("userId", userId);
 
-        Boolean isAdmin = baseDao.querySingleForSqlWithDeleteCondition(checkAdminSql, adminParams, Boolean.class);
+        Boolean isAdmin = baseDao.querySingleForSql(checkAdminSql, adminParams, Boolean.class);
 
         // 如果是管理员，返回所有权限
         if (isAdmin != null && isAdmin) {
             String allPermissionsSql = "SELECT DISTINCT permission " +
                     "FROM sys_menu " +
                     "WHERE status = 1 AND permission IS NOT NULL";
-            return baseDao.queryListForSqlWithDeleteCondition(allPermissionsSql, Maps.newHashMap(), String.class)
+            return baseDao.queryListForSql(allPermissionsSql, Maps.newHashMap(), String.class)
                     .stream()
                     .filter(StringUtils::hasText)
                     .collect(Collectors.toList());
@@ -144,52 +144,7 @@ public class MenuService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("userId", userId);
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, params, String.class)
-                .stream()
-                .filter(StringUtils::hasText)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 获取平台管理员权限字符串列表
-     * 使用 @PublicSchema 注解确保查询 public.sys_menu
-     * 用于前端按钮权限控制和后端接口权限校验
-     * 管理员返回所有权限，普通用户根据角色获取权限
-     *
-     * @param userId 用户ID
-     * @return 权限字符串列表
-     */
-    @com.seer.fitness.framework.annotation.PublicSchema(reason = "平台管理员权限查询")
-    public List<String> getPlatformUserPermissions(Long userId) {
-        // 首先检查用户是否为管理员
-        String checkAdminSql = "SELECT admin_flag FROM sys_user WHERE id = :userId";
-        Map<String, Object> adminParams = Maps.newHashMap();
-        adminParams.put("userId", userId);
-
-        Boolean isAdmin = baseDao.querySingleForSqlWithDeleteCondition(checkAdminSql, adminParams, Boolean.class);
-
-        // 如果是管理员，返回所有权限
-        if (isAdmin != null && isAdmin) {
-            String allPermissionsSql = "SELECT DISTINCT permission " +
-                    "FROM sys_menu " +
-                    "WHERE status = 1 AND permission IS NOT NULL";
-            return baseDao.queryListForSqlWithDeleteCondition(allPermissionsSql, Maps.newHashMap(), String.class)
-                    .stream()
-                    .filter(StringUtils::hasText)
-                    .collect(Collectors.toList());
-        }
-
-        // 普通用户通过角色获取权限
-        String sql = "SELECT DISTINCT m.permission " +
-                    "FROM sys_menu m " +
-                    "INNER JOIN sys_role_menu rm ON m.id = rm.menu_id " +
-                    "INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id " +
-                    "WHERE ur.user_id = :userId AND m.status = 1 AND m.permission IS NOT NULL";
-
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("userId", userId);
-
-        return baseDao.queryListForSqlWithDeleteCondition(sql, params, String.class)
+        return baseDao.queryListForSql(sql, params, String.class)
                 .stream()
                 .filter(StringUtils::hasText)
                 .collect(Collectors.toList());
@@ -206,7 +161,7 @@ public class MenuService extends BaseServiceImpl {
                     "status, created_at, updated_at " +
                     "FROM sys_menu ORDER BY sort_order";
 
-        return baseDao.queryListForSqlWithDeleteCondition(sql, Maps.newHashMap(), MenuDTO.class);
+        return baseDao.queryListForSql(sql, Maps.newHashMap(), MenuDTO.class);
     }
 
     /**
@@ -221,7 +176,7 @@ public class MenuService extends BaseServiceImpl {
             throw new BusinessException("菜单ID不能为空");
         }
 
-        SysMenu menu = baseDao.queryByIdWithDeleteCondition(id, SysMenu.class);
+        SysMenu menu = baseDao.queryById(id, SysMenu.class);
         if (menu == null) {
             throw new BusinessException("菜单不存在");
         }
@@ -242,7 +197,7 @@ public class MenuService extends BaseServiceImpl {
 
         // 验证父菜单是否存在（如果有设置）
         if (parentId != 0L) {
-            SysMenu parentMenu = baseDao.queryByIdWithDeleteCondition(parentId, SysMenu.class);
+            SysMenu parentMenu = baseDao.queryById(parentId, SysMenu.class);
             if (parentMenu == null) {
                 throw new BusinessException("父菜单不存在");
             }
@@ -274,7 +229,7 @@ public class MenuService extends BaseServiceImpl {
      */
     @Transactional(readOnly = false)
     public void update(MenuUpdateRequest request) {
-        SysMenu menu = baseDao.queryByIdWithDeleteCondition(request.getId(), SysMenu.class);
+        SysMenu menu = baseDao.queryById(request.getId(), SysMenu.class);
         if (menu == null) {
             throw new BusinessException("菜单不存在");
         }
@@ -288,7 +243,7 @@ public class MenuService extends BaseServiceImpl {
                 throw new BusinessException("不能将自己设为父菜单");
             }
 
-            SysMenu parentMenu = baseDao.queryByIdWithDeleteCondition(parentId, SysMenu.class);
+            SysMenu parentMenu = baseDao.queryById(parentId, SysMenu.class);
             if (parentMenu == null) {
                 throw new BusinessException("父菜单不存在");
             }
@@ -372,7 +327,7 @@ public class MenuService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("parentId", menuId);
 
-        Long count = baseDao.querySingleForSqlWithDeleteCondition(sql, params, Long.class);
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }
 
