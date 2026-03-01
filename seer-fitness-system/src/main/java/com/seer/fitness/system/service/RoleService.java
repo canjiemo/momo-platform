@@ -38,7 +38,7 @@ public class RoleService extends BaseServiceImpl {
     public Pager<RoleDTO> search(RoleQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
-        String sql = "SELECT id, role_name, description, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
                     "FROM sys_role";
 
         // 动态添加查询条件
@@ -71,7 +71,7 @@ public class RoleService extends BaseServiceImpl {
      * 获取角色列表（不分页）
      */
     public List<RoleDTO> list() {
-        String sql = "SELECT id, role_name, description, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
                     "FROM sys_role WHERE status = 1 ORDER BY created_at DESC";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
@@ -112,9 +112,14 @@ public class RoleService extends BaseServiceImpl {
         if (isRoleNameExists(request.getRoleName())) {
             throw new BusinessException("角色名已存在");
         }
+        // 检查角色编码是否已存在
+        if (isRoleCodeExists(request.getRoleCode(), null)) {
+            throw new BusinessException("角色编码已存在");
+        }
 
         SysRole role = new SysRole();
         role.setRoleName(request.getRoleName());
+        role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setDeleteFlag(0);
@@ -146,8 +151,14 @@ public class RoleService extends BaseServiceImpl {
             isRoleNameExists(request.getRoleName())) {
             throw new BusinessException("角色名已存在");
         }
+        // 如果修改了角色编码，检查是否重复（排除自身）
+        if (!request.getRoleCode().equals(role.getRoleCode()) &&
+            isRoleCodeExists(request.getRoleCode(), request.getId())) {
+            throw new BusinessException("角色编码已存在");
+        }
 
         role.setRoleName(request.getRoleName());
+        role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setUpdatedAt(LocalDateTime.now());
@@ -253,6 +264,21 @@ public class RoleService extends BaseServiceImpl {
         Map<String, Object> params = Maps.newHashMap();
         params.put("roleName", roleName);
 
+        Long count = baseDao.querySingleForSql(sql, params, Long.class);
+        return count != null && count > 0;
+    }
+
+    /**
+     * 检查角色编码是否已存在（excludeId 不为 null 时排除该 ID，用于更新校验）
+     */
+    private boolean isRoleCodeExists(String roleCode, Long excludeId) {
+        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_code = :roleCode";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("roleCode", roleCode);
+        if (excludeId != null) {
+            sql += " AND id != :excludeId";
+            params.put("excludeId", excludeId);
+        }
         Long count = baseDao.querySingleForSql(sql, params, Long.class);
         return count != null && count > 0;
     }

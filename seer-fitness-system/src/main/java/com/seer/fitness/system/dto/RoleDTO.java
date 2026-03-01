@@ -24,6 +24,11 @@ public class RoleDTO {
     private String roleName;
 
     /**
+     * 角色编码
+     */
+    private String roleCode;
+
+    /**
      * 角色描述
      */
     private String description;

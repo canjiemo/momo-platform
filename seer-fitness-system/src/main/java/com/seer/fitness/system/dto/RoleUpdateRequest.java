@@ -2,6 +2,7 @@ package com.seer.fitness.system.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -21,6 +22,11 @@ public class RoleUpdateRequest {
     @NotBlank(message = "角色名称不能为空")
     @Size(max = 50, message = "角色名称长度不能超过50位")
     private String roleName;
+
+    @NotBlank(message = "角色编码不能为空")
+    @Size(max = 50, message = "角色编码长度不能超过50位")
+    @Pattern(regexp = "^[A-Z][A-Z0-9_]*$", message = "角色编码只能包含大写字母、数字和下划线，且以大写字母开头")
+    private String roleCode;
 
     @Size(max = 255, message = "角色描述长度不能超过255位")
     private String description;

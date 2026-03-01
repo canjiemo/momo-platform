@@ -78,6 +78,7 @@ CREATE TABLE public.sys_role (
   id BIGSERIAL PRIMARY KEY,
   tenant_id BIGINT,
   role_name VARCHAR(50) NOT NULL,
+  role_code VARCHAR(50) NOT NULL,
   description VARCHAR(255),
   status SMALLINT DEFAULT 1,
   delete_flag SMALLINT DEFAULT 0,
@@ -87,9 +88,12 @@ CREATE TABLE public.sys_role (
 
 CREATE INDEX idx_sys_role_tenant ON public.sys_role(tenant_id);
 CREATE INDEX idx_sys_role_status ON public.sys_role(status, delete_flag);
+-- role_code 在同一租户内唯一（NULL tenant_id 用 -1 代替参与唯一约束，软删除安全）
+CREATE UNIQUE INDEX idx_sys_role_code ON public.sys_role(COALESCE(tenant_id, -1), role_code) WHERE delete_flag = 0;
 
 COMMENT ON TABLE public.sys_role IS '角色表';
 COMMENT ON COLUMN public.sys_role.tenant_id IS '租户ID，NULL表示平台角色模板';
+COMMENT ON COLUMN public.sys_role.role_code IS '角色编码，同租户内唯一，用于数据权限识别，如 ADMIN、TENANT_ADMIN';
 
 -- ----------------------------
 -- sys_menu (菜单表)

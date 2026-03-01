@@ -31,6 +31,11 @@ public class SysRole {
     private String roleName;
 
     /**
+     * 角色编码，同租户内唯一，用于数据权限识别
+     */
+    private String roleCode;
+
+    /**
      * 角色描述
      */
     private String description;

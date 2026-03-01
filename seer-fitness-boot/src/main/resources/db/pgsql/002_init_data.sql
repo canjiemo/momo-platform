@@ -124,12 +124,12 @@ VALUES
 -- ========================================
 
 -- 平台超级管理员
-INSERT INTO public.sys_role (id, tenant_id, role_name, description, status, delete_flag, created_at, updated_at)
-VALUES (1, NULL, '平台超级管理员', '拥有平台所有管理权限', 1, 0, NOW(), NOW());
+INSERT INTO public.sys_role (id, tenant_id, role_name, role_code, description, status, delete_flag, created_at, updated_at)
+VALUES (1, NULL, '平台超级管理员', 'PLATFORM_ADMIN', '拥有平台所有管理权限', 1, 0, NOW(), NOW());
 
 -- 租户管理员模板（供租户同步）
-INSERT INTO public.sys_role (id, tenant_id, role_name, description, status, delete_flag, created_at, updated_at)
-VALUES (100, NULL, '系统管理员', '拥有所有系统管理权限', 1, 0, NOW(), NOW());
+INSERT INTO public.sys_role (id, tenant_id, role_name, role_code, description, status, delete_flag, created_at, updated_at)
+VALUES (100, NULL, '系统管理员', 'TENANT_ADMIN', '拥有所有系统管理权限', 1, 0, NOW(), NOW());
 
 -- ========================================
 -- 第三部分: 平台角色-菜单关联 (tenant_id=NULL)
