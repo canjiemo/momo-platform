@@ -7,6 +7,7 @@ import com.seer.fitness.system.dto.*;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
+import io.github.mocanjie.base.myjpa.tenant.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,12 +75,22 @@ public class RoleService extends BaseServiceImpl {
 
     /**
      * 获取角色列表（不分页）
+     * tenantId != null 时：平台用户查询指定租户的角色列表（需绕过 myjpa 自动注入）
+     * tenantId == null 时：租户用户查询自身角色（myjpa 自动注入 tenant_id）
      */
-    public List<RoleDTO> list() {
+    public List<RoleDTO> list(Long tenantId) {
+        if (tenantId != null) {
+            // 平台用户指定租户ID查询
+            String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
+                        "FROM sys_role WHERE tenant_id = :tenantId AND delete_flag = 0 AND status = 1 ORDER BY created_at DESC";
+            Map<String, Object> params = Maps.newHashMap();
+            params.put("tenantId", tenantId);
+            return TenantContext.withoutTenant(() ->
+                    baseDao.queryListForSql(sql, params, RoleDTO.class));
+        }
         // tenant_id IS NOT NULL 确保只返回租户角色，防止平台管理员误调此接口混入平台角色
         String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
                     "FROM sys_role WHERE tenant_id IS NOT NULL AND status = 1 ORDER BY created_at DESC";
-
         return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
     }
 

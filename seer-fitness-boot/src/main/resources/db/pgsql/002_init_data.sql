@@ -55,6 +55,15 @@ VALUES
     (10501, NULL, '查看日志', 10500, 2, NULL, 'platform:log:view', NULL, 1, 1, 0, NOW(), NOW()),
     (10502, NULL, '导出日志', 10500, 2, NULL, 'platform:log:export', NULL, 2, 1, 0, NOW(), NOW());
 
+-- 平台组织管理(菜单 + 按钮)
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES
+    (10600, NULL, '平台组织', 10000, 1, '/platform/organization', NULL, 'ApartmentOutlined', 6, 1, 0, NOW(), NOW()),
+    (10601, NULL, '查看组织', 10600, 2, NULL, 'platform:org:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (10602, NULL, '创建组织', 10600, 2, NULL, 'platform:org:create', NULL, 2, 1, 0, NOW(), NOW()),
+    (10603, NULL, '更新组织', 10600, 2, NULL, 'platform:org:update', NULL, 3, 1, 0, NOW(), NOW()),
+    (10604, NULL, '删除组织', 10600, 2, NULL, 'platform:org:delete', NULL, 4, 1, 0, NOW(), NOW());
+
 -- ========================================
 -- 租户菜单模板 (tenant_id=NULL，供租户同步)
 -- ========================================
@@ -157,14 +166,15 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
     (NULL, 1, 10000),
     -- 菜单节点 (type=1)
-    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 1300), (NULL, 1, 10300), (NULL, 1, 10400), (NULL, 1, 10500),
+    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 1300), (NULL, 1, 10300), (NULL, 1, 10400), (NULL, 1, 10500), (NULL, 1, 10600),
     -- 按钮节点 (type=2)
     (NULL, 1, 10101), (NULL, 1, 10102), (NULL, 1, 10103), (NULL, 1, 10104), (NULL, 1, 10105),
     (NULL, 1, 10201), (NULL, 1, 10202), (NULL, 1, 10203), (NULL, 1, 10204), (NULL, 1, 10205),
     (NULL, 1, 1301), (NULL, 1, 1302), (NULL, 1, 1303), (NULL, 1, 1304),
     (NULL, 1, 10301), (NULL, 1, 10302), (NULL, 1, 10303), (NULL, 1, 10304),
     (NULL, 1, 10401), (NULL, 1, 10402),
-    (NULL, 1, 10501), (NULL, 1, 10502);
+    (NULL, 1, 10501), (NULL, 1, 10502),
+    (NULL, 1, 10601), (NULL, 1, 10602), (NULL, 1, 10603), (NULL, 1, 10604);
 
 -- 系统管理员模板(id=100) -> 所有租户菜单（含目录、菜单、按钮节点，保证导航树可正常渲染）
 -- 注意：菜单管理(1300)已移至平台管理，租户角色不包含菜单管理权限

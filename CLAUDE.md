@@ -121,7 +121,7 @@ myjpa:
 
 **有 tenant_id 的表**:
 - `sys_user`, `sys_role`, `sys_menu`, `sys_role_menu`, `sys_user_role`
-- `sys_organization`（NOT NULL）, `sys_operation_log`, `sys_dict_type`, `sys_dict_data`
+- `sys_organization`（NULL=平台组织，非NULL=租户组织）, `sys_operation_log`, `sys_dict_type`, `sys_dict_data`
 
 **无 tenant_id 的表**:
 - `sys_tenant`（平台级元数据表）
@@ -267,11 +267,23 @@ POST /system/user/reset-password-admin # 重置密码 [user:reset]
 GET  /system/user/profile             # 个人信息 [登录即可]
 ```
 
+### 平台组织管理（平台管理员使用）
+
+```
+POST /platform/organization/search    # 分页查询平台组织 [platform:org:view]
+GET  /platform/organization/tree      # 平台组织树 [platform:org:view]
+GET  /platform/organization/list      # 平台组织列表 [platform:org:view]
+GET  /platform/organization/{id}      # 平台组织详情 [platform:org:view]
+POST /platform/organization/create    # 创建平台组织 [platform:org:create]
+POST /platform/organization/update    # 更新平台组织 [platform:org:update]
+POST /platform/organization/delete    # 删除平台组织 [platform:org:delete]
+```
+
 ### 角色管理
 
 ```
 POST /system/role/search              # 分页查询 [role:view]
-GET  /system/role/list                # 角色列表 [role:view]
+GET  /system/role/list                # 角色列表（?tenantId=xxx 平台用户可指定租户）[role:view]
 POST /system/role/create              # 创建角色 [role:create]
 POST /system/role/update              # 更新角色 [role:update]
 POST /system/role/delete              # 删除角色 [role:delete]
@@ -293,7 +305,7 @@ POST /system/menu/update              # 更新菜单 [menu:update]
 POST /system/menu/delete              # 删除菜单 [menu:delete]
 ```
 
-### 组织管理
+### 组织管理（租户使用）
 
 ```
 POST /system/organization/search      # 分页查询 [organization:view]

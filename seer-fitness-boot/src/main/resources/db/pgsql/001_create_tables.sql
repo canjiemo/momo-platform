@@ -190,7 +190,7 @@ COMMENT ON COLUMN public.sys_tenant_role.role_id IS '平台角色ID（tenant_id=
 DROP TABLE IF EXISTS public.sys_organization;
 CREATE TABLE public.sys_organization (
   id BIGSERIAL PRIMARY KEY,
-  tenant_id BIGINT NOT NULL,
+  tenant_id BIGINT,
   org_code VARCHAR(50),
   org_name VARCHAR(100) NOT NULL,
   parent_id BIGINT DEFAULT 0,
@@ -213,7 +213,7 @@ CREATE INDEX idx_sys_org_parent ON public.sys_organization(parent_id);
 CREATE INDEX idx_sys_org_status ON public.sys_organization(status, delete_flag);
 
 COMMENT ON TABLE public.sys_organization IS '组织架构表';
-COMMENT ON COLUMN public.sys_organization.tenant_id IS '租户ID，必填';
+COMMENT ON COLUMN public.sys_organization.tenant_id IS '租户ID，NULL=平台组织，非NULL=租户组织';
 
 -- ----------------------------
 -- sys_operation_log (操作日志表)
