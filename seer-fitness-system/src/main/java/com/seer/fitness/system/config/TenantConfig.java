@@ -17,8 +17,9 @@ public class TenantConfig {
 
     /**
      * 租户ID提供者
-     * - 超级管理员（adminFlag=1）返回 null，可访问所有租户数据
-     * - 租户用户返回自己的 tenantId
+     * - 平台超级管理员（adminFlag=1 且 tenantId=null）返回 null，可访问所有数据
+     * - 租户管理员（adminFlag=1 且 tenantId≠null）返回自己的 tenantId
+     * - 普通租户用户返回自己的 tenantId
      * - 未登录用户返回 null
      */
     @Bean
@@ -26,7 +27,8 @@ public class TenantConfig {
         return () -> {
             UserCacheInfo user = SecurityContextUtil.getCurrentUser();
             if (user == null) return null;
-            if (user.getAdminFlag() != null && user.getAdminFlag() == 1) return null;
+            // 只有平台超管（tenant_id=NULL 且 admin_flag=1）才绕过租户过滤
+            if (user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() == null) return null;
             return user.getTenantId();
         };
     }

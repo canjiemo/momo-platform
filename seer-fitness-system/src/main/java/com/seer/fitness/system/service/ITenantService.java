@@ -5,6 +5,7 @@ import com.seer.fitness.system.dto.TenantDTO;
 import com.seer.fitness.system.dto.TenantQueryParam;
 import com.seer.fitness.system.dto.TenantUpdateRequest;
 import io.github.mocanjie.base.mycommon.pager.Pager;
+import java.util.List;
 
 /**
  * 租户管理服务接口
@@ -87,4 +88,13 @@ public interface ITenantService {
      */
     boolean existsByCode(String tenantCode);
 
+    /**
+     * 获取租户已分配的平台角色 ID 列表
+     */
+    List<Long> getTenantRoleIds(Long tenantId);
+
+    /**
+     * 为租户分配平台角色（全量替换）
+     */
+    void assignRoles(Long tenantId, List<Long> roleIds);
 }

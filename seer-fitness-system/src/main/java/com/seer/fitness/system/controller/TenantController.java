@@ -1,13 +1,11 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.system.annotation.OperationLog;
-import com.seer.fitness.system.dto.TenantCreateRequest;
-import com.seer.fitness.system.dto.TenantDTO;
-import com.seer.fitness.system.dto.TenantQueryParam;
-import com.seer.fitness.system.dto.TenantUpdateRequest;
+import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.ITenantService;
+import com.seer.fitness.system.service.IUserService;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.mycommon.pager.PagerHandler;
 import io.github.mocanjie.base.mymvc.controller.MyBaseController;
@@ -15,6 +13,7 @@ import io.github.mocanjie.base.mymvc.data.MyResponseResult;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 /**
  * 租户管理控制器
@@ -28,6 +27,9 @@ public class TenantController extends MyBaseController {
 
     @Autowired
     private ITenantService tenantService;
+
+    @Autowired
+    private IUserService userService;
 
     /**
      * 分页查询租户
@@ -123,5 +125,34 @@ public class TenantController extends MyBaseController {
     public MyResponseResult<Boolean> checkCode(@PathVariable String tenantCode) {
         boolean exists = tenantService.existsByCode(tenantCode);
         return super.doJsonOut(!exists);
+    }
+
+    /**
+     * 平台用户列表（只查 tenant_id=null 的平台用户）
+     */
+    @GetMapping("/platform-users")
+    @RequireAuth(permissions = {"tenant:view"})
+    public MyResponseResult<List<UserDTO>> listPlatformUsers() {
+        return super.doJsonOut(userService.listPlatformUsers());
+    }
+
+    /**
+     * 获取租户已分配的平台角色 ID 列表
+     */
+    @GetMapping("/{id}/roles")
+    @RequireAuth(permissions = {"tenant:view"})
+    public MyResponseResult<List<Long>> getTenantRoles(@PathVariable Long id) {
+        return super.doJsonOut(tenantService.getTenantRoleIds(id));
+    }
+
+    /**
+     * 为租户分配/更新平台角色
+     */
+    @PostMapping("/{id}/assign-roles")
+    @RequireAuth(permissions = {"tenant:update"})
+    @OperationLog(type = OperationType.UPDATE, module = "tenant", description = "分配租户角色")
+    public MyResponseResult assignRoles(@PathVariable Long id, @RequestBody List<Long> roleIds) {
+        tenantService.assignRoles(id, roleIds);
+        return super.doJsonMsg("角色分配成功");
     }
 }

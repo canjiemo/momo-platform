@@ -7,6 +7,7 @@ import com.seer.fitness.system.dto.TenantDTO;
 import com.seer.fitness.system.dto.TenantQueryParam;
 import com.seer.fitness.system.dto.TenantUpdateRequest;
 import com.seer.fitness.system.entity.SysTenant;
+import com.seer.fitness.system.entity.SysTenantRole;
 import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.enums.TenantStatus;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -151,6 +152,16 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
         log.info("租户创建成功: tenantCode={}, id={}", request.getTenantCode(), tenant.getId());
 
+        // 保存租户-平台角色映射
+        for (Long roleId : request.getRoleIds()) {
+            SysTenantRole tenantRole = new SysTenantRole();
+            tenantRole.setTenantId(tenant.getId());
+            tenantRole.setRoleId(roleId);
+            tenantRole.setCreatedAt(LocalDateTime.now());
+            baseDao.insertPO(tenantRole, true);
+        }
+        log.info("租户角色映射创建成功: tenantId={}, roleIds={}", tenant.getId(), request.getRoleIds());
+
         // 租户模式开启时，自动创建租户管理员账号
         if (tenantEnabled) {
             createTenantAdmin(tenant);
@@ -159,9 +170,10 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     /**
      * 为新租户创建管理员用户
-     * - username 使用 tenant_name（学校名称即登录账号）
-     * - real_name 使用 sys_tenant.real_name（联系人姓名），不填则为空
+     * - username 使用 tenant_name（管理员登录账号）
+     * - real_name 使用 sys_tenant.real_name（学校中文名称）
      * - admin_flag=1 表示租户内管理员（非平台超管）
+     * - 菜单权限由 sys_tenant_role 动态决定，无需分配具体角色
      */
     private void createTenantAdmin(SysTenant tenant) {
         String username = tenant.getTenantName();
@@ -193,8 +205,51 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         admin.setUpdatedAt(LocalDateTime.now());
 
         baseDao.insertPO(admin, true);
-
         log.info("租户管理员创建成功: tenantId={}, username={}", tenant.getId(), username);
+    }
+
+    /**
+     * 获取租户已分配的平台角色 ID 列表
+     */
+    @Override
+    public List<Long> getTenantRoleIds(Long tenantId) {
+        String sql = "SELECT role_id FROM sys_tenant_role WHERE tenant_id = :tenantId";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("tenantId", tenantId);
+        return baseDao.queryListForSql(sql, params, Long.class);
+    }
+
+    /**
+     * 为租户分配平台角色（全量替换）
+     */
+    @Override
+    @Transactional
+    public void assignRoles(Long tenantId, List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            throw new BusinessException("必须为租户分配至少一个平台角色");
+        }
+
+        SysTenant tenant = baseDao.queryById(tenantId, SysTenant.class);
+        if (tenant == null) throw new BusinessException("租户不存在");
+
+        // 删除旧的映射（SysTenantRole 无 deleteFlag，myjpa 执行物理删除）
+        String selectSql = "SELECT * FROM sys_tenant_role WHERE tenant_id = :tenantId";
+        Map<String, Object> selectParams = Maps.newHashMap();
+        selectParams.put("tenantId", tenantId);
+        List<SysTenantRole> existing = baseDao.queryListForSql(selectSql, selectParams, SysTenantRole.class);
+        for (SysTenantRole old : existing) {
+            baseDao.delPO(old);
+        }
+
+        // 插入新的映射
+        for (Long roleId : roleIds) {
+            SysTenantRole tenantRole = new SysTenantRole();
+            tenantRole.setTenantId(tenantId);
+            tenantRole.setRoleId(roleId);
+            tenantRole.setCreatedAt(LocalDateTime.now());
+            baseDao.insertPO(tenantRole, true);
+        }
+        log.info("租户角色分配成功: tenantId={}, roleIds={}", tenantId, roleIds);
     }
 
     @Override

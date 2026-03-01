@@ -35,8 +35,8 @@ CREATE INDEX idx_sys_tenant_status ON public.sys_tenant(status, delete_flag);
 COMMENT ON TABLE public.sys_tenant IS '租户表（学校表），平台级';
 COMMENT ON COLUMN public.sys_tenant.id IS '主键ID';
 COMMENT ON COLUMN public.sys_tenant.tenant_code IS '租户编码，全局唯一';
-COMMENT ON COLUMN public.sys_tenant.tenant_name IS '租户名称（学校名称），创建后不可修改';
-COMMENT ON COLUMN public.sys_tenant.real_name IS '管理员真实姓名';
+COMMENT ON COLUMN public.sys_tenant.tenant_name IS '管理员登录账号，字母开头，只能包含字母/数字/下划线，创建后不可修改';
+COMMENT ON COLUMN public.sys_tenant.real_name IS '学校中文名称，作为管理员账号的显示名称';
 COMMENT ON COLUMN public.sys_tenant.status IS '状态：0-待激活 1-正常 2-已禁用 3-已过期';
 
 -- ----------------------------
@@ -162,6 +162,27 @@ CREATE INDEX idx_sys_user_role_role ON public.sys_user_role(role_id);
 
 COMMENT ON TABLE public.sys_user_role IS '用户-角色关联表';
 COMMENT ON COLUMN public.sys_user_role.tenant_id IS '租户ID';
+
+-- ----------------------------
+-- sys_tenant_role (租户-平台角色映射表)
+-- 记录平台分配给每个租户的平台角色（tenant_id=NULL 的角色）
+-- 租户管理员的菜单权限由此表动态决定
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_tenant_role;
+CREATE TABLE public.sys_tenant_role (
+  id BIGSERIAL PRIMARY KEY,
+  tenant_id BIGINT NOT NULL,
+  role_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(tenant_id, role_id)
+);
+
+CREATE INDEX idx_sys_tenant_role_tenant ON public.sys_tenant_role(tenant_id);
+CREATE INDEX idx_sys_tenant_role_role ON public.sys_tenant_role(role_id);
+
+COMMENT ON TABLE public.sys_tenant_role IS '租户-平台角色映射表';
+COMMENT ON COLUMN public.sys_tenant_role.tenant_id IS '租户ID';
+COMMENT ON COLUMN public.sys_tenant_role.role_id IS '平台角色ID（tenant_id=NULL 的角色）';
 
 -- ----------------------------
 -- sys_organization (组织架构表)

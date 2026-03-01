@@ -19,13 +19,3 @@ spring:
       port: 30169
       password: Seer@bigdata
       database: 5
-
-# Logging - More verbose in development
-logging:
-  level:
-    root: INFO
-    com.seer.fitness: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.jdbc: DEBUG
-    com.alibaba.druid: DEBUG
-    io.github.mocanjie: DEBUG

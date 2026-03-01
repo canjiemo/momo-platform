@@ -10,6 +10,7 @@ import com.seer.fitness.system.dto.MenuTreeVO;
 import com.seer.fitness.system.dto.MenuUpdateRequest;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
+import io.github.mocanjie.base.myjpa.tenant.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -50,104 +53,128 @@ public class MenuService extends BaseServiceImpl {
     }
 
     /**
-     * 获取用户菜单树
-     * 根据用户角色权限返回用户可访问的菜单树（目录+菜单）
-     * 超级管理员(admin_flag=1)返回所有菜单
-     *
-     * @param userId 用户ID
-     * @return 用户菜单树形结构
+     * 获取用户菜单树（目录+菜单，不含按钮）
+     * - 平台超管：所有菜单
+     * - 租户管理员：sys_tenant_role → 平台角色菜单（动态，随平台调整实时生效）
+     * - 普通用户：自身角色菜单 ∩ 租户允许菜单（平台收回菜单立即失效）
      */
     public List<MenuTreeVO> getUserMenuTree(String userId) {
-        // 检查用户是否为超级管理员
         SysUser user = baseDao.queryById(Long.parseLong(userId), SysUser.class);
-        if (user != null && user.getAdminFlag() != null && user.getAdminFlag() == 1) {
-            // 超级管理员返回所有启用的菜单（目录+菜单，不含按钮）
-            String allMenusSql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
-                                "FROM sys_menu WHERE status = 1 AND type IN (0, 1) ORDER BY sort_order";
-            List<MenuDTO> allMenus = baseDao.queryListForSql(allMenusSql, Maps.newHashMap(), MenuDTO.class);
-            return buildMenuTree(allMenus, null);
-        }
+        List<Long> menuIds = resolveUserMenuIds(user, Long.parseLong(userId), true);
+        if (menuIds.isEmpty()) return List.of();
 
-        // 普通用户根据角色权限返回菜单
-        String sql = "SELECT DISTINCT m.id, m.menu_name, m.path, m.parent_id, m.type, " +
-                    "m.permission, m.icon, m.sort_order, m.status " +
-                    "FROM sys_menu m " +
-                    "INNER JOIN sys_role_menu rm ON m.id = rm.menu_id " +
-                    "INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id " +
-                    "WHERE ur.user_id = :userId AND m.status = 1 AND m.type IN (0, 1) " +
-                    "ORDER BY m.sort_order";
-
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("userId", userId);
-
-        List<MenuDTO> userMenus = baseDao.queryListForSql(sql, params, MenuDTO.class);
-
-        return buildMenuTree(userMenus, null);
+        String ids = menuIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String menuSql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
+                        "FROM sys_menu WHERE id IN (" + ids + ") AND status = 1 AND type IN (0, 1) ORDER BY sort_order";
+        List<MenuDTO> menus = TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(menuSql, Maps.newHashMap(), MenuDTO.class));
+        return buildMenuTree(menus, null);
     }
 
     /**
-     * 获取用户扁平菜单列表
-     * 返回扁平的菜单列表（目录+菜单，不含按钮），用于导航渲染
-     *
-     * @param userId 用户ID
-     * @return 扁平的菜单列表
+     * 获取用户扁平菜单列表（目录+菜单，不含按钮），用于导航渲染
+     * 逻辑同 getUserMenuTree，返回扁平结构
      */
     public List<MenuDTO> getUserMenus(String userId) {
-        String sql = "SELECT DISTINCT m.id, m.menu_name, m.path, m.parent_id, m.type, " +
-                    "m.permission, m.icon, m.sort_order, m.status " +
-                    "FROM sys_menu m " +
-                    "INNER JOIN sys_role_menu rm ON m.id = rm.menu_id " +
-                    "INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id " +
-                    "WHERE ur.user_id = :userId AND m.status = 1 AND m.type IN (0, 1) " +
-                    "ORDER BY m.sort_order";
+        SysUser user = baseDao.queryById(Long.parseLong(userId), SysUser.class);
+        List<Long> menuIds = resolveUserMenuIds(user, Long.parseLong(userId), true);
+        if (menuIds.isEmpty()) return List.of();
 
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("userId", userId);
-
-        return baseDao.queryListForSql(sql, params, MenuDTO.class);
+        String ids = menuIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String menuSql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
+                        "FROM sys_menu WHERE id IN (" + ids + ") AND status = 1 AND type IN (0, 1) ORDER BY sort_order";
+        return TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(menuSql, Maps.newHashMap(), MenuDTO.class));
     }
 
     /**
-     * 获取用户权限字符串列表（租户用户）
-     * 用于前端按钮权限控制和后端接口权限校验
-     * 管理员返回所有权限，普通用户根据角色获取权限
-     *
-     * @param userId 用户ID
-     * @return 权限字符串列表
+     * 获取用户权限字符串列表，用于前端按钮权限控制和后端接口权限校验
+     * 注：平台超管由 AuthInterceptor 直接放行，此处返回空列表即可
      */
     public List<String> getUserPermissions(Long userId) {
-        // 首先检查用户是否为管理员
-        String checkAdminSql = "SELECT admin_flag FROM sys_user WHERE id = :userId";
-        Map<String, Object> adminParams = Maps.newHashMap();
-        adminParams.put("userId", userId);
+        SysUser user = baseDao.queryById(userId, SysUser.class);
+        List<Long> menuIds = resolveUserMenuIds(user, userId, false);
+        if (menuIds.isEmpty()) return List.of();
 
-        Boolean isAdmin = baseDao.querySingleForSql(checkAdminSql, adminParams, Boolean.class);
+        String ids = menuIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String permSql = "SELECT DISTINCT permission FROM sys_menu " +
+                        "WHERE id IN (" + ids + ") AND status = 1 AND permission IS NOT NULL";
+        return TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(permSql, Maps.newHashMap(), String.class)
+                        .stream()
+                        .filter(StringUtils::hasText)
+                        .collect(Collectors.toList()));
+    }
 
-        // 如果是管理员，返回所有权限
-        if (isAdmin != null && isAdmin) {
-            String allPermissionsSql = "SELECT DISTINCT permission " +
-                    "FROM sys_menu " +
-                    "WHERE status = 1 AND permission IS NOT NULL";
-            return baseDao.queryListForSql(allPermissionsSql, Maps.newHashMap(), String.class)
-                    .stream()
-                    .filter(StringUtils::hasText)
-                    .collect(Collectors.toList());
+    /**
+     * 解析用户可访问的菜单 ID 列表（核心分支逻辑）
+     * @param navOnly true=只返回目录+菜单（type 0,1），false=包含按钮（用于权限字符串）
+     */
+    private List<Long> resolveUserMenuIds(SysUser user, Long userId, boolean navOnly) {
+        if (user == null) return List.of();
+
+        boolean isPlatformSuperAdmin = Integer.valueOf(1).equals(user.getAdminFlag()) && user.getTenantId() == null;
+        if (isPlatformSuperAdmin) {
+            // 平台超管：返回所有菜单（AuthInterceptor 已放行，此分支主要用于 profile 接口展示）
+            String sql = navOnly
+                    ? "SELECT id FROM sys_menu WHERE status = 1 AND type IN (0, 1)"
+                    : "SELECT id FROM sys_menu WHERE status = 1";
+            return baseDao.queryListForSql(sql, Maps.newHashMap(), Long.class);
         }
 
-        // 普通用户通过角色获取权限
-        String sql = "SELECT DISTINCT m.permission " +
-                    "FROM sys_menu m " +
-                    "INNER JOIN sys_role_menu rm ON m.id = rm.menu_id " +
-                    "INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id " +
-                    "WHERE ur.user_id = :userId AND m.status = 1 AND m.permission IS NOT NULL";
+        boolean isTenantAdmin = Integer.valueOf(1).equals(user.getAdminFlag()) && user.getTenantId() != null;
+        if (isTenantAdmin) {
+            // 租户管理员：通过 sys_tenant_role → 平台角色菜单动态获取（永远全部）
+            return getTenantAllowedMenuIds(user.getTenantId());
+        }
 
+        // 普通租户用户：取自身角色菜单 ∩ 租户允许菜单
+        return getAccessibleMenuIds(userId, user.getTenantId());
+    }
+
+    /**
+     * 获取租户允许的菜单 ID 列表（通过 sys_tenant_role → 平台 sys_role_menu 动态查）
+     * 平台调整角色菜单后，此处立即生效
+     */
+    private List<Long> getTenantAllowedMenuIds(Long tenantId) {
+        String roleIdSql = "SELECT role_id FROM sys_tenant_role WHERE tenant_id = :tenantId";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("tenantId", tenantId);
+        List<Long> platformRoleIds = baseDao.queryListForSql(roleIdSql, params, Long.class);
+
+        if (platformRoleIds.isEmpty()) return List.of();
+
+        String roleIds = platformRoleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String menuIdSql = "SELECT DISTINCT menu_id FROM sys_role_menu WHERE role_id IN (" + roleIds + ") AND tenant_id IS NULL";
+        return TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(menuIdSql, Maps.newHashMap(), Long.class));
+    }
+
+    /**
+     * 获取普通租户用户实际可访问的菜单 ID（自身角色菜单 ∩ 租户允许菜单）
+     * 保证：平台收回租户的菜单权限后，用户即使还有角色分配也无法访问
+     */
+    private List<Long> getAccessibleMenuIds(Long userId, Long tenantId) {
+        // 用户的角色 IDs（myjpa 自动注入 tenant_id 过滤）
+        String userRoleSql = "SELECT role_id FROM sys_user_role WHERE user_id = :userId";
         Map<String, Object> params = Maps.newHashMap();
         params.put("userId", userId);
+        List<Long> roleIds = baseDao.queryListForSql(userRoleSql, params, Long.class);
+        if (roleIds.isEmpty()) return List.of();
 
-        return baseDao.queryListForSql(sql, params, String.class)
-                .stream()
-                .filter(StringUtils::hasText)
-                .collect(Collectors.toList());
+        // 用户角色的菜单 IDs（myjpa 自动注入 tenant_id 过滤）
+        String roleIdStr = roleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String userMenuIdSql = "SELECT DISTINCT menu_id FROM sys_role_menu WHERE role_id IN (" + roleIdStr + ")";
+        List<Long> userMenuIds = baseDao.queryListForSql(userMenuIdSql, Maps.newHashMap(), Long.class);
+        if (userMenuIds.isEmpty()) return List.of();
+
+        // 租户允许的菜单 IDs（基于平台角色动态决定）
+        List<Long> allowedMenuIds = getTenantAllowedMenuIds(tenantId);
+        if (allowedMenuIds.isEmpty()) return List.of();
+
+        // 取交集：只返回租户还有效的菜单
+        Set<Long> allowedSet = new HashSet<>(allowedMenuIds);
+        return userMenuIds.stream().filter(allowedSet::contains).collect(Collectors.toList());
     }
 
     /**

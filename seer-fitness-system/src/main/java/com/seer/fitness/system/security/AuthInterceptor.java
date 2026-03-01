@@ -139,11 +139,11 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 检查是否超级管理员
+     * 检查是否平台超级管理员
+     * 必须满足：admin_flag=1 且 tenant_id=null（租户管理员不算平台超管）
      */
     private boolean isSuperAdmin(UserCacheInfo user) {
-        // 检查用户是否设置了管理员标识 (1=管理员)
-        return user.getAdminFlag() != null && user.getAdminFlag() == 1;
+        return user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() == null;
     }
 
     /**

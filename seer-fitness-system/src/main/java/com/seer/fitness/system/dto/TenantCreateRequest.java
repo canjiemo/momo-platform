@@ -1,10 +1,11 @@
 package com.seer.fitness.system.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.List;
 
 /**
  * 租户创建请求DTO
@@ -16,11 +17,15 @@ public class TenantCreateRequest {
 
     @NotBlank(message = "租户编码不能为空")
     @Size(min = 3, max = 50, message = "租户编码长度为3-50位")
-    @Pattern(regexp = "^[A-Z][A-Z0-9_]*$", message = "租户编码必须以大写字母开头，只能包含大写字母、数字和下划线")
+    @Pattern(regexp = "^[A-Za-z][A-Za-z0-9_]*$", message = "租户编码必须以字母开头，只能包含字母、数字和下划线")
     private String tenantCode;
 
-    @NotBlank(message = "租户名称不能为空")
-    @Size(max = 100, message = "租户名称长度不能超过100位")
+    /**
+     * 租户管理员登录账号，创建后不可修改
+     */
+    @NotBlank(message = "管理员账号不能为空")
+    @Size(min = 3, max = 50, message = "管理员账号长度为3-50位")
+    @Pattern(regexp = "^[A-Za-z][A-Za-z0-9_]*$", message = "管理员账号必须以字母开头，只能包含字母、数字和下划线")
     private String tenantName;
 
     @Size(max = 20, message = "联系电话长度不能超过20位")
@@ -38,9 +43,9 @@ public class TenantCreateRequest {
     private String description;
 
     /**
-     * 管理员真实姓名（可选，填入后成为租户管理员的 real_name）
+     * 学校中文名称，如"某某学校"（可选，作为管理员账号的显示名称）
      */
-    @Size(max = 50, message = "管理员姓名长度不能超过50位")
+    @Size(max = 50, message = "学校名称长度不能超过50位")
     private String realName;
 
     /**
@@ -53,4 +58,11 @@ public class TenantCreateRequest {
      * 格式：yyyy-MM-dd HH:mm:ss
      */
     private String expiredAt;
+
+    /**
+     * 授权给租户的平台角色ID列表（必填，至少一个）
+     * 这些角色决定租户管理员可以访问哪些菜单
+     */
+    @NotEmpty(message = "必须为租户分配至少一个平台角色")
+    private List<Long> roleIds;
 }

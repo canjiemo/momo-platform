@@ -467,4 +467,15 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
         return userDTO;
     }
+
+    /**
+     * 查询平台用户列表（tenant_id=null）
+     * 仅供平台管理员使用，显式指定 tenant_id IS NULL 确保只返回平台用户
+     */
+    @Override
+    public List<UserDTO> listPlatformUsers() {
+        String sql = "SELECT id, username, real_name, status, admin_flag, user_type, " +
+                    "created_at, updated_at FROM sys_user WHERE tenant_id IS NULL AND delete_flag = 0 ORDER BY id";
+        return baseDao.queryListForSql(sql, Maps.newHashMap(), UserDTO.class);
+    }
 }

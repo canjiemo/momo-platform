@@ -2,6 +2,7 @@ package com.seer.fitness.system.service;
 
 import com.seer.fitness.system.dto.*;
 import io.github.mocanjie.base.mycommon.pager.Pager;
+import java.util.List;
 
 /**
  * 用户管理服务接口
@@ -86,4 +87,12 @@ public interface IUserService {
      * @return 用户完整信息
      */
     UserDTO getCurrentUserProfile();
+
+    /**
+     * 查询平台用户列表（tenant_id=null）
+     * 仅供平台管理员使用
+     *
+     * @return 平台用户列表
+     */
+    List<UserDTO> listPlatformUsers();
 }

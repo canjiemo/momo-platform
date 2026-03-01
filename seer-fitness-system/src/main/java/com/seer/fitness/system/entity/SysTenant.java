@@ -26,12 +26,12 @@ public class SysTenant {
     private String tenantCode;
 
     /**
-     * 租户名称（学校名称），创建后不可修改
+     * 管理员登录账号，创建后不可修改
      */
     private String tenantName;
 
     /**
-     * 管理员真实姓名
+     * 学校中文名称，作为管理员账号的显示名称
      */
     private String realName;
 
