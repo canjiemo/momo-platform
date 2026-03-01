@@ -76,8 +76,9 @@ public class RoleService extends BaseServiceImpl {
      * 获取角色列表（不分页）
      */
     public List<RoleDTO> list() {
+        // tenant_id IS NOT NULL 确保只返回租户角色，防止平台管理员误调此接口混入平台角色
         String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                    "FROM sys_role WHERE status = 1 ORDER BY created_at DESC";
+                    "FROM sys_role WHERE tenant_id IS NOT NULL AND status = 1 ORDER BY created_at DESC";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
     }
