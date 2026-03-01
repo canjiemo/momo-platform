@@ -76,4 +76,15 @@ public class SecurityContextUtil {
                currentUser.getPermissions() != null &&
                currentUser.getPermissions().contains(permission);
     }
+
+    /**
+     * 判断当前用户是否为平台管理员
+     * 条件：adminFlag=1 且 tenantId=null
+     */
+    public static boolean isPlatformAdmin() {
+        UserCacheInfo currentUser = getCurrentUser();
+        return currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() == null;
+    }
 }

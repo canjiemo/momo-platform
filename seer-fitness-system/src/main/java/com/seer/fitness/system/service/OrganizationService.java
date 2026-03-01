@@ -81,10 +81,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         }
 
         // 平台管理员可按 tenantId 过滤特定租户数据
-        UserCacheInfo currentUser = SecurityContextUtil.getCurrentUser();
-        boolean isPlatformAdmin = currentUser != null
-                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
-                && currentUser.getTenantId() == null;
+        boolean isPlatformAdmin = SecurityContextUtil.isPlatformAdmin();
         if (isPlatformAdmin && param.getTenantId() != null) {
             conditions.add("o.tenant_id = :tenantId");
             queryMap.put("tenantId", param.getTenantId());
