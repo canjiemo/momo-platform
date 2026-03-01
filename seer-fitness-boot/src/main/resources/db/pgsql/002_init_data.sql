@@ -80,10 +80,14 @@ VALUES
     (1403, NULL, '更新组织', 1400, 2, NULL, 'organization:update', NULL, 3, 1, 0, NOW(), NOW()),
     (1404, NULL, '删除组织', 1400, 2, NULL, 'organization:delete', NULL, 4, 1, 0, NOW(), NOW());
 
+-- 数据字典(目录) — 与平台管理/系统管理同级
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES (3000, NULL, '数据字典', 0, 0, '/dict', NULL, 'BookOutlined', 3, 1, 0, NOW(), NOW());
+
 -- 字典类型(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (3100, NULL, '字典类型', 1000, 1, '/system/dict/type', NULL, 'DatabaseOutlined', 4, 1, 0, NOW(), NOW()),
+    (3100, NULL, '字典类型', 3000, 1, '/dict/type', NULL, 'DatabaseOutlined', 1, 1, 0, NOW(), NOW()),
     (3101, NULL, '查看字典类型', 3100, 2, NULL, 'dict:type:view', NULL, 1, 1, 0, NOW(), NOW()),
     (3102, NULL, '创建字典类型', 3100, 2, NULL, 'dict:type:create', NULL, 2, 1, 0, NOW(), NOW()),
     (3103, NULL, '更新字典类型', 3100, 2, NULL, 'dict:type:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -92,7 +96,7 @@ VALUES
 -- 字典数据(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (3200, NULL, '字典数据', 1000, 1, '/system/dict/data', NULL, 'UnorderedListOutlined', 5, 1, 0, NOW(), NOW()),
+    (3200, NULL, '字典数据', 3000, 1, '/dict/data', NULL, 'UnorderedListOutlined', 2, 1, 0, NOW(), NOW()),
     (3201, NULL, '查看字典数据', 3200, 2, NULL, 'dict:data:view', NULL, 1, 1, 0, NOW(), NOW()),
     (3202, NULL, '创建字典数据', 3200, 2, NULL, 'dict:data:create', NULL, 2, 1, 0, NOW(), NOW()),
     (3203, NULL, '更新字典数据', 3200, 2, NULL, 'dict:data:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -128,7 +132,7 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
 -- 系统管理员模板(id=100) -> 系统管理菜单（用户管理 + 角色管理 + 组织管理 + 数据字典）
 INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
-    (NULL, 100, 1000),
+    (NULL, 100, 1000), (NULL, 100, 3000),
     -- 菜单节点 (type=1)
     (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400), (NULL, 100, 3100), (NULL, 100, 3200),
     -- 按钮节点 (type=2)
