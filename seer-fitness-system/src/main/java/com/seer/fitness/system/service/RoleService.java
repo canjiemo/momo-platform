@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
 import com.seer.fitness.system.dto.*;
+import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
@@ -60,6 +61,16 @@ public class RoleService extends BaseServiceImpl {
             queryMap.put("status", param.getStatus());
         }
 
+        // 平台管理员可按 tenantId 过滤特定租户数据
+        UserCacheInfo currentUser = SecurityContextUtil.getCurrentUser();
+        boolean isPlatformAdmin = currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() == null;
+        if (isPlatformAdmin && param.getTenantId() != null) {
+            conditions.add("tenant_id = :tenantId");
+            queryMap.put("tenantId", param.getTenantId());
+        }
+
         // 拼接WHERE条件
         if (!conditions.isEmpty()) {
             sql += " WHERE " + String.join(" AND ", conditions);
@@ -70,7 +81,10 @@ public class RoleService extends BaseServiceImpl {
 
         log.info("角色分页查询SQL: {}", sql);
 
-        return baseDao.queryPageForSql(sql, queryMap, pager, RoleDTO.class);
+        final String finalSql = sql;
+        return (isPlatformAdmin && param.getTenantId() != null)
+                ? TenantContext.withoutTenant(() -> baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class))
+                : baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class);
     }
 
     /**

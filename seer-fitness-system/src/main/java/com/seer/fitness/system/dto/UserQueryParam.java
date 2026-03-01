@@ -36,4 +36,9 @@ public class UserQueryParam extends PagerParam {
      * 角色ID
      */
     private Long roleId;
+
+    /**
+     * 租户ID（平台管理员专用，指定后只查该租户的用户；非平台用户传此参数无效）
+     */
+    private Long tenantId;
 }

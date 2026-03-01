@@ -26,4 +26,9 @@ public class RoleQueryParam extends PagerParam {
      * 状态：1启用 0禁用
      */
     private Integer status;
+
+    /**
+     * 租户ID（平台管理员专用，指定后只查该租户的角色；非平台用户传此参数无效）
+     */
+    private Long tenantId;
 }

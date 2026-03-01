@@ -11,6 +11,7 @@ import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
+import io.github.mocanjie.base.myjpa.tenant.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户管理服务实现
@@ -82,6 +84,16 @@ public class UserService extends BaseServiceImpl implements IUserService {
             queryMap.put("adminFlag", param.getAdminFlag());
         }
 
+        // 平台管理员可按 tenantId 过滤特定租户数据
+        UserCacheInfo currentUser = SecurityContextUtil.getCurrentUser();
+        boolean isPlatformAdmin = currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() == null;
+        if (isPlatformAdmin && param.getTenantId() != null) {
+            conditions.add("u.tenant_id = :tenantId");
+            queryMap.put("tenantId", param.getTenantId());
+        }
+
         if (!conditions.isEmpty()) {
             sql += " WHERE " + String.join(" AND ", conditions);
         }
@@ -90,7 +102,10 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
         log.info("用户分页查询SQL: {}", sql);
 
-        Pager<UserDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, UserDTO.class);
+        final String finalSql = sql;
+        Pager<UserDTO> result = (isPlatformAdmin && param.getTenantId() != null)
+                ? TenantContext.withoutTenant(() -> baseDao.queryPageForSql(finalSql, queryMap, pager, UserDTO.class))
+                : baseDao.queryPageForSql(finalSql, queryMap, pager, UserDTO.class);
 
         // 为每个用户查询角色信息
         if (result.getPageData() != null && !result.getPageData().isEmpty()) {

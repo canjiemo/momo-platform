@@ -7,6 +7,8 @@ import com.seer.fitness.system.dto.*;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
+import io.github.mocanjie.base.myjpa.tenant.TenantContext;
+import com.seer.fitness.system.util.SecurityContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +80,16 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
             queryMap.put("status", param.getStatus());
         }
 
+        // 平台管理员可按 tenantId 过滤特定租户数据
+        UserCacheInfo currentUser = SecurityContextUtil.getCurrentUser();
+        boolean isPlatformAdmin = currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() == null;
+        if (isPlatformAdmin && param.getTenantId() != null) {
+            conditions.add("o.tenant_id = :tenantId");
+            queryMap.put("tenantId", param.getTenantId());
+        }
+
         if (!conditions.isEmpty()) {
             sql += " WHERE " + String.join(" AND ", conditions);
         }
@@ -86,8 +98,10 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         log.info("组织架构分页查询SQL: {}", sql);
 
-        // 由于SQL已经包含了所有扩展信息，不需要再调用enrichOrganizationData
-        return baseDao.queryPageForSql(sql, queryMap, pager, OrganizationDTO.class);
+        final String finalSql = sql;
+        return (isPlatformAdmin && param.getTenantId() != null)
+                ? TenantContext.withoutTenant(() -> baseDao.queryPageForSql(finalSql, queryMap, pager, OrganizationDTO.class))
+                : baseDao.queryPageForSql(finalSql, queryMap, pager, OrganizationDTO.class);
     }
 
     /**
