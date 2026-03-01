@@ -87,4 +87,15 @@ public class SecurityContextUtil {
                 && Integer.valueOf(1).equals(currentUser.getAdminFlag())
                 && currentUser.getTenantId() == null;
     }
+
+    /**
+     * 判断当前用户是否为租户管理员
+     * 条件：adminFlag=1 且 tenantId!=null
+     */
+    public static boolean isTenantAdmin() {
+        UserCacheInfo currentUser = getCurrentUser();
+        return currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() != null;
+    }
 }

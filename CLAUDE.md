@@ -267,22 +267,10 @@ POST /system/user/reset-password-admin # 重置密码 [user:reset]
 GET  /system/user/profile             # 个人信息 [登录即可]
 ```
 
-### 平台组织管理（平台管理员使用）
+### 角色管理（租户侧）
 
 ```
-POST /platform/organization/search    # 分页查询平台组织 [platform:org:view]
-GET  /platform/organization/tree      # 平台组织树 [platform:org:view]
-GET  /platform/organization/list      # 平台组织列表 [platform:org:view]
-GET  /platform/organization/{id}      # 平台组织详情 [platform:org:view]
-POST /platform/organization/create    # 创建平台组织 [platform:org:create]
-POST /platform/organization/update    # 更新平台组织 [platform:org:update]
-POST /platform/organization/delete    # 删除平台组织 [platform:org:delete]
-```
-
-### 角色管理
-
-```
-POST /system/role/search              # 分页查询 [role:view]
+POST /system/role/search              # 分页查询 [role:view]（平台用户可传 tenantId 过滤）
 GET  /system/role/list                # 角色列表（?tenantId=xxx 平台用户可指定租户）[role:view]
 POST /system/role/create              # 创建角色 [role:create]
 POST /system/role/update              # 更新角色 [role:update]
@@ -293,7 +281,7 @@ GET  /system/role/menus/{id}          # 角色权限 [role:view]
 
 ### 菜单管理（平台管理员使用）
 
-> 菜单由平台统一定义（全部 tenant_id=NULL），已移至平台管理模块，租户不参与菜单管理
+> 菜单由平台统一定义（全部 tenant_id=NULL），挂在平台管理目录下
 
 ```
 GET  /system/menu/tree                # 菜单树 [menu:view]
@@ -305,10 +293,10 @@ POST /system/menu/update              # 更新菜单 [menu:update]
 POST /system/menu/delete              # 删除菜单 [menu:delete]
 ```
 
-### 组织管理（租户使用）
+### 组织管理（租户侧）
 
 ```
-POST /system/organization/search      # 分页查询 [organization:view]
+POST /system/organization/search      # 分页查询 [organization:view]（平台用户可传 tenantId 过滤）
 GET  /system/organization/tree        # 组织树 [organization:view]
 POST /system/organization/create      # 创建组织 [organization:create]
 POST /system/organization/update      # 更新组织 [organization:update]
