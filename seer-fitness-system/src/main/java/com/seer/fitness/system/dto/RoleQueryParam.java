@@ -18,6 +18,11 @@ public class RoleQueryParam extends PagerParam {
     private String roleName;
 
     /**
+     * 角色编码（精确查询）
+     */
+    private String roleCode;
+
+    /**
      * 状态：1启用 0禁用
      */
     private Integer status;

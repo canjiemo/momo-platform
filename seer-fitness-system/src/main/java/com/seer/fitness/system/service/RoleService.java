@@ -49,6 +49,11 @@ public class RoleService extends BaseServiceImpl {
             queryMap.put("roleName", "%" + param.getRoleName() + "%");
         }
 
+        if (StringUtils.hasText(param.getRoleCode())) {
+            conditions.add("role_code = :roleCode");
+            queryMap.put("roleCode", param.getRoleCode());
+        }
+
         if (param.getStatus() != null) {
             conditions.add("status = :status");
             queryMap.put("status", param.getStatus());
