@@ -84,10 +84,10 @@ VALUES
     (1204, NULL, '删除角色', 1200, 2, NULL, 'role:delete', NULL, 4, 1, 0, NOW(), NOW()),
     (1205, NULL, '分配权限', 1200, 2, NULL, 'role:assign', NULL, 5, 1, 0, NOW(), NOW());
 
--- 菜单管理(菜单 + 4个按钮)
+-- 菜单管理(菜单 + 4个按钮) — 挂在平台管理(10000)下，菜单由平台统一定义，租户不参与管理
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (1300, NULL, '菜单管理', 1000, 1, '/system/menu', NULL, 'MenuOutlined', 3, 1, 0, NOW(), NOW()),
+    (1300, NULL, '菜单管理', 10000, 1, '/platform/menu', NULL, 'MenuOutlined', 3, 1, 0, NOW(), NOW()),
     (1301, NULL, '查看菜单', 1300, 2, NULL, 'menu:view', NULL, 1, 1, 0, NOW(), NOW()),
     (1302, NULL, '创建菜单', 1300, 2, NULL, 'menu:create', NULL, 2, 1, 0, NOW(), NOW()),
     (1303, NULL, '更新菜单', 1300, 2, NULL, 'menu:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -157,26 +157,27 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
     (NULL, 1, 10000),
     -- 菜单节点 (type=1)
-    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 10300), (NULL, 1, 10400), (NULL, 1, 10500),
+    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 1300), (NULL, 1, 10300), (NULL, 1, 10400), (NULL, 1, 10500),
     -- 按钮节点 (type=2)
     (NULL, 1, 10101), (NULL, 1, 10102), (NULL, 1, 10103), (NULL, 1, 10104), (NULL, 1, 10105),
     (NULL, 1, 10201), (NULL, 1, 10202), (NULL, 1, 10203), (NULL, 1, 10204), (NULL, 1, 10205),
+    (NULL, 1, 1301), (NULL, 1, 1302), (NULL, 1, 1303), (NULL, 1, 1304),
     (NULL, 1, 10301), (NULL, 1, 10302), (NULL, 1, 10303), (NULL, 1, 10304),
     (NULL, 1, 10401), (NULL, 1, 10402),
     (NULL, 1, 10501), (NULL, 1, 10502);
 
 -- 系统管理员模板(id=100) -> 所有租户菜单（含目录、菜单、按钮节点，保证导航树可正常渲染）
+-- 注意：菜单管理(1300)已移至平台管理，租户角色不包含菜单管理权限
 INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
     (NULL, 100, 1000), (NULL, 100, 2000), (NULL, 100, 3000),
     -- 菜单节点 (type=1)
-    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1300), (NULL, 100, 1400),
+    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400),
     (NULL, 100, 2100),
     (NULL, 100, 3100), (NULL, 100, 3200),
     -- 按钮节点 (type=2)
     (NULL, 100, 1101), (NULL, 100, 1102), (NULL, 100, 1103), (NULL, 100, 1104), (NULL, 100, 1105), (NULL, 100, 1106),
     (NULL, 100, 1201), (NULL, 100, 1202), (NULL, 100, 1203), (NULL, 100, 1204), (NULL, 100, 1205),
-    (NULL, 100, 1301), (NULL, 100, 1302), (NULL, 100, 1303), (NULL, 100, 1304),
     (NULL, 100, 1401), (NULL, 100, 1402), (NULL, 100, 1403), (NULL, 100, 1404),
     (NULL, 100, 2101), (NULL, 100, 2102), (NULL, 100, 2103),
     (NULL, 100, 3101), (NULL, 100, 3102), (NULL, 100, 3103), (NULL, 100, 3104),

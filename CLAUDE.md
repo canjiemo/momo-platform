@@ -279,7 +279,9 @@ POST /system/role/assign-menus        # 分配权限 [role:assign]
 GET  /system/role/menus/{id}          # 角色权限 [role:view]
 ```
 
-### 菜单管理
+### 菜单管理（平台管理员使用）
+
+> 菜单由平台统一定义（全部 tenant_id=NULL），已移至平台管理模块，租户不参与菜单管理
 
 ```
 GET  /system/menu/tree                # 菜单树 [menu:view]
