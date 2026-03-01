@@ -22,6 +22,23 @@ VALUES
     (10104, NULL, '禁用租户', 10100, 2, NULL, 'tenant:disable', NULL, 4, 1, 0, NOW(), NOW()),
     (10105, NULL, '启用租户', 10100, 2, NULL, 'tenant:enable', NULL, 5, 1, 0, NOW(), NOW());
 
+-- 租户角色管理(菜单 + 按钮)
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES
+    (10200, NULL, '租户角色', 10000, 1, '/platform/role', NULL, 'TeamOutlined', 2, 1, 0, NOW(), NOW()),
+    (10201, NULL, '查看角色', 10200, 2, NULL, 'platform:role:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (10202, NULL, '创建角色', 10200, 2, NULL, 'platform:role:create', NULL, 2, 1, 0, NOW(), NOW()),
+    (10203, NULL, '更新角色', 10200, 2, NULL, 'platform:role:update', NULL, 3, 1, 0, NOW(), NOW()),
+    (10204, NULL, '删除角色', 10200, 2, NULL, 'platform:role:delete', NULL, 4, 1, 0, NOW(), NOW()),
+    (10205, NULL, '分配菜单', 10200, 2, NULL, 'platform:role:assign', NULL, 5, 1, 0, NOW(), NOW());
+
+-- 菜单授权(菜单 + 按钮)
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES
+    (10400, NULL, '菜单授权', 10000, 1, '/platform/menu-auth', NULL, 'BlockOutlined', 4, 1, 0, NOW(), NOW()),
+    (10401, NULL, '查看授权', 10400, 2, NULL, 'platform:role:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (10402, NULL, '配置授权', 10400, 2, NULL, 'platform:role:assign', NULL, 2, 1, 0, NOW(), NOW());
+
 -- 平台用户管理(菜单 + 按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
@@ -140,10 +157,12 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
     (NULL, 1, 10000),
     -- 菜单节点 (type=1)
-    (NULL, 1, 10100), (NULL, 1, 10300), (NULL, 1, 10500),
+    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 10300), (NULL, 1, 10400), (NULL, 1, 10500),
     -- 按钮节点 (type=2)
     (NULL, 1, 10101), (NULL, 1, 10102), (NULL, 1, 10103), (NULL, 1, 10104), (NULL, 1, 10105),
+    (NULL, 1, 10201), (NULL, 1, 10202), (NULL, 1, 10203), (NULL, 1, 10204), (NULL, 1, 10205),
     (NULL, 1, 10301), (NULL, 1, 10302), (NULL, 1, 10303), (NULL, 1, 10304),
+    (NULL, 1, 10401), (NULL, 1, 10402),
     (NULL, 1, 10501), (NULL, 1, 10502);
 
 -- 系统管理员模板(id=100) -> 所有租户菜单（含目录、菜单、按钮节点，保证导航树可正常渲染）

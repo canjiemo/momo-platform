@@ -135,7 +135,7 @@ public TenantIdProvider tenantIdProvider() {
     return () -> {
         UserCacheInfo user = SecurityContextUtil.getCurrentUser();
         if (user == null) return null;
-        if (user.getAdminFlag() != null && user.getAdminFlag() == 1) return null; // 超管看所有
+        if (user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() == null) return null; // 平台超管看所有
         return user.getTenantId();
     };
 }
@@ -227,12 +227,30 @@ GET  /auth/captcha        # 获取验证码 (公开)
 POST /platform/tenant/search            # 分页查询租户 [tenant:view]
 GET  /platform/tenant/{id}              # 租户详情 [tenant:view]
 GET  /platform/tenant/code/{code}       # 按编码查询租户 [tenant:view]
-POST /platform/tenant/create            # 创建租户 [tenant:create]
+POST /platform/tenant/create            # 创建租户（必须指定 roleIds）[tenant:create]
 POST /platform/tenant/update            # 更新租户 [tenant:update]
 POST /platform/tenant/enable/{id}       # 启用租户 [tenant:update]
 POST /platform/tenant/disable/{id}      # 禁用租户 [tenant:update]
 POST /platform/tenant/delete/{id}       # 删除租户 [tenant:delete]
 GET  /platform/tenant/check-code/{code} # 检查编码可用 [tenant:create]
+GET  /platform/tenant/platform-users    # 平台用户列表（tenant_id=null）[tenant:view]
+GET  /platform/tenant/{id}/roles        # 租户已分配的平台角色 ID [tenant:view]
+POST /platform/tenant/{id}/assign-roles # 为租户分配平台角色（全量替换）[tenant:update]
+```
+
+### 平台角色管理（租户角色 + 菜单授权）
+
+> 管理可分配给租户的平台角色模板（`tenant_id=NULL` 的角色），对应前端「租户角色」和「菜单授权」两个模块
+
+```
+POST /platform/role/search              # 分页查询平台角色 [platform:role:view]
+GET  /platform/role/list                # 平台角色列表（创建租户用下拉）[platform:role:view]
+GET  /platform/role/{id}                # 平台角色详情 [platform:role:view]
+POST /platform/role/create              # 创建平台角色 [platform:role:create]
+POST /platform/role/update              # 更新平台角色 [platform:role:update]
+POST /platform/role/delete/{id}         # 删除平台角色（检查租户占用）[platform:role:delete]
+GET  /platform/role/{id}/menus          # 平台角色已分配菜单 ID [platform:role:view]
+POST /platform/role/{id}/assign-menus   # 为平台角色分配菜单（全量替换）[platform:role:assign]
 ```
 
 ### 用户管理
