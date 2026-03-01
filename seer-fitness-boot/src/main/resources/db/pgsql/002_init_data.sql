@@ -80,6 +80,24 @@ VALUES
     (1403, NULL, '更新组织', 1400, 2, NULL, 'organization:update', NULL, 3, 1, 0, NOW(), NOW()),
     (1404, NULL, '删除组织', 1400, 2, NULL, 'organization:delete', NULL, 4, 1, 0, NOW(), NOW());
 
+-- 字典类型(菜单 + 4个按钮)
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES
+    (3100, NULL, '字典类型', 1000, 1, '/system/dict/type', NULL, 'DatabaseOutlined', 4, 1, 0, NOW(), NOW()),
+    (3101, NULL, '查看字典类型', 3100, 2, NULL, 'dict:type:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (3102, NULL, '创建字典类型', 3100, 2, NULL, 'dict:type:create', NULL, 2, 1, 0, NOW(), NOW()),
+    (3103, NULL, '更新字典类型', 3100, 2, NULL, 'dict:type:update', NULL, 3, 1, 0, NOW(), NOW()),
+    (3104, NULL, '删除字典类型', 3100, 2, NULL, 'dict:type:delete', NULL, 4, 1, 0, NOW(), NOW());
+
+-- 字典数据(菜单 + 4个按钮)
+INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
+VALUES
+    (3200, NULL, '字典数据', 1000, 1, '/system/dict/data', NULL, 'UnorderedListOutlined', 5, 1, 0, NOW(), NOW()),
+    (3201, NULL, '查看字典数据', 3200, 2, NULL, 'dict:data:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (3202, NULL, '创建字典数据', 3200, 2, NULL, 'dict:data:create', NULL, 2, 1, 0, NOW(), NOW()),
+    (3203, NULL, '更新字典数据', 3200, 2, NULL, 'dict:data:update', NULL, 3, 1, 0, NOW(), NOW()),
+    (3204, NULL, '删除字典数据', 3200, 2, NULL, 'dict:data:delete', NULL, 4, 1, 0, NOW(), NOW());
+
 -- ========================================
 -- 第二部分: 平台角色 (tenant_id=NULL)
 -- ========================================
@@ -107,16 +125,18 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     (NULL, 1, 10201), (NULL, 1, 10202), (NULL, 1, 10203), (NULL, 1, 10204), (NULL, 1, 10205),
     (NULL, 1, 1301), (NULL, 1, 1302), (NULL, 1, 1303), (NULL, 1, 1304);
 
--- 系统管理员模板(id=100) -> 系统管理菜单（用户管理 + 角色管理 + 组织管理）
+-- 系统管理员模板(id=100) -> 系统管理菜单（用户管理 + 角色管理 + 组织管理 + 数据字典）
 INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
     (NULL, 100, 1000),
     -- 菜单节点 (type=1)
-    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400),
+    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400), (NULL, 100, 3100), (NULL, 100, 3200),
     -- 按钮节点 (type=2)
     (NULL, 100, 1101), (NULL, 100, 1102), (NULL, 100, 1103), (NULL, 100, 1104), (NULL, 100, 1105), (NULL, 100, 1106),
     (NULL, 100, 1201), (NULL, 100, 1202), (NULL, 100, 1203), (NULL, 100, 1204), (NULL, 100, 1205),
-    (NULL, 100, 1401), (NULL, 100, 1402), (NULL, 100, 1403), (NULL, 100, 1404);
+    (NULL, 100, 1401), (NULL, 100, 1402), (NULL, 100, 1403), (NULL, 100, 1404),
+    (NULL, 100, 3101), (NULL, 100, 3102), (NULL, 100, 3103), (NULL, 100, 3104),
+    (NULL, 100, 3201), (NULL, 100, 3202), (NULL, 100, 3203), (NULL, 100, 3204);
 
 -- ========================================
 -- 第四部分: 平台管理员用户 (tenant_id=NULL)
