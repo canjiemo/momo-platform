@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class MenuService extends BaseServiceImpl {
 
     /**
      * 解析用户可访问的菜单 ID 列表（核心分支逻辑）
-     * @param navOnly true=只返回目录+菜单（type 0,1），false=包含按钮（用于权限字符串）
+     * @param navOnly true=只返回目录+菜单（type 0,1），false=包含全部（用于权限字符串）
      */
     private List<Long> resolveUserMenuIds(SysUser user, Long userId, boolean navOnly) {
         if (user == null) return List.of();
@@ -125,11 +126,45 @@ public class MenuService extends BaseServiceImpl {
         boolean isTenantAdmin = Integer.valueOf(1).equals(user.getAdminFlag()) && user.getTenantId() != null;
         if (isTenantAdmin) {
             // 租户管理员：通过 sys_tenant_role → 平台角色菜单动态获取（永远全部）
-            return getTenantAllowedMenuIds(user.getTenantId());
+            List<Long> allIds = getTenantAllowedMenuIds(user.getTenantId());
+            return navOnly ? filterNavIds(allIds) : allIds;
         }
 
         // 普通租户用户：取自身角色菜单 ∩ 租户允许菜单
-        return getAccessibleMenuIds(userId, user.getTenantId());
+        List<Long> allIds = getAccessibleMenuIds(userId, user.getTenantId());
+        return navOnly ? filterNavIds(allIds) : allIds;
+    }
+
+    /**
+     * 从菜单 ID 列表中筛选导航节点（type 0,1），并自动补全按钮的父节点
+     * 确保即使 sys_role_menu 只存按钮 ID 也能正常渲染导航树
+     */
+    private List<Long> filterNavIds(List<Long> menuIds) {
+        if (menuIds.isEmpty()) return List.of();
+        String ids = menuIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+
+        // 1. 取 type IN (0,1) 的目录和菜单节点
+        String navSql = "SELECT id FROM sys_menu WHERE id IN (" + ids + ") AND status = 1 AND type IN (0, 1)";
+        List<Long> navIds = TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(navSql, Maps.newHashMap(), Long.class));
+
+        // 2. 取按钮节点的 parent_id（菜单层），防止只存按钮时导航树为空
+        String menuLevelSql = "SELECT DISTINCT parent_id FROM sys_menu WHERE id IN (" + ids + ") AND type = 2 AND parent_id != 0";
+        List<Long> menuLevelIds = TenantContext.withoutTenant(() ->
+                baseDao.queryListForSql(menuLevelSql, Maps.newHashMap(), Long.class));
+
+        Set<Long> result = new HashSet<>(navIds);
+        if (!menuLevelIds.isEmpty()) {
+            result.addAll(menuLevelIds);
+            // 3. 再取菜单节点的 parent_id（目录层）
+            String dirLevelSql = "SELECT DISTINCT parent_id FROM sys_menu WHERE id IN (" +
+                    menuLevelIds.stream().map(String::valueOf).collect(Collectors.joining(",")) +
+                    ") AND parent_id != 0";
+            List<Long> dirLevelIds = TenantContext.withoutTenant(() ->
+                    baseDao.queryListForSql(dirLevelSql, Maps.newHashMap(), Long.class));
+            result.addAll(dirLevelIds);
+        }
+        return new ArrayList<>(result);
     }
 
     /**
