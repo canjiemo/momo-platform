@@ -428,6 +428,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
     private UserDTO convertToDTO(SysUser user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
+        dto.setTenantId(user.getTenantId());
         dto.setUsername(user.getUsername());
         dto.setRealName(user.getRealName());
         dto.setStatus(user.getStatus());

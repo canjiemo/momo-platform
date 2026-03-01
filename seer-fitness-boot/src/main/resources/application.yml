@@ -49,6 +49,7 @@ spring:
 
 # MyJPA Configuration (多租户配置)
 myjpa:
+  show-sql-time: true # 开启执行时间打印（默认 false）
   tenant:
     enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
     column: tenant_id                    # 租户字段名
@@ -126,19 +127,4 @@ jwt:
   secret: "9F922B9833DEDAC0176412709F157797"  # JWT密钥(256位)
   expiration: 86400000                   # Token过期时间(毫秒,24小时)
 
-# Logging Configuration
-logging:
-  level:
-    root: INFO
-    com.seer.fitness: DEBUG
-    org.springframework.web: INFO
-    com.alibaba.druid: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/seer-fitness-edu.log
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 30
+# 日志配置统一由 logback-spring.xml 管理

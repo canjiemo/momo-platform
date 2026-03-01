@@ -13,18 +13,12 @@ spring:
         login-username: admin
         login-password: admin123
 
+  flyway:
+    enabled: false
+
   data:
     redis:
       host: localhost
       port: 30069
       password: Seer@bigdata
 
-# Logging - More verbose in development
-logging:
-  level:
-    root: INFO
-    com.seer.fitness: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.jdbc: DEBUG
-    com.alibaba.druid: DEBUG
-    io.github.mocanjie: DEBUG

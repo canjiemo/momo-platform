@@ -38,8 +38,7 @@ public class RoleService extends BaseServiceImpl {
     public Pager<RoleDTO> search(RoleQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
-        // 基础SQL - 包含 platform_role_id 用于前端判断是否只读
-        String sql = "SELECT id, role_name, description, platform_role_id, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, description, status, created_at, updated_at " +
                     "FROM sys_role";
 
         // 动态添加查询条件
@@ -72,7 +71,7 @@ public class RoleService extends BaseServiceImpl {
      * 获取角色列表（不分页）
      */
     public List<RoleDTO> list() {
-        String sql = "SELECT id, role_name, description, platform_role_id, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, description, status, created_at, updated_at " +
                     "FROM sys_role WHERE status = 1 ORDER BY created_at DESC";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);

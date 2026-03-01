@@ -10,12 +10,12 @@
 
 -- 平台管理(目录)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
-VALUES (10000, NULL, '平台管理', 0, 0, '/platform', NULL, 'dashboard', 1, 1, 0, NOW(), NOW());
+VALUES (10000, NULL, '平台管理', 0, 0, '/platform', NULL, 'CloudServerOutlined', 1, 1, 0, NOW(), NOW());
 
 -- 租户管理(菜单 + 按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (10100, NULL, '租户管理', 10000, 1, '/platform/tenant', NULL, 'team', 1, 1, 0, NOW(), NOW()),
+    (10100, NULL, '租户管理', 10000, 1, '/platform/tenant', NULL, 'ShopOutlined', 1, 1, 0, NOW(), NOW()),
     (10101, NULL, '查看租户', 10100, 2, NULL, 'tenant:view', NULL, 1, 1, 0, NOW(), NOW()),
     (10102, NULL, '创建租户', 10100, 2, NULL, 'tenant:create', NULL, 2, 1, 0, NOW(), NOW()),
     (10103, NULL, '更新租户', 10100, 2, NULL, 'tenant:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -25,7 +25,7 @@ VALUES
 -- 平台用户管理(菜单 + 按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (10300, NULL, '平台用户', 10000, 1, '/platform/user', NULL, 'user', 3, 1, 0, NOW(), NOW()),
+    (10300, NULL, '平台用户', 10000, 1, '/platform/user', NULL, 'UserOutlined', 3, 1, 0, NOW(), NOW()),
     (10301, NULL, '查看用户', 10300, 2, NULL, 'platform:user:view', NULL, 1, 1, 0, NOW(), NOW()),
     (10302, NULL, '创建用户', 10300, 2, NULL, 'platform:user:create', NULL, 2, 1, 0, NOW(), NOW()),
     (10303, NULL, '更新用户', 10300, 2, NULL, 'platform:user:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -34,7 +34,7 @@ VALUES
 -- 平台日志(菜单 + 按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (10500, NULL, '操作日志', 10000, 1, '/platform/log', NULL, 'file-text', 5, 1, 0, NOW(), NOW()),
+    (10500, NULL, '操作日志', 10000, 1, '/platform/log', NULL, 'FileTextOutlined', 5, 1, 0, NOW(), NOW()),
     (10501, NULL, '查看日志', 10500, 2, NULL, 'platform:log:view', NULL, 1, 1, 0, NOW(), NOW()),
     (10502, NULL, '导出日志', 10500, 2, NULL, 'platform:log:export', NULL, 2, 1, 0, NOW(), NOW());
 
@@ -44,12 +44,12 @@ VALUES
 
 -- 系统管理(目录)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
-VALUES (1000, NULL, '系统管理', 0, 0, '/system', NULL, 'setting', 1, 1, 0, NOW(), NOW());
+VALUES (1000, NULL, '系统管理', 0, 0, '/system', NULL, 'SettingOutlined', 1, 1, 0, NOW(), NOW());
 
 -- 用户管理(菜单 + 6个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (1100, NULL, '用户管理', 1000, 1, '/system/user', NULL, 'user', 1, 1, 0, NOW(), NOW()),
+    (1100, NULL, '用户管理', 1000, 1, '/system/user', NULL, 'UserOutlined', 1, 1, 0, NOW(), NOW()),
     (1101, NULL, '查看用户', 1100, 2, NULL, 'user:view', NULL, 1, 1, 0, NOW(), NOW()),
     (1102, NULL, '创建用户', 1100, 2, NULL, 'user:create', NULL, 2, 1, 0, NOW(), NOW()),
     (1103, NULL, '更新用户', 1100, 2, NULL, 'user:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -60,7 +60,7 @@ VALUES
 -- 角色管理(菜单 + 5个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (1200, NULL, '角色管理', 1000, 1, '/system/role', NULL, 'team', 2, 1, 0, NOW(), NOW()),
+    (1200, NULL, '角色管理', 1000, 1, '/system/role', NULL, 'SafetyOutlined', 2, 1, 0, NOW(), NOW()),
     (1201, NULL, '查看角色', 1200, 2, NULL, 'role:view', NULL, 1, 1, 0, NOW(), NOW()),
     (1202, NULL, '创建角色', 1200, 2, NULL, 'role:create', NULL, 2, 1, 0, NOW(), NOW()),
     (1203, NULL, '更新角色', 1200, 2, NULL, 'role:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -70,7 +70,7 @@ VALUES
 -- 菜单管理(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (1300, NULL, '菜单管理', 1000, 1, '/system/menu', NULL, 'menu', 3, 1, 0, NOW(), NOW()),
+    (1300, NULL, '菜单管理', 1000, 1, '/system/menu', NULL, 'MenuOutlined', 3, 1, 0, NOW(), NOW()),
     (1301, NULL, '查看菜单', 1300, 2, NULL, 'menu:view', NULL, 1, 1, 0, NOW(), NOW()),
     (1302, NULL, '创建菜单', 1300, 2, NULL, 'menu:create', NULL, 2, 1, 0, NOW(), NOW()),
     (1303, NULL, '更新菜单', 1300, 2, NULL, 'menu:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -79,7 +79,7 @@ VALUES
 -- 组织管理(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (1400, NULL, '组织管理', 1000, 1, '/system/organization', NULL, 'apartment', 4, 1, 0, NOW(), NOW()),
+    (1400, NULL, '组织管理', 1000, 1, '/system/organization', NULL, 'ApartmentOutlined', 4, 1, 0, NOW(), NOW()),
     (1401, NULL, '查看组织', 1400, 2, NULL, 'organization:view', NULL, 1, 1, 0, NOW(), NOW()),
     (1402, NULL, '创建组织', 1400, 2, NULL, 'organization:create', NULL, 2, 1, 0, NOW(), NOW()),
     (1403, NULL, '更新组织', 1400, 2, NULL, 'organization:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -87,24 +87,24 @@ VALUES
 
 -- 日志管理(目录)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
-VALUES (2000, NULL, '日志管理', 0, 0, '/log', NULL, 'file-text', 2, 1, 0, NOW(), NOW());
+VALUES (2000, NULL, '日志管理', 0, 0, '/log', NULL, 'AuditOutlined', 2, 1, 0, NOW(), NOW());
 
 -- 操作日志(菜单 + 3个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (2100, NULL, '操作日志', 2000, 1, '/log/operation', NULL, 'history', 1, 1, 0, NOW(), NOW()),
+    (2100, NULL, '操作日志', 2000, 1, '/log/operation', NULL, 'HistoryOutlined', 1, 1, 0, NOW(), NOW()),
     (2101, NULL, '查看日志', 2100, 2, NULL, 'operation_log:view', NULL, 1, 1, 0, NOW(), NOW()),
     (2102, NULL, '删除日志', 2100, 2, NULL, 'operation_log:delete', NULL, 2, 1, 0, NOW(), NOW()),
     (2103, NULL, '导出日志', 2100, 2, NULL, 'operation_log:export', NULL, 3, 1, 0, NOW(), NOW());
 
 -- 数据字典(目录)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
-VALUES (3000, NULL, '数据字典', 0, 0, '/dict', NULL, 'book', 3, 1, 0, NOW(), NOW());
+VALUES (3000, NULL, '数据字典', 0, 0, '/dict', NULL, 'BookOutlined', 3, 1, 0, NOW(), NOW());
 
 -- 字典类型(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (3100, NULL, '字典类型', 3000, 1, '/dict/type', NULL, 'database', 1, 1, 0, NOW(), NOW()),
+    (3100, NULL, '字典类型', 3000, 1, '/dict/type', NULL, 'DatabaseOutlined', 1, 1, 0, NOW(), NOW()),
     (3101, NULL, '查看字典类型', 3100, 2, NULL, 'dict:type:view', NULL, 1, 1, 0, NOW(), NOW()),
     (3102, NULL, '创建字典类型', 3100, 2, NULL, 'dict:type:create', NULL, 2, 1, 0, NOW(), NOW()),
     (3103, NULL, '更新字典类型', 3100, 2, NULL, 'dict:type:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -113,7 +113,7 @@ VALUES
 -- 字典数据(菜单 + 4个按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
-    (3200, NULL, '字典数据', 3000, 1, '/dict/data', NULL, 'database', 2, 1, 0, NOW(), NOW()),
+    (3200, NULL, '字典数据', 3000, 1, '/dict/data', NULL, 'UnorderedListOutlined', 2, 1, 0, NOW(), NOW()),
     (3201, NULL, '查看字典数据', 3200, 2, NULL, 'dict:data:view', NULL, 1, 1, 0, NOW(), NOW()),
     (3202, NULL, '创建字典数据', 3200, 2, NULL, 'dict:data:create', NULL, 2, 1, 0, NOW(), NOW()),
     (3203, NULL, '更新字典数据', 3200, 2, NULL, 'dict:data:update', NULL, 3, 1, 0, NOW(), NOW()),
@@ -156,9 +156,9 @@ INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
 -- ========================================
 
 -- 超级管理员 (admin_flag=1, 绕过所有权限检查)
--- 密码: Aa123456!
+-- 密码: 123456
 INSERT INTO public.sys_user (id, tenant_id, username, password, real_name, admin_flag, user_type, status, delete_flag, created_at, updated_at)
-VALUES (1, NULL, 'superadmin', '$2a$12$ZcTn.iSGO93QuorJrZix6elFfTFHJSTScYwqPyqbiZKa6GYQtfvhK', '超级管理员', 1, 0, 1, 0, NOW(), NOW());
+VALUES (1, NULL, 'admin', '$2a$12$zdxSVanWeNihjqgNN/A/yej4PKwqUlb4ymtVKnkt.GQpJD3daqBie', '超级管理员', 1, 0, 1, 0, NOW(), NOW());
 
 -- ========================================
 -- 第五部分: 平台字典数据 (tenant_id=NULL)

@@ -95,6 +95,13 @@
                 <version>${fastjson2.version}</version>
             </dependency>
 
+            <!-- FastJSON 1.x (mymvc框架内部依赖) -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.83</version>
+            </dependency>
+
             <!-- PostgreSQL Driver -->
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -114,6 +121,10 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

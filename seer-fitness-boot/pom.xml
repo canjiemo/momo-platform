@@ -50,6 +50,12 @@
             <artifactId>fastjson2-extension-spring6</artifactId>
         </dependency>
 
+        <!-- FastJSON 1.x (mymvc框架内部依赖 com.alibaba.fastjson.serializer.ValueFilter) -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
         <!-- Database Support -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,6 +84,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 配置文件自动提示（编译时生成元数据） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
 

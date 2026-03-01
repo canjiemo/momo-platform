@@ -119,6 +119,7 @@ CREATE INDEX idx_sys_menu_status_delete ON public.sys_menu(status, delete_flag);
 COMMENT ON TABLE public.sys_menu IS '菜单表';
 COMMENT ON COLUMN public.sys_menu.tenant_id IS '租户ID，NULL表示平台菜单模板';
 COMMENT ON COLUMN public.sys_menu.type IS '类型：0目录 1菜单 2按钮';
+COMMENT ON COLUMN public.sys_menu.icon IS 'Ant Design 图标名，如 DashboardOutlined、UserOutlined';
 
 -- ----------------------------
 -- sys_role_menu (角色菜单关联表)

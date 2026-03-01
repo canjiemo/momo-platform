@@ -20,6 +20,11 @@ public class UserDTO {
     private Long id;
 
     /**
+     * 租户ID（平台管理员为null）
+     */
+    private Long tenantId;
+
+    /**
      * 用户名
      */
     private String username;

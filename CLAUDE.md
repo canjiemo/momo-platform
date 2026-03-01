@@ -52,7 +52,7 @@ psql -U postgres -d seer_fitness_edu -f seer-fitness-boot/src/main/resources/db/
 
 ### 默认账号
 
-- **管理员**: superadmin / Aa123456!
+- **管理员**: admin / 123456
 
 ---
 
