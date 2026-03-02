@@ -344,8 +344,11 @@ public class RoleService extends BaseServiceImpl {
         RoleDTO dto = new RoleDTO();
         dto.setId(role.getId());
         dto.setRoleName(role.getRoleName());
+        dto.setRoleCode(role.getRoleCode());
         dto.setDescription(role.getDescription());
         dto.setStatus(role.getStatus());
+        dto.setCreatedAt(role.getCreatedAt());
+        dto.setUpdatedAt(role.getUpdatedAt());
         return dto;
     }
 }

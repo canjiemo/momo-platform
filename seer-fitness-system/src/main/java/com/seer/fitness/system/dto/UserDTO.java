@@ -56,6 +56,16 @@ public class UserDTO {
     private Long orgId;
 
     /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
+
+    /**
      * 角色列表
      */
     private List<RoleDTO> roles;

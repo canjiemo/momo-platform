@@ -445,6 +445,10 @@ public class UserService extends BaseServiceImpl implements IUserService {
         dto.setRealName(user.getRealName());
         dto.setStatus(user.getStatus());
         dto.setAdminFlag(user.getAdminFlag());
+        dto.setUserType(user.getUserType());
+        dto.setOrgId(user.getOrgId());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 
