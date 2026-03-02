@@ -198,7 +198,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:8070/system/user/search
 
 **获取当前用户**（重要！）:
 ```java
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import com.seer.fitness.system.dto.UserCacheInfo;
 
 // ✅ 正确做法

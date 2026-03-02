@@ -7,7 +7,7 @@ import com.seer.fitness.system.entity.SysUserRole;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.utils.PasswordUtil;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 用户管理服务实现

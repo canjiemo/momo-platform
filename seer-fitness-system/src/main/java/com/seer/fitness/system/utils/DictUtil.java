@@ -1,7 +1,8 @@
-package com.seer.fitness.system.util;
+package com.seer.fitness.system.utils;
 
 import com.seer.fitness.system.service.DictDataService;
 import com.seer.fitness.system.service.OrganizationService;
+import io.github.mocanjie.tools.dict.IMyDict;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -13,7 +14,7 @@ import org.springframework.util.StringUtils;
  * @author seer-fitness
  */
 @Component
-public class DictUtil {
+public class DictUtil implements IMyDict {
 
     private static DictDataService dictDataService;
     private static OrganizationService organizationService;
@@ -69,5 +70,10 @@ public class DictUtil {
             // 如果获取组织名称失败，返回原值
             return organizationId;
         }
+    }
+
+    @Override
+    public String getDesc(String s, Object o) {
+        return getLabel(s,o);
     }
 }

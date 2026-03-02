@@ -5,7 +5,7 @@ import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.IUserService;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.mycommon.pager.PagerHandler;

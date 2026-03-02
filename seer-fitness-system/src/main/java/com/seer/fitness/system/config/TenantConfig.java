@@ -1,7 +1,7 @@
 package com.seer.fitness.system.config;
 
 import com.seer.fitness.system.dto.UserCacheInfo;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.myjpa.tenant.TenantIdProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

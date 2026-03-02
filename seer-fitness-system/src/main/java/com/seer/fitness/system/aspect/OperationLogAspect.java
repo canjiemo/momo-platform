@@ -2,13 +2,10 @@ package com.seer.fitness.system.aspect;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seer.fitness.system.annotation.OperationLog;
 import com.seer.fitness.system.entity.SysOperationLog;
-import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.service.IOperationLogService;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

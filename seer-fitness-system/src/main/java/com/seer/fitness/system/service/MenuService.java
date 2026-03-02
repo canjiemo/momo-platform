@@ -8,6 +8,7 @@ import com.seer.fitness.system.dto.MenuCreateRequest;
 import com.seer.fitness.system.dto.MenuDTO;
 import com.seer.fitness.system.dto.MenuTreeVO;
 import com.seer.fitness.system.dto.MenuUpdateRequest;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
 import io.github.mocanjie.base.myjpa.tenant.TenantContext;
@@ -45,7 +46,7 @@ public class MenuService extends BaseServiceImpl {
      */
     public List<MenuTreeVO> getMenuTree() {
         com.seer.fitness.system.dto.UserCacheInfo currentUser =
-                com.seer.fitness.system.util.SecurityContextUtil.getCurrentUser();
+                SecurityContextUtil.getCurrentUser();
 
         boolean isTenantAdmin = currentUser != null
                 && Integer.valueOf(1).equals(currentUser.getAdminFlag())

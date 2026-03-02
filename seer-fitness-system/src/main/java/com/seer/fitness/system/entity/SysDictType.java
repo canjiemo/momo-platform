@@ -1,4 +1,4 @@
-package com.seer.fitness.framework.entity;
+package com.seer.fitness.system.entity;
 
 import io.github.mocanjie.base.myjpa.MyTableEntity;
 import io.github.mocanjie.base.myjpa.annotation.MyTable;

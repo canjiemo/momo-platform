@@ -17,6 +17,12 @@
     </description>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.mocanjie</groupId>
+            <artifactId>mydict-spring-boot-starter</artifactId>
+        </dependency>
+
         <!-- MyJPA Spring Boot Starter -->
         <dependency>
             <groupId>io.github.mocanjie</groupId>

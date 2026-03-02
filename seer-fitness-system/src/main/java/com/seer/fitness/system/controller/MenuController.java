@@ -5,7 +5,7 @@ import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.MenuService;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mymvc.controller.MyBaseController;
 import io.github.mocanjie.base.mymvc.data.MyResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;

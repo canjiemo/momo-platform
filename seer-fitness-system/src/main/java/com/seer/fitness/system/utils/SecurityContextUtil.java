@@ -1,4 +1,4 @@
-package com.seer.fitness.system.util;
+package com.seer.fitness.system.utils;
 
 import com.seer.fitness.system.dto.UserCacheInfo;
 import jakarta.servlet.http.HttpServletRequest;

@@ -5,7 +5,7 @@ import com.seer.fitness.system.dto.DictTypeCreateRequest;
 import com.seer.fitness.system.dto.DictTypeDTO;
 import com.seer.fitness.system.dto.DictTypeQueryParam;
 import com.seer.fitness.system.dto.DictTypeUpdateRequest;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
