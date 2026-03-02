@@ -103,44 +103,27 @@ VALUES
     (3204, NULL, '删除字典数据', 3200, 2, NULL, 'dict:data:delete', NULL, 4, 1, 0, NOW(), NOW());
 
 -- ========================================
--- 第二部分: 平台角色 (tenant_id=NULL)
+-- 第二部分: 平台角色模板 (tenant_id=NULL)
 -- ========================================
 
--- 平台超级管理员
+-- 租户管理员模板（供创建租户时分配，决定租户能访问哪些系统功能）
 INSERT INTO public.sys_role (id, tenant_id, role_name, role_code, description, status, delete_flag, created_at, updated_at)
-VALUES (1, NULL, '平台超级管理员', 'PLATFORM_ADMIN', '拥有平台所有管理权限', 1, 0, NOW(), NOW());
-
--- 租户管理员模板（供租户同步）
-INSERT INTO public.sys_role (id, tenant_id, role_name, role_code, description, status, delete_flag, created_at, updated_at)
-VALUES (100, NULL, '系统管理员', 'TENANT_ADMIN', '拥有所有系统管理权限', 1, 0, NOW(), NOW());
+VALUES (100, NULL, '租户管理员', 'TENANT_ADMIN', '拥有所有系统管理权限', 1, 0, NOW(), NOW());
 
 -- ========================================
 -- 第三部分: 平台角色-菜单关联 (tenant_id=NULL)
 -- ========================================
 
--- 平台超级管理员(id=1) -> 平台管理菜单（租户管理 + 租户角色 + 菜单管理）
+-- 租户管理员模板(id=100) -> 系统管理菜单（用户管理 + 角色管理 + 组织管理）
 INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
     -- 目录节点 (type=0)
-    (NULL, 1, 10000),
+    (NULL, 100, 1000),
     -- 菜单节点 (type=1)
-    (NULL, 1, 10100), (NULL, 1, 10200), (NULL, 1, 1300),
-    -- 按钮节点 (type=2)
-    (NULL, 1, 10101), (NULL, 1, 10102), (NULL, 1, 10103), (NULL, 1, 10104), (NULL, 1, 10105),
-    (NULL, 1, 10201), (NULL, 1, 10202), (NULL, 1, 10203), (NULL, 1, 10204), (NULL, 1, 10205),
-    (NULL, 1, 1301), (NULL, 1, 1302), (NULL, 1, 1303), (NULL, 1, 1304);
-
--- 系统管理员模板(id=100) -> 系统管理菜单（用户管理 + 角色管理 + 组织管理 + 数据字典）
-INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
-    -- 目录节点 (type=0)
-    (NULL, 100, 1000), (NULL, 100, 3000),
-    -- 菜单节点 (type=1)
-    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400), (NULL, 100, 3100), (NULL, 100, 3200),
+    (NULL, 100, 1100), (NULL, 100, 1200), (NULL, 100, 1400),
     -- 按钮节点 (type=2)
     (NULL, 100, 1101), (NULL, 100, 1102), (NULL, 100, 1103), (NULL, 100, 1104), (NULL, 100, 1105), (NULL, 100, 1106),
     (NULL, 100, 1201), (NULL, 100, 1202), (NULL, 100, 1203), (NULL, 100, 1204), (NULL, 100, 1205),
-    (NULL, 100, 1401), (NULL, 100, 1402), (NULL, 100, 1403), (NULL, 100, 1404),
-    (NULL, 100, 3101), (NULL, 100, 3102), (NULL, 100, 3103), (NULL, 100, 3104),
-    (NULL, 100, 3201), (NULL, 100, 3202), (NULL, 100, 3203), (NULL, 100, 3204);
+    (NULL, 100, 1401), (NULL, 100, 1402), (NULL, 100, 1403), (NULL, 100, 1404);
 
 -- ========================================
 -- 第四部分: 平台管理员用户 (tenant_id=NULL)
