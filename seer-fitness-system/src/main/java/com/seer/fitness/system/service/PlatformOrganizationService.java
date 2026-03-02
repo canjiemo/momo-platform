@@ -37,10 +37,10 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
             "COALESCE(child_count.cnt, 0) as children_count, " +
             "COALESCE(member_count.cnt, 0) as member_count " +
             "FROM sys_organization o " +
-            "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 AND u.tenant_id IS NULL " +
+            "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.tenant_id IS NULL " +
             "LEFT JOIN (SELECT parent_id, COUNT(*) as cnt FROM sys_organization WHERE delete_flag = 0 AND tenant_id IS NULL GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
             "LEFT JOIN (SELECT org_id, COUNT(*) as cnt FROM sys_user WHERE delete_flag = 0 AND status = 1 AND tenant_id IS NULL GROUP BY org_id) member_count ON o.id = member_count.org_id " +
-            "WHERE o.tenant_id IS NULL AND o.delete_flag = 0";
+            "WHERE o.tenant_id IS NULL";
 
     @Override
     public Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager pager) {
@@ -191,7 +191,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private SysOrganization getPlatformOrgEntity(Long id) {
-        String sql = "SELECT * FROM sys_organization WHERE id = :id AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT * FROM sys_organization WHERE id = :id AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);
         SysOrganization org = TenantContext.withoutTenant(() ->
@@ -202,7 +202,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
 
     private boolean isOrgCodeUnique(String orgCode, Long excludeId) {
         if (!StringUtils.hasText(orgCode)) return true;
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE org_code = :orgCode AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_organization WHERE org_code = :orgCode AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("orgCode", orgCode);
         if (excludeId != null) {
@@ -216,7 +216,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private boolean hasChildren(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("parentId", orgId);
         Long count = TenantContext.withoutTenant(() ->
@@ -225,7 +225,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private boolean hasMembers(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("orgId", orgId);
         Long count = TenantContext.withoutTenant(() ->
@@ -245,7 +245,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private void collectChildrenIds(Long parentId, List<Long> result) {
-        String sql = "SELECT id FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT id FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("parentId", parentId);
         List<Long> children = TenantContext.withoutTenant(() ->

@@ -44,7 +44,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
-                    "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 " +
+                    "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id";
 
@@ -112,7 +112,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
-                    "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 " +
+                    "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.status = 1 ORDER BY o.sort_order ASC";
@@ -135,7 +135,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
-                    "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 " +
+                    "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.status = 1";
@@ -166,7 +166,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
-                    "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 " +
+                    "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "ORDER BY o.sort_order ASC, o.created_at DESC";
@@ -190,7 +190,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
-                    "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.delete_flag = 0 " +
+                    "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.id = :id";
@@ -489,7 +489,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
      * 检查是否有关联用户
      */
     private boolean hasMembers(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND delete_flag = 0 AND status = 1";
+        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND status = 1";
         Map<String, Object> params = Maps.newHashMap();
         params.put("orgId", orgId);
 

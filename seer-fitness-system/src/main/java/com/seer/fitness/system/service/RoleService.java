@@ -93,7 +93,7 @@ public class RoleService extends BaseServiceImpl {
         if (tenantId != null) {
             // 平台用户指定租户ID查询
             String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                        "FROM sys_role WHERE tenant_id = :tenantId AND delete_flag = 0 AND status = 1 ORDER BY created_at DESC";
+                        "FROM sys_role WHERE tenant_id = :tenantId AND status = 1 ORDER BY created_at DESC";
             Map<String, Object> params = Maps.newHashMap();
             params.put("tenantId", tenantId);
             return TenantContext.withoutTenant(() ->
@@ -291,7 +291,7 @@ public class RoleService extends BaseServiceImpl {
         String sql = "SELECT u.id, u.username, u.real_name, u.status, u.admin_flag, u.user_type, u.org_id " +
                     "FROM sys_user u " +
                     "INNER JOIN sys_user_role ur ON u.id = ur.user_id " +
-                    "WHERE ur.role_id = :roleId AND u.delete_flag = 0 " +
+                    "WHERE ur.role_id = :roleId " +
                     "ORDER BY u.id";
         Map<String, Object> params = Maps.newHashMap();
         params.put("roleId", roleId);

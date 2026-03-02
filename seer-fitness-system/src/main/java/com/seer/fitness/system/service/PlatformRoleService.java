@@ -37,7 +37,6 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         Map<String, Object> queryMap = Maps.newHashMap();
         List<String> conditions = new ArrayList<>();
         conditions.add("tenant_id IS NULL");
-        conditions.add("delete_flag = 0");
 
         String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at FROM sys_role";
 
@@ -63,7 +62,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     @Override
     public List<RoleDTO> list() {
         String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                "FROM sys_role WHERE tenant_id IS NULL AND delete_flag = 0 AND status = 1 ORDER BY created_at DESC";
+                "FROM sys_role WHERE tenant_id IS NULL AND status = 1 ORDER BY created_at DESC";
         return TenantContext.withoutTenant(() ->
                 baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class));
     }
@@ -71,7 +70,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     @Override
     public RoleDTO getById(Long id) {
         String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                "FROM sys_role WHERE id = :id AND tenant_id IS NULL AND delete_flag = 0";
+                "FROM sys_role WHERE id = :id AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);
         SysRole role = TenantContext.withoutTenant(() ->
@@ -194,7 +193,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     }
 
     private SysRole getPlatformRoleEntity(Long id) {
-        String sql = "SELECT * FROM sys_role WHERE id = :id AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT * FROM sys_role WHERE id = :id AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);
         SysRole role = TenantContext.withoutTenant(() ->
@@ -215,7 +214,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     }
 
     private boolean isRoleNameExists(String roleName) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_name = :roleName AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_name = :roleName AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("roleName", roleName);
         Long count = TenantContext.withoutTenant(() ->
@@ -224,7 +223,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     }
 
     private boolean isRoleCodeExists(String roleCode, Long excludeId) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_code = :roleCode AND tenant_id IS NULL AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_code = :roleCode AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("roleCode", roleCode);
         if (excludeId != null) {

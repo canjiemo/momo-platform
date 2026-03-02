@@ -53,7 +53,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
                     "FROM sys_tenant";
 
         List<String> conditions = new ArrayList<>();
-        conditions.add("delete_flag = 0");
 
         if (StringUtils.hasText(param.getTenantCode())) {
             conditions.add("tenant_code LIKE :tenantCode");
@@ -102,7 +101,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
     public TenantDTO getByCode(String tenantCode) {
         if (!StringUtils.hasText(tenantCode)) throw new BusinessException("租户编码不能为空");
 
-        String sql = "SELECT * FROM sys_tenant WHERE tenant_code = :tenantCode AND delete_flag = 0";
+        String sql = "SELECT * FROM sys_tenant WHERE tenant_code = :tenantCode";
         Map<String, Object> params = Maps.newHashMap();
         params.put("tenantCode", tenantCode);
 
@@ -179,7 +178,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         String username = tenant.getTenantName();
 
         // 检查该租户下用户名是否已存在（tenant_id + username 联合唯一）
-        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND tenant_id = :tenantId AND delete_flag = 0";
+        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND tenant_id = :tenantId";
         Map<String, Object> checkParams = Maps.newHashMap();
         checkParams.put("username", username);
         checkParams.put("tenantId", tenant.getId());
@@ -322,7 +321,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     @Override
     public boolean existsByCode(String tenantCode) {
-        String sql = "SELECT COUNT(*) FROM sys_tenant WHERE tenant_code = :tenantCode AND delete_flag = 0";
+        String sql = "SELECT COUNT(*) FROM sys_tenant WHERE tenant_code = :tenantCode";
         Map<String, Object> params = Maps.newHashMap();
         params.put("tenantCode", tenantCode);
         Long count = baseDao.querySingleForSql(sql, params, Long.class);
