@@ -96,7 +96,7 @@ public class OrganizationController extends MyBaseController {
      * @return 组织详情
      */
     @GetMapping("/{id}")
-    @RequireAuth(permissions = {"organization:view"})
+    @RequireAuth(login = true)
     @OperationLog(
         type = OperationType.QUERY,
         module = "organization",

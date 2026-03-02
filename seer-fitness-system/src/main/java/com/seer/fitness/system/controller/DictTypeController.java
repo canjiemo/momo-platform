@@ -59,7 +59,7 @@ public class DictTypeController extends MyBaseController {
      * @return 字典类型详情
      */
     @GetMapping("/{id}")
-    @RequireAuth(permissions = {"dict:type:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<DictTypeDTO> getById(@PathVariable String id) {
         return super.doJsonOut(dictTypeService.getById(id));
     }

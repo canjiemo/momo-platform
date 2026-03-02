@@ -72,7 +72,7 @@ public class RoleController extends MyBaseController {
      * @return 角色详情
      */
     @GetMapping("/{id}")
-    @RequireAuth(permissions = {"role:view"})
+    @RequireAuth(login = true)
     @OperationLog(
         type = OperationType.QUERY,
         module = "role",
