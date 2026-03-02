@@ -212,6 +212,15 @@ public class UserService extends BaseServiceImpl implements IUserService {
             throw new BusinessException("用户不存在");
         }
 
+        // 管理员账号只允许修改姓名
+        if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
+            user.setRealName(request.getRealName());
+            user.setUpdatedAt(LocalDateTime.now());
+            baseDao.updatePO(user);
+            log.info("更新管理员用户姓名成功: id={}, realName={}", request.getId(), request.getRealName());
+            return;
+        }
+
         // 验证组织ID是否存在（如果提供了）
         if (request.getOrgId() != null) {
             SysOrganization org = baseDao.queryById(request.getOrgId(), SysOrganization.class);
@@ -291,6 +300,10 @@ public class UserService extends BaseServiceImpl implements IUserService {
         SysUser user = baseDao.queryById(userId, SysUser.class);
         if (user == null) {
             throw new BusinessException("用户不存在");
+        }
+
+        if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
+            throw new BusinessException("不能对管理员账号进行密码重置");
         }
 
         // 检查新密码是否与旧密码相同
