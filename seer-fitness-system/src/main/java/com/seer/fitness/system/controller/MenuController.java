@@ -64,7 +64,7 @@ public class MenuController extends MyBaseController {
      * @return 菜单列表
      */
     @GetMapping("/list")
-    @RequireAuth(permissions = {"menu:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<MenuDTO>> list() {
         List<MenuDTO> menus = menuService.list();
         return super.doJsonOut(menus);

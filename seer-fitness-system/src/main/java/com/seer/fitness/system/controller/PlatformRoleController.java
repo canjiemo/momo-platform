@@ -41,7 +41,7 @@ public class PlatformRoleController extends MyBaseController {
      * 平台角色列表（不分页，用于租户创建时的角色选择下拉）
      */
     @GetMapping("/list")
-    @RequireAuth(permissions = {"platform:role:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<RoleDTO>> list() {
         return super.doJsonOut(platformRoleService.list());
     }

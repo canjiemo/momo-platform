@@ -59,7 +59,7 @@ public class RoleController extends MyBaseController {
      * @return 角色列表
      */
     @GetMapping("/list")
-    @RequireAuth(permissions = {"role:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<RoleDTO>> list(@RequestParam(required = false) Long tenantId) {
         List<RoleDTO> roles = roleService.list(tenantId);
         return super.doJsonOut(roles);

@@ -53,7 +53,7 @@ public class OrganizationController extends MyBaseController {
      * @return 组织架构树形结构列表
      */
     @GetMapping("/tree")
-//    @RequireAuth(permissions = {"organization:view"})
+    @RequireAuth(login = true)
     @OperationLog(
         type = OperationType.QUERY,
         module = "organization",
@@ -71,7 +71,7 @@ public class OrganizationController extends MyBaseController {
      * @return 子组织树形结构
      */
     @GetMapping("/tree/{parentId}")
-    @RequireAuth(permissions = {"organization:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<OrganizationTreeVO>> getChildrenTree(@PathVariable String parentId) {
         return super.doJsonOut(organizationService.getChildrenTree(parentId));
     }
@@ -83,7 +83,7 @@ public class OrganizationController extends MyBaseController {
      * @return 组织列表
      */
     @GetMapping("/list")
-    @RequireAuth(permissions = {"organization:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<OrganizationDTO>> list() {
         return super.doJsonOut(organizationService.list());
     }
