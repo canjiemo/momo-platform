@@ -39,17 +39,32 @@ public class MenuService extends BaseServiceImpl {
     private RoleService roleService;
 
     /**
-     * 获取完整的菜单树形结构
-     * 返回所有启用状态的菜单，按排序字段排序
-     *
-     * @return 菜单树形结构列表
+     * 获取菜单树形结构
+     * - 平台超管：返回全部启用菜单（用于菜单管理）
+     * - 租户管理员：仅返回平台为该租户授权的菜单（用于角色分配菜单选择框）
      */
     public List<MenuTreeVO> getMenuTree() {
+        com.seer.fitness.system.dto.UserCacheInfo currentUser =
+                com.seer.fitness.system.util.SecurityContextUtil.getCurrentUser();
+
+        boolean isTenantAdmin = currentUser != null
+                && Integer.valueOf(1).equals(currentUser.getAdminFlag())
+                && currentUser.getTenantId() != null;
+
+        if (isTenantAdmin) {
+            List<Long> allowedIds = getTenantAllowedMenuIds(currentUser.getTenantId());
+            if (allowedIds.isEmpty()) return List.of();
+            String ids = allowedIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+            String sql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
+                        "FROM sys_menu WHERE id IN (" + ids + ") AND status = 1 ORDER BY sort_order";
+            List<MenuDTO> menus = TenantContext.withoutTenant(() ->
+                    baseDao.queryListForSql(sql, Maps.newHashMap(), MenuDTO.class));
+            return buildMenuTree(menus, null);
+        }
+
         String sql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, status " +
                     "FROM sys_menu WHERE status = 1 ORDER BY sort_order";
-
         List<MenuDTO> allMenus = baseDao.queryListForSql(sql, Maps.newHashMap(), MenuDTO.class);
-
         return buildMenuTree(allMenus, null);
     }
 
