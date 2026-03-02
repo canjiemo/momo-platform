@@ -1,6 +1,6 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.framework.entity.SysDictData;
+import com.seer.fitness.system.entity.SysDictData;
 import com.seer.fitness.system.dto.DictDataCreateRequest;
 import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
@@ -34,12 +34,14 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      * 分页查询字典数据
      */
     public Pager<DictDataDTO> search(DictDataQueryParam param, Pager pager) {
-        var query = lambdaQuery(SysDictData.class, DictDataDTO.class);
-        if (StringUtils.hasText(param.getDictType())) query.eq(SysDictData::getDictType, param.getDictType());
-        if (StringUtils.hasText(param.getDictLabel())) query.like(SysDictData::getDictLabel, param.getDictLabel());
-        if (StringUtils.hasText(param.getDictValue())) query.like(SysDictData::getDictValue, param.getDictValue());
-        if (param.getStatus() != null) query.eq(SysDictData::getStatus, param.getStatus());
-        return query.orderByAsc(SysDictData::getSortOrder).orderByDesc(SysDictData::getCreateTime).page(pager);
+        return lambdaQuery(SysDictData.class, DictDataDTO.class)
+                .eq(SysDictData::getDictType, param.getDictType())
+                .like(SysDictData::getDictLabel, param.getDictLabel())
+                .like(SysDictData::getDictValue, param.getDictValue())
+                .eq(SysDictData::getStatus, param.getStatus())
+                .orderByAsc(SysDictData::getSortOrder)
+                .orderByDesc(SysDictData::getCreateTime)
+                .page(pager);
     }
 
     /**

@@ -28,21 +28,6 @@ public class DictConstants {
     public static final String ALL_DICT_TYPES_CACHE_KEY = DICT_TYPE_CACHE_KEY + "all";
 
     /**
-     * 缓存过期时间（小时）
-     */
-    public static final long DICT_TYPE_CACHE_EXPIRE_HOURS = 12L;
-    public static final long DICT_DATA_CACHE_EXPIRE_HOURS = 24L;
-    public static final long NULL_VALUE_CACHE_EXPIRE_MINUTES = 5L;
-
-    /**
-     * 状态常量
-     */
-    public static final class Status {
-        public static final Boolean ENABLED = true;
-        public static final Boolean DISABLED = false;
-    }
-
-    /**
      * 默认排序
      */
     public static final int DEFAULT_SORT_ORDER = 0;

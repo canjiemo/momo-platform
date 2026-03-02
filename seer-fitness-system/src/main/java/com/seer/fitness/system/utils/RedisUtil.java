@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -101,5 +102,20 @@ public class RedisUtil {
      */
     public Long decrement(String key, long delta) {
         return redisTemplate.opsForValue().decrement(key, delta);
+    }
+
+    /**
+     * 按 pattern 批量删除 key（使用 keys 命令，适合低频管理操作）
+     *
+     * @param pattern Redis key pattern，如 "dict:*"
+     * @return 实际删除的 key 数量
+     */
+    public long deleteByPattern(String pattern) {
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys == null || keys.isEmpty()) {
+            return 0L;
+        }
+        Long deleted = redisTemplate.delete(keys);
+        return deleted != null ? deleted : 0L;
     }
 }

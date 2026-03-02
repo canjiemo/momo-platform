@@ -1,6 +1,6 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.framework.entity.SysDictType;
+import com.seer.fitness.system.entity.SysDictType;
 import com.seer.fitness.system.dto.DictTypeCreateRequest;
 import com.seer.fitness.system.dto.DictTypeDTO;
 import com.seer.fitness.system.dto.DictTypeQueryParam;
@@ -37,11 +37,13 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
      * 分页查询字典类型
      */
     public Pager<DictTypeDTO> search(DictTypeQueryParam param, Pager pager) {
-        var query = lambdaQuery(SysDictType.class, DictTypeDTO.class);
-        if (StringUtils.hasText(param.getDictName())) query.like(SysDictType::getDictName, param.getDictName());
-        if (StringUtils.hasText(param.getDictType())) query.like(SysDictType::getDictType, param.getDictType());
-        if (param.getStatus() != null) query.eq(SysDictType::getStatus, param.getStatus());
-        return query.orderByAsc(SysDictType::getSortOrder).orderByDesc(SysDictType::getCreateTime).page(pager);
+        return lambdaQuery(SysDictType.class, DictTypeDTO.class)
+                .like(SysDictType::getDictName, param.getDictName())
+                .like(SysDictType::getDictType, param.getDictType())
+                .eq(SysDictType::getStatus, param.getStatus())
+                .orderByAsc(SysDictType::getSortOrder)
+                .orderByDesc(SysDictType::getCreateTime)
+                .page(pager);
     }
 
     /**
@@ -219,10 +221,12 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
     }
 
     /**
-     * 刷新字典缓存
+     * 刷新字典缓存（删除缓存，下次读取时懒加载回填）
+     * 如需主动重新加载，Controller 应调用 DictCacheInitializer.refreshDictType()
      */
     public void refreshCache(String dictType) {
-        dictCacheService.refreshDictCache(dictType);
+        dictCacheService.deleteDictTypeCache(dictType);
+        dictCacheService.deleteDictDataCache(dictType);
         log.info("刷新字典缓存完成: {}", dictType);
     }
 

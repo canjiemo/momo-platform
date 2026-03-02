@@ -75,12 +75,6 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <!-- Caffeine 本地缓存 -->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-        </dependency>
-
         <!-- AspectJ Runtime (AOP支持) -->
         <dependency>
             <groupId>org.aspectj</groupId>

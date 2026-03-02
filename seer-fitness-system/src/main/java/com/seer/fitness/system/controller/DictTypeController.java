@@ -2,6 +2,7 @@ package com.seer.fitness.system.controller;
 
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.security.RequireAuth;
+import com.seer.fitness.system.service.DictCacheInitializer;
 import com.seer.fitness.system.service.IDictTypeService;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.mycommon.pager.PagerHandler;
@@ -25,6 +26,9 @@ public class DictTypeController extends MyBaseController {
 
     @Autowired
     private IDictTypeService dictTypeService;
+
+    @Autowired
+    private DictCacheInitializer dictCacheInitializer;
 
     /**
      * 分页查询字典类型
@@ -116,7 +120,7 @@ public class DictTypeController extends MyBaseController {
     }
 
     /**
-     * 刷新字典缓存
+     * 刷新指定字典类型的缓存（删除 + 从 DB 重新加载）
      *
      * @param dictType 字典类型编码
      * @return 操作结果
@@ -124,7 +128,19 @@ public class DictTypeController extends MyBaseController {
     @PostMapping("/refresh")
     @RequireAuth(permissions = {"dict:type:update"})
     public MyResponseResult refreshCache(@RequestParam String dictType) {
-        dictTypeService.refreshCache(dictType);
+        dictCacheInitializer.refreshDictType(dictType);
+        return super.doJsonDefaultMsg();
+    }
+
+    /**
+     * 刷新全部字典缓存（清空 Redis 中所有 dict:* key 并从 DB 全量重新加载）
+     *
+     * @return 操作结果
+     */
+    @PostMapping("/refresh-all")
+    @RequireAuth(permissions = {"dict:type:update"})
+    public MyResponseResult refreshAllCache() {
+        dictCacheInitializer.refreshAllDictCache();
         return super.doJsonDefaultMsg();
     }
 }
