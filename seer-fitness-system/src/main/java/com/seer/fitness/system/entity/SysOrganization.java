@@ -1,5 +1,6 @@
 package com.seer.fitness.system.entity;
 
+import io.github.mocanjie.base.myjpa.MyTableEntity;
 import io.github.mocanjie.base.myjpa.annotation.MyTable;
 import lombok.Data;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @MyTable("sys_organization")
-public class SysOrganization {
+public class SysOrganization implements MyTableEntity {
 
     /**
      * 主键ID
