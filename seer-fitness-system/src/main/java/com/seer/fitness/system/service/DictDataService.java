@@ -1,6 +1,5 @@
 package com.seer.fitness.system.service;
 
-import com.google.common.collect.Maps;
 import com.seer.fitness.framework.entity.SysDictData;
 import com.seer.fitness.system.dto.DictDataCreateRequest;
 import com.seer.fitness.system.dto.DictDataDTO;
@@ -17,9 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 字典数据管理服务
@@ -37,44 +34,12 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      * 分页查询字典数据
      */
     public Pager<DictDataDTO> search(DictDataQueryParam param, Pager pager) {
-        Map<String, Object> queryMap = Maps.newHashMap();
-
-        String sql = "SELECT id, dict_type, dict_label, dict_value, dict_description, " +
-                    "css_class, list_class, is_default, status, sort_order, remark, " +
-                    "create_by, create_time, update_by, update_time " +
-                    "FROM sys_dict_data";
-
-        List<String> conditions = new ArrayList<>();
-
-        if (StringUtils.hasText(param.getDictType())) {
-            conditions.add("dict_type = :dictType");
-            queryMap.put("dictType", param.getDictType());
-        }
-
-        if (StringUtils.hasText(param.getDictLabel())) {
-            conditions.add("dict_label LIKE :dictLabel");
-            queryMap.put("dictLabel", "%" + param.getDictLabel() + "%");
-        }
-
-        if (StringUtils.hasText(param.getDictValue())) {
-            conditions.add("dict_value LIKE :dictValue");
-            queryMap.put("dictValue", "%" + param.getDictValue() + "%");
-        }
-
-        if (param.getStatus() != null) {
-            conditions.add("status = :status");
-            queryMap.put("status", param.getStatus());
-        }
-
-        if (!conditions.isEmpty()) {
-            sql += " WHERE " + String.join(" AND ", conditions);
-        }
-
-        sql += " ORDER BY sort_order ASC, create_time DESC";
-
-        log.info("字典数据分页查询SQL: {}", sql);
-
-        return baseDao.queryPageForSql(sql, queryMap, pager, DictDataDTO.class);
+        var query = lambdaQuery(SysDictData.class, DictDataDTO.class);
+        if (StringUtils.hasText(param.getDictType())) query.eq(SysDictData::getDictType, param.getDictType());
+        if (StringUtils.hasText(param.getDictLabel())) query.like(SysDictData::getDictLabel, param.getDictLabel());
+        if (StringUtils.hasText(param.getDictValue())) query.like(SysDictData::getDictValue, param.getDictValue());
+        if (param.getStatus() != null) query.eq(SysDictData::getStatus, param.getStatus());
+        return query.orderByAsc(SysDictData::getSortOrder).orderByDesc(SysDictData::getCreateTime).page(pager);
     }
 
     /**
@@ -85,26 +50,19 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             throw new BusinessException("字典类型不能为空");
         }
 
-        // 先从缓存获取
         List<DictDataDTO> cachedList = dictCacheService.getDictDataFromCache(dictType);
         if (cachedList != null) {
             log.debug("从缓存获取字典数据成功: {}, 数量: {}", dictType, cachedList.size());
             return cachedList;
         }
 
-        // 缓存未命中，从数据库查询
-        String sql = "SELECT id, dict_type, dict_label, dict_value, dict_description, " +
-                    "css_class, list_class, is_default, status, sort_order, remark, " +
-                    "create_by, create_time, update_by, update_time " +
-                    "FROM sys_dict_data WHERE dict_type = :dictType AND status = 1 " +
-                    "ORDER BY sort_order ASC, create_time DESC";
+        List<DictDataDTO> list = lambdaQuery(SysDictData.class, DictDataDTO.class)
+                .eq(SysDictData::getDictType, dictType)
+                .eq(SysDictData::getStatus, 1)
+                .orderByAsc(SysDictData::getSortOrder)
+                .orderByDesc(SysDictData::getCreateTime)
+                .list();
 
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", dictType);
-
-        List<DictDataDTO> list = baseDao.queryListForSql(sql, params, DictDataDTO.class);
-
-        // 缓存结果
         if (list != null) {
             dictCacheService.cacheDictData(dictType, list);
         }
@@ -121,15 +79,8 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             throw new BusinessException("字典数据ID不能为空");
         }
 
-        String sql = "SELECT id, dict_type, dict_label, dict_value, dict_description, " +
-                    "css_class, list_class, is_default, status, sort_order, remark, " +
-                    "create_by, create_time, update_by, update_time " +
-                    "FROM sys_dict_data WHERE id = :id";
-
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("id", Long.valueOf(id));
-
-        DictDataDTO dictData = baseDao.querySingleForSql(sql, params, DictDataDTO.class);
+        DictDataDTO dictData = lambdaQuery(SysDictData.class, DictDataDTO.class)
+                .eq(SysDictData::getId, Long.valueOf(id)).one();
         if (dictData == null) {
             throw new BusinessException("字典数据不存在");
         }
@@ -145,24 +96,20 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             return null;
         }
 
-        // 先从缓存获取
         String cachedLabel = dictCacheService.getDictLabelByValue(dictType, dictValue);
         if (cachedLabel != null) {
             log.debug("从缓存获取字典标签成功: {}={}", dictType + ":" + dictValue, cachedLabel);
             return cachedLabel;
         }
 
-        // 缓存未命中，从数据库查询
-        String sql = "SELECT dict_label FROM sys_dict_data " +
-                    "WHERE dict_type = :dictType AND dict_value = :dictValue AND status = 1";
+        SysDictData dictData = lambdaQuery(SysDictData.class)
+                .eq(SysDictData::getDictType, dictType)
+                .eq(SysDictData::getDictValue, dictValue)
+                .eq(SysDictData::getStatus, 1)
+                .one();
 
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", dictType);
-        params.put("dictValue", dictValue);
-
-        String label = baseDao.querySingleForSql(sql, params, String.class);
+        String label = dictData != null ? dictData.getDictLabel() : null;
         log.info("从数据库获取字典标签: {}={}", dictType + ":" + dictValue, label);
-
         return label;
     }
 
@@ -171,13 +118,11 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      */
     @Transactional(readOnly = false)
     public void create(DictDataCreateRequest request) {
-        // 检查字典值是否已存在
         if (isDictValueExists(request.getDictType(), request.getDictValue())) {
             throw new BusinessException("字典值已存在: " + request.getDictValue());
         }
 
-        // 如果设置为默认值，需要将其他项的默认状态置为false
-        if (request.getIsDefault()==1) {
+        if (request.getIsDefault() == 1) {
             clearDefaultStatus(request.getDictType());
         }
 
@@ -203,9 +148,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
         baseDao.insertPO(dictData, true);
 
-        // 清除相关缓存
         dictCacheService.deleteDictDataCache(request.getDictType());
-
         log.info("创建字典数据成功: dictType={}, dictValue={}", request.getDictType(), request.getDictValue());
     }
 
@@ -219,14 +162,12 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             throw new BusinessException("字典数据不存在");
         }
 
-        // 如果修改了字典值，检查是否重复
         if (!existingData.getDictValue().equals(request.getDictValue()) &&
             isDictValueExists(request.getDictType(), request.getDictValue())) {
             throw new BusinessException("字典值已存在: " + request.getDictValue());
         }
 
-        // 如果设置为默认值，需要将其他项的默认状态置为false
-        if (request.getIsDefault()==1 && existingData.getIsDefault()!=1) {
+        if (request.getIsDefault() == 1 && existingData.getIsDefault() != 1) {
             clearDefaultStatus(request.getDictType());
         }
 
@@ -248,7 +189,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
         baseDao.updatePO(existingData);
 
-        // 清除相关缓存
         String oldDictType = existingData.getDictType();
         dictCacheService.deleteDictDataCache(oldDictType);
         if (!oldDictType.equals(request.getDictType())) {
@@ -273,20 +213,16 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
                 throw new BusinessException("字典数据ID不能为空");
             }
 
-            Long dictDataId = Long.valueOf(id);
-            SysDictData dictData = baseDao.queryById(dictDataId, SysDictData.class);
+            SysDictData dictData = baseDao.queryById(Long.valueOf(id), SysDictData.class);
             if (dictData == null) {
                 throw new BusinessException("字典数据不存在");
             }
 
-            // 清除相关缓存
             dictCacheService.deleteDictDataCache(dictData.getDictType());
-
             log.info("删除字典数据成功: id={}, dictType={}, dictValue={}",
-                    dictDataId, dictData.getDictType(), dictData.getDictValue());
+                    id, dictData.getDictType(), dictData.getDictValue());
         }
 
-        // 逻辑删除
         baseDao.delByIds(SysDictData.class, ids);
     }
 
@@ -301,30 +237,20 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
         String currentUser = SecurityContextUtil.getCurrentUsername();
         LocalDateTime now = LocalDateTime.now();
-
         String dictType = null;
 
         for (int i = 0; i < ids.size(); i++) {
-            String id = ids.get(i);
-            Integer sortOrder = sortOrders.get(i);
+            SysDictData dictData = baseDao.queryById(Long.valueOf(ids.get(i)), SysDictData.class);
+            if (dictData == null) continue;
 
-            SysDictData dictData = baseDao.queryById(Long.valueOf(id), SysDictData.class);
-            if (dictData == null) {
-                continue;
-            }
+            if (dictType == null) dictType = dictData.getDictType();
 
-            if (dictType == null) {
-                dictType = dictData.getDictType();
-            }
-
-            dictData.setSortOrder(sortOrder);
+            dictData.setSortOrder(sortOrders.get(i));
             dictData.setUpdateBy(currentUser);
             dictData.setUpdateTime(now);
-
             baseDao.updatePO(dictData);
         }
 
-        // 清除相关缓存
         if (dictType != null) {
             dictCacheService.deleteDictDataCache(dictType);
         }
@@ -336,12 +262,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      * 检查指定字典类型下是否存在字典数据
      */
     public boolean hasDictDataByType(String dictType) {
-        String sql = "SELECT COUNT(*) FROM sys_dict_data WHERE dict_type = :dictType";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", dictType);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysDictData.class).eq(SysDictData::getDictType, dictType).exists();
     }
 
     /**
@@ -352,11 +273,8 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         String currentUser = SecurityContextUtil.getCurrentUsername();
         LocalDateTime now = LocalDateTime.now();
 
-        String sql = "SELECT * FROM sys_dict_data WHERE dict_type = :dictType";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", oldDictType);
-
-        List<SysDictData> dictDataList = baseDao.queryListForSql(sql, params, SysDictData.class);
+        List<SysDictData> dictDataList = lambdaQuery(SysDictData.class)
+                .eq(SysDictData::getDictType, oldDictType).list();
 
         for (SysDictData dictData : dictDataList) {
             dictData.setDictType(newDictType);
@@ -369,32 +287,21 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
                 oldDictType, newDictType, dictDataList.size());
     }
 
-    /**
-     * 检查字典值是否已存在
-     */
     private boolean isDictValueExists(String dictType, String dictValue) {
-        String sql = "SELECT COUNT(*) FROM sys_dict_data " +
-                    "WHERE dict_type = :dictType AND dict_value = :dictValue";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", dictType);
-        params.put("dictValue", dictValue);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysDictData.class)
+                .eq(SysDictData::getDictType, dictType)
+                .eq(SysDictData::getDictValue, dictValue)
+                .exists();
     }
 
-    /**
-     * 清除指定字典类型下所有数据的默认状态
-     */
     private void clearDefaultStatus(String dictType) {
         String currentUser = SecurityContextUtil.getCurrentUsername();
         LocalDateTime now = LocalDateTime.now();
 
-        String sql = "SELECT * FROM sys_dict_data WHERE dict_type = :dictType AND is_default = 1";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("dictType", dictType);
-
-        List<SysDictData> dictDataList = baseDao.queryListForSql(sql, params, SysDictData.class);
+        List<SysDictData> dictDataList = lambdaQuery(SysDictData.class)
+                .eq(SysDictData::getDictType, dictType)
+                .eq(SysDictData::getIsDefault, 1)
+                .list();
 
         for (SysDictData dictData : dictDataList) {
             dictData.setIsDefault(0);

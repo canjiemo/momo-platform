@@ -411,12 +411,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
      * 检查用户名是否已存在
      */
     private boolean isUsernameExists(String username) {
-        String sql = "SELECT COUNT(*) FROM sys_user WHERE username = :username";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("username", username);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysUser.class).eq(SysUser::getUsername, username).exists();
     }
 
     /**

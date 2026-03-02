@@ -3,6 +3,7 @@ package com.seer.fitness.system.service;
 import com.google.common.collect.Maps;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
+import com.seer.fitness.system.entity.SysUserRole;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.util.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
@@ -302,39 +303,23 @@ public class RoleService extends BaseServiceImpl {
      * 检查角色名是否已存在
      */
     private boolean isRoleNameExists(String roleName) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_name = :roleName";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleName", roleName);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysRole.class).eq(SysRole::getRoleName, roleName).exists();
     }
 
     /**
      * 检查角色编码是否已存在（excludeId 不为 null 时排除该 ID，用于更新校验）
      */
     private boolean isRoleCodeExists(String roleCode, Long excludeId) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_code = :roleCode";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleCode", roleCode);
-        if (excludeId != null) {
-            sql += " AND id != :excludeId";
-            params.put("excludeId", excludeId);
-        }
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        var query = lambdaQuery(SysRole.class).eq(SysRole::getRoleCode, roleCode);
+        if (excludeId != null) query.ne(SysRole::getId, excludeId);
+        return query.exists();
     }
 
     /**
      * 检查是否有用户使用该角色
      */
     private boolean hasUsersWithRole(Long roleId) {
-        String sql = "SELECT COUNT(*) FROM sys_user_role WHERE role_id = :roleId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysUserRole.class).eq(SysUserRole::getRoleId, roleId).exists();
     }
 
     /**
