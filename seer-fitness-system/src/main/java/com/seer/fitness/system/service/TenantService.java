@@ -74,7 +74,10 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             queryMap.put("contactPhone", "%" + param.getContactPhone() + "%");
         }
 
-        sql += " WHERE " + String.join(" AND ", conditions) + " ORDER BY created_at DESC";
+        if (!conditions.isEmpty()) {
+            sql += " WHERE " + String.join(" AND ", conditions);
+        }
+        sql += " ORDER BY created_at DESC";
 
         Pager<TenantDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, TenantDTO.class);
 
