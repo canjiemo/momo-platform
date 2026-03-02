@@ -285,6 +285,20 @@ public class RoleService extends BaseServiceImpl {
     }
 
     /**
+     * 查询指定角色下的用户列表
+     */
+    public List<UserDTO> getUsersByRole(Long roleId) {
+        String sql = "SELECT u.id, u.username, u.real_name, u.status, u.admin_flag, u.user_type, u.org_id " +
+                    "FROM sys_user u " +
+                    "INNER JOIN sys_user_role ur ON u.id = ur.user_id " +
+                    "WHERE ur.role_id = :roleId AND u.delete_flag = 0 " +
+                    "ORDER BY u.id";
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("roleId", roleId);
+        return baseDao.queryListForSql(sql, params, UserDTO.class);
+    }
+
+    /**
      * 检查角色名是否已存在
      */
     private boolean isRoleNameExists(String roleName) {

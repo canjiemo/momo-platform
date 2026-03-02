@@ -171,4 +171,16 @@ public class RoleController extends MyBaseController {
         List<String> menuIds = roleService.getRoleMenuIds(id);
         return super.doJsonOut(menuIds);
     }
+
+    /**
+     * 查询指定角色下的用户列表
+     *
+     * @param roleId 角色ID
+     * @return 用户列表
+     */
+    @GetMapping("/{roleId}/users")
+    @RequireAuth(login = true)
+    public MyResponseResult<List<UserDTO>> getUsersByRole(@PathVariable Long roleId) {
+        return super.doJsonOut(roleService.getUsersByRole(roleId));
+    }
 }
