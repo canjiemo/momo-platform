@@ -36,7 +36,7 @@ public class DictDataController extends MyBaseController {
      * @return 分页结果
      */
     @PostMapping("/search")
-//    @RequireAuth(permissions = {"dict:data:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<Pager<DictDataDTO>> search(@RequestBody DictDataQueryParam param) {
         return super.doJsonPagerOut(dictDataService.search(param, PagerHandler.createPager(param)));
     }
@@ -49,7 +49,7 @@ public class DictDataController extends MyBaseController {
      * @return 字典数据列表
      */
     @GetMapping("/list/{dictType}")
-//    @RequireAuth(permissions = {"dict:data:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<DictDataDTO>> list(@PathVariable String dictType) {
         List<DictDataDTO> dataList = dictDataService.getByDictType(dictType);
         return super.doJsonOut(dataList);
@@ -62,7 +62,7 @@ public class DictDataController extends MyBaseController {
      * @return 字典数据详情
      */
     @GetMapping("/{id}")
-//    @RequireAuth(permissions = {"dict:data:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<DictDataDTO> getById(@PathVariable String id) {
         return super.doJsonOut(dictDataService.getById(id));
     }

@@ -46,7 +46,7 @@ public class DictTypeController extends MyBaseController {
      * @return 字典类型列表
      */
     @GetMapping("/list")
-    @RequireAuth(permissions = {"dict:type:view"})
+    @RequireAuth(login = true)
     public MyResponseResult<List<DictTypeDTO>> list() {
         List<DictTypeDTO> types = dictTypeService.list();
         return super.doJsonOut(types);
