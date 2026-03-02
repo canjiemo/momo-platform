@@ -5,7 +5,7 @@ import com.seer.fitness.system.dto.DictDataCreateRequest;
 import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
 import com.seer.fitness.system.dto.DictDataUpdateRequest;
-import com.seer.fitness.system.util.SecurityContextUtil;
+import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.mocanjie.base.mycommon.exception.BusinessException;
 import io.github.mocanjie.base.mycommon.pager.Pager;
 import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
@@ -92,27 +92,19 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
     /**
      * 根据字典类型和字典值获取字典标签
+     * <p>
+     * 复用 getByDictType() 的完整链路（Redis → DB → 回写），缓存命中时只需内存过滤，无额外 IO。
      */
     public String getDictLabel(String dictType, String dictValue) {
         if (!StringUtils.hasText(dictType) || !StringUtils.hasText(dictValue)) {
             return null;
         }
-
-        String cachedLabel = dictCacheService.getDictLabelByValue(dictType, dictValue);
-        if (cachedLabel != null) {
-            log.debug("从缓存获取字典标签成功: {}={}", dictType + ":" + dictValue, cachedLabel);
-            return cachedLabel;
-        }
-
-        SysDictData dictData = lambdaQuery(SysDictData.class)
-                .eq(SysDictData::getDictType, dictType)
-                .eq(SysDictData::getDictValue, dictValue)
-                .eq(SysDictData::getStatus, 1)
-                .one();
-
-        String label = dictData != null ? dictData.getDictLabel() : null;
-        log.info("从数据库获取字典标签: {}={}", dictType + ":" + dictValue, label);
-        return label;
+        List<DictDataDTO> list = getByDictType(dictType);
+        return list.stream()
+                .filter(item -> dictValue.equals(item.getDictValue()))
+                .map(DictDataDTO::getDictLabel)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -314,9 +306,18 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
     }
 
     /**
-     * 根据字典类型和值获取字典描述
+     * 根据字典类型和值获取字典标签（供 DictUtil 调用）
+     * <p>
+     * 走 getByDictType() 的完整链路：Redis 命中 → 直接过滤；Redis 未命中 → 查 DB → 写入 Redis → 过滤。
      */
     public String getDesc(String dictType, Object dictValue) {
-        return dictCacheService.getDictLabelByValue(dictType, String.valueOf(dictValue));
+        if (!StringUtils.hasText(dictType) || dictValue == null) return null;
+        String value = String.valueOf(dictValue);
+        List<DictDataDTO> list = getByDictType(dictType);
+        return list.stream()
+                .filter(item -> value.equals(item.getDictValue()))
+                .map(DictDataDTO::getDictLabel)
+                .findFirst()
+                .orElse(null);
     }
 }
