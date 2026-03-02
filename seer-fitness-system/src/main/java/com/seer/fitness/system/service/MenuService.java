@@ -290,8 +290,8 @@ public class MenuService extends BaseServiceImpl {
         menu.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0);
         menu.setStatus(request.getStatus());
         menu.setDeleteFlag(0);
-        menu.setCreatedAt(LocalDateTime.now());
-        menu.setUpdatedAt(LocalDateTime.now());
+        menu.setCreateTime(LocalDateTime.now());
+        menu.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(menu, true);
 
@@ -334,7 +334,7 @@ public class MenuService extends BaseServiceImpl {
         menu.setIcon(request.getIcon());
         menu.setSortOrder(request.getSortOrder());
         menu.setStatus(request.getStatus());
-        menu.setUpdatedAt(LocalDateTime.now());
+        menu.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(menu);
 

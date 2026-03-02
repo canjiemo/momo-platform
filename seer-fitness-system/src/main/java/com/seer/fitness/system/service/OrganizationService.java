@@ -249,8 +249,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         org.setStatus(request.getStatus());
         org.setDeleteFlag(0);
         // TODO: 设置创建人
-        org.setCreatedAt(LocalDateTime.now());
-        org.setUpdatedAt(LocalDateTime.now());
+        org.setCreateTime(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(org, true);
 
@@ -312,7 +312,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
         // TODO: 设置更新人
-        org.setUpdatedAt(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(org);
 
@@ -388,7 +388,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         }
 
         org.setParentId("0".equals(parentIdStr) ? 0L : Long.parseLong(parentIdStr));
-        org.setUpdatedAt(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(org);
 
@@ -543,8 +543,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         dto.setAddress(org.getAddress());
         dto.setDescription(org.getDescription());
         dto.setStatus(org.getStatus());
-        dto.setCreatedAt(org.getCreatedAt());
-        dto.setUpdatedAt(org.getUpdatedAt());
+        dto.setCreateTime(org.getCreateTime());
+        dto.setUpdateTime(org.getUpdateTime());
         return dto;
     }
 

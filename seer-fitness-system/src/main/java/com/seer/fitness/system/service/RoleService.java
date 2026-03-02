@@ -151,8 +151,8 @@ public class RoleService extends BaseServiceImpl {
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setDeleteFlag(0);
-        role.setCreatedAt(LocalDateTime.now());
-        role.setUpdatedAt(LocalDateTime.now());
+        role.setCreateTime(LocalDateTime.now());
+        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(role, true);
 
@@ -189,7 +189,7 @@ public class RoleService extends BaseServiceImpl {
         role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
-        role.setUpdatedAt(LocalDateTime.now());
+        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(role);
 
@@ -250,7 +250,7 @@ public class RoleService extends BaseServiceImpl {
             SysRoleMenu roleMenu = new SysRoleMenu();
             roleMenu.setRoleId(roleId);
             roleMenu.setMenuId(menuId);
-            roleMenu.setCreatedAt(LocalDateTime.now());
+            roleMenu.setCreateTime(LocalDateTime.now());
 
             baseDao.insertPO(roleMenu, true);
         }
@@ -361,8 +361,8 @@ public class RoleService extends BaseServiceImpl {
         dto.setRoleCode(role.getRoleCode());
         dto.setDescription(role.getDescription());
         dto.setStatus(role.getStatus());
-        dto.setCreatedAt(role.getCreatedAt());
-        dto.setUpdatedAt(role.getUpdatedAt());
+        dto.setCreateTime(role.getCreateTime());
+        dto.setUpdateTime(role.getUpdateTime());
         return dto;
     }
 }

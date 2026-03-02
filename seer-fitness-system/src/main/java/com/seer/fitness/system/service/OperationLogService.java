@@ -319,7 +319,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
         dto.setOperationResult(operationLog.getOperationResult());
         dto.setErrorMessage(operationLog.getErrorMessage());
         dto.setExecutionTime(operationLog.getExecutionTime());
-        dto.setCreatedAt(operationLog.getCreatedAt());
+        dto.setCreateTime(operationLog.getCreateTime());
         return dto;
     }
 }

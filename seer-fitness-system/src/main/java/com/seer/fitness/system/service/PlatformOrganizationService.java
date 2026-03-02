@@ -121,8 +121,8 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
         org.setDeleteFlag(0);
-        org.setCreatedAt(LocalDateTime.now());
-        org.setUpdatedAt(LocalDateTime.now());
+        org.setCreateTime(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.insertPO(org, true);
@@ -159,7 +159,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
         org.setAddress(request.getAddress());
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
-        org.setUpdatedAt(LocalDateTime.now());
+        org.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.updatePO(org);

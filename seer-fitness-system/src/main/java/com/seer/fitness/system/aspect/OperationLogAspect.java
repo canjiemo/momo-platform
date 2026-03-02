@@ -165,7 +165,7 @@ public class OperationLogAspect {
         logEntity.setOperationType(operationLog.type().getCode());
         logEntity.setModuleName(operationLog.module());
         logEntity.setOperationDesc(operationLog.description());
-        logEntity.setCreatedAt(LocalDateTime.now());
+        logEntity.setCreateTime(LocalDateTime.now());
     }
 
     /**

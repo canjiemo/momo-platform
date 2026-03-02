@@ -92,8 +92,8 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setDeleteFlag(0);
-        role.setCreatedAt(LocalDateTime.now());
-        role.setUpdatedAt(LocalDateTime.now());
+        role.setCreateTime(LocalDateTime.now());
+        role.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.insertPO(role, true);
@@ -123,7 +123,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
-        role.setUpdatedAt(LocalDateTime.now());
+        role.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.updatePO(role);
@@ -182,7 +182,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
             roleMenu.setTenantId(null);
             roleMenu.setRoleId(roleId);
             roleMenu.setMenuId(Long.parseLong(menuIdStr));
-            roleMenu.setCreatedAt(LocalDateTime.now());
+            roleMenu.setCreateTime(LocalDateTime.now());
             TenantContext.withoutTenant(() -> {
                 baseDao.insertPO(roleMenu, true);
                 return null;
@@ -243,8 +243,8 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         dto.setRoleCode(role.getRoleCode());
         dto.setDescription(role.getDescription());
         dto.setStatus(role.getStatus());
-        dto.setCreatedAt(role.getCreatedAt());
-        dto.setUpdatedAt(role.getUpdatedAt());
+        dto.setCreateTime(role.getCreateTime());
+        dto.setUpdateTime(role.getUpdateTime());
         return dto;
     }
 }
