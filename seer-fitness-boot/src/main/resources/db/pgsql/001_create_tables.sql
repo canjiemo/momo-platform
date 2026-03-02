@@ -24,9 +24,9 @@ CREATE TABLE public.sys_tenant (
   max_users INT DEFAULT 1000,
   delete_flag SMALLINT DEFAULT 0,
   created_by BIGINT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_by BIGINT,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_tenant_code ON public.sys_tenant(tenant_code);
@@ -55,9 +55,9 @@ CREATE TABLE public.sys_user (
   status SMALLINT DEFAULT 1,
   delete_flag SMALLINT DEFAULT 0,
   created_by BIGINT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_by BIGINT,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(tenant_id, username)
 );
 
@@ -82,8 +82,8 @@ CREATE TABLE public.sys_role (
   description VARCHAR(255),
   status SMALLINT DEFAULT 1,
   delete_flag SMALLINT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_role_tenant ON public.sys_role(tenant_id);
@@ -111,8 +111,8 @@ CREATE TABLE public.sys_menu (
   sort_order INT DEFAULT 0,
   status SMALLINT DEFAULT 1,
   delete_flag SMALLINT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_menu_tenant ON public.sys_menu(tenant_id);
@@ -134,7 +134,7 @@ CREATE TABLE public.sys_role_menu (
   tenant_id BIGINT,
   role_id BIGINT NOT NULL,
   menu_id BIGINT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_role_menu_tenant ON public.sys_role_menu(tenant_id);
@@ -153,7 +153,7 @@ CREATE TABLE public.sys_user_role (
   tenant_id BIGINT,
   user_id BIGINT NOT NULL,
   role_id BIGINT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_user_role_tenant ON public.sys_user_role(tenant_id);
@@ -173,7 +173,7 @@ CREATE TABLE public.sys_tenant_role (
   id BIGSERIAL PRIMARY KEY,
   tenant_id BIGINT NOT NULL,
   role_id BIGINT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(tenant_id, role_id)
 );
 
@@ -203,9 +203,9 @@ CREATE TABLE public.sys_organization (
   status SMALLINT DEFAULT 1,
   delete_flag SMALLINT DEFAULT 0,
   created_by BIGINT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_by BIGINT,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_sys_org_tenant ON public.sys_organization(tenant_id);
@@ -239,14 +239,14 @@ CREATE TABLE public.sys_operation_log (
   operation_result SMALLINT DEFAULT 1,
   error_message TEXT,
   execution_time INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_op_log_tenant ON public.sys_operation_log(tenant_id);
 CREATE INDEX idx_op_log_user ON public.sys_operation_log(user_id);
 CREATE INDEX idx_op_log_type ON public.sys_operation_log(operation_type);
 CREATE INDEX idx_op_log_module ON public.sys_operation_log(module_name);
-CREATE INDEX idx_op_log_time ON public.sys_operation_log(created_at);
+CREATE INDEX idx_op_log_time ON public.sys_operation_log(create_time);
 
 COMMENT ON TABLE public.sys_operation_log IS '操作日志表';
 COMMENT ON COLUMN public.sys_operation_log.tenant_id IS '租户ID，NULL表示平台操作日志';

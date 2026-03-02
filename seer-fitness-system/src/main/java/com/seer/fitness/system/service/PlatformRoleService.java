@@ -38,7 +38,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         List<String> conditions = new ArrayList<>();
         conditions.add("tenant_id IS NULL");
 
-        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at FROM sys_role";
+        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time FROM sys_role";
 
         if (StringUtils.hasText(param.getRoleName())) {
             conditions.add("role_name LIKE :roleName");
@@ -53,7 +53,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
             queryMap.put("status", param.getStatus());
         }
 
-        final String finalSql = sql + " WHERE " + String.join(" AND ", conditions) + " ORDER BY created_at DESC";
+        final String finalSql = sql + " WHERE " + String.join(" AND ", conditions) + " ORDER BY create_time DESC";
 
         return TenantContext.withoutTenant(() ->
                 baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class));
@@ -61,15 +61,15 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
 
     @Override
     public List<RoleDTO> list() {
-        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                "FROM sys_role WHERE tenant_id IS NULL AND status = 1 ORDER BY created_at DESC";
+        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
+                "FROM sys_role WHERE tenant_id IS NULL AND status = 1 ORDER BY create_time DESC";
         return TenantContext.withoutTenant(() ->
                 baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class));
     }
 
     @Override
     public RoleDTO getById(Long id) {
-        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
                 "FROM sys_role WHERE id = :id AND tenant_id IS NULL";
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);

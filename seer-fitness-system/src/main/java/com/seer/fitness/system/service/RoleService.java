@@ -40,7 +40,7 @@ public class RoleService extends BaseServiceImpl {
     public Pager<RoleDTO> search(RoleQueryParam param, Pager pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
-        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
+        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
                     "FROM sys_role";
 
         // 动态添加查询条件
@@ -74,7 +74,7 @@ public class RoleService extends BaseServiceImpl {
         }
 
         // 排序
-        sql += " ORDER BY created_at DESC";
+        sql += " ORDER BY create_time DESC";
 
         log.info("角色分页查询SQL: {}", sql);
 
@@ -92,16 +92,16 @@ public class RoleService extends BaseServiceImpl {
     public List<RoleDTO> list(Long tenantId) {
         if (tenantId != null) {
             // 平台用户指定租户ID查询
-            String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                        "FROM sys_role WHERE tenant_id = :tenantId AND status = 1 ORDER BY created_at DESC";
+            String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
+                        "FROM sys_role WHERE tenant_id = :tenantId AND status = 1 ORDER BY create_time DESC";
             Map<String, Object> params = Maps.newHashMap();
             params.put("tenantId", tenantId);
             return TenantContext.withoutTenant(() ->
                     baseDao.queryListForSql(sql, params, RoleDTO.class));
         }
         // tenant_id IS NOT NULL 确保只返回租户角色，防止平台管理员误调此接口混入平台角色
-        String sql = "SELECT id, role_name, role_code, description, status, created_at, updated_at " +
-                    "FROM sys_role WHERE tenant_id IS NOT NULL AND status = 1 ORDER BY created_at DESC";
+        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
+                    "FROM sys_role WHERE tenant_id IS NOT NULL AND status = 1 ORDER BY create_time DESC";
         return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
     }
 

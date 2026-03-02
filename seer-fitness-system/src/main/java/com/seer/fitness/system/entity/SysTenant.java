@@ -88,7 +88,7 @@ public class SysTenant {
     /**
      * 创建时间
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createTime;
 
     /**
      * 更新人ID
@@ -98,5 +98,5 @@ public class SysTenant {
     /**
      * 更新时间
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateTime;
 }

@@ -49,7 +49,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
         String sql = "SELECT id, tenant_code, tenant_name, real_name, contact_phone, contact_email, " +
                     "address, description, status, activated_at, expired_at, " +
-                    "max_users, created_at, updated_at, created_by, updated_by " +
+                    "max_users, create_time, update_time, created_by, updated_by " +
                     "FROM sys_tenant";
 
         List<String> conditions = new ArrayList<>();
@@ -77,7 +77,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         if (!conditions.isEmpty()) {
             sql += " WHERE " + String.join(" AND ", conditions);
         }
-        sql += " ORDER BY created_at DESC";
+        sql += " ORDER BY create_time DESC";
 
         Pager<TenantDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, TenantDTO.class);
 

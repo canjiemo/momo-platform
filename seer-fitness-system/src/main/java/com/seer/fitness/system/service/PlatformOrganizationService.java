@@ -32,7 +32,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     private static final String BASE_SELECT =
             "SELECT o.id, o.org_code, o.org_name, o.parent_id, " +
             "o.sort_order, o.leader_id, o.contact_phone, o.email, o.address, " +
-            "o.description, o.status, o.created_at, o.updated_at, " +
+            "o.description, o.status, o.create_time, o.update_time, " +
             "u.real_name as leader_name, " +
             "COALESCE(child_count.cnt, 0) as children_count, " +
             "COALESCE(member_count.cnt, 0) as member_count " +
@@ -63,7 +63,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
             sql.append(" AND o.status = :status");
             queryMap.put("status", param.getStatus());
         }
-        sql.append(" ORDER BY o.sort_order ASC, o.created_at DESC");
+        sql.append(" ORDER BY o.sort_order ASC, o.create_time DESC");
 
         final String finalSql = sql.toString();
         return TenantContext.withoutTenant(() ->
@@ -80,7 +80,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
 
     @Override
     public List<OrganizationDTO> list() {
-        String sql = BASE_SELECT + " AND o.status = 1 ORDER BY o.sort_order ASC, o.created_at DESC";
+        String sql = BASE_SELECT + " AND o.status = 1 ORDER BY o.sort_order ASC, o.create_time DESC";
         return TenantContext.withoutTenant(() ->
                 baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class));
     }

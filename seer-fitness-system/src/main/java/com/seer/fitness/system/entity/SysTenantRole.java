@@ -23,5 +23,5 @@ public class SysTenantRole {
     /** 平台角色ID（对应 sys_role.id，且 sys_role.tenant_id=NULL） */
     private Long roleId;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createTime;
 }

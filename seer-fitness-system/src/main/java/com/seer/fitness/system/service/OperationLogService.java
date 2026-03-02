@@ -56,7 +56,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
                     "ol.module_name, ol.business_id, ol.business_name, ol.operation_desc, " +
                     "ol.request_method, ol.request_url, ol.request_params, ol.response_data, " +
                     "ol.ip_address, ol.user_agent, ol.operation_result, ol.error_message, " +
-                    "ol.execution_time, ol.created_at " +
+                    "ol.execution_time, ol.create_time " +
                     "FROM sys_operation_log ol";
 
         List<String> conditions = new ArrayList<>();
@@ -135,12 +135,12 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
 
         // 时间范围条件
         if (param.getStartTime() != null) {
-            conditions.add("ol.created_at >= :startTime");
+            conditions.add("ol.create_time >= :startTime");
             queryMap.put("startTime", param.getStartTime());
         }
 
         if (param.getEndTime() != null) {
-            conditions.add("ol.created_at <= :endTime");
+            conditions.add("ol.create_time <= :endTime");
             queryMap.put("endTime", param.getEndTime());
         }
 
@@ -160,7 +160,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
             sql += " WHERE " + String.join(" AND ", conditions);
         }
 
-        sql += " ORDER BY ol.created_at DESC";
+        sql += " ORDER BY ol.create_time DESC";
 
         log.info("操作日志分页查询SQL: {}", sql);
 

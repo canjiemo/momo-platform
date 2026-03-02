@@ -235,7 +235,7 @@ public class MenuService extends BaseServiceImpl {
      */
     public List<MenuDTO> list() {
         String sql = "SELECT id, menu_name, path, parent_id, type, permission, icon, sort_order, " +
-                    "status, created_at, updated_at " +
+                    "status, create_time, update_time " +
                     "FROM sys_menu ORDER BY sort_order";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), MenuDTO.class);

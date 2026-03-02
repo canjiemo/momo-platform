@@ -52,7 +52,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
         Map<String, Object> queryMap = Maps.newHashMap();
 
         String sql = "SELECT u.id, u.username, u.real_name, u.status, u.admin_flag, " +
-                    "u.user_type, u.org_id, u.created_at, u.updated_at " +
+                    "u.user_type, u.org_id, u.create_time, u.update_time " +
                     "FROM sys_user u";
 
         List<String> conditions = new ArrayList<>();
@@ -95,7 +95,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
             sql += " WHERE " + String.join(" AND ", conditions);
         }
 
-        sql += " ORDER BY u.created_at DESC";
+        sql += " ORDER BY u.create_time DESC";
 
         log.info("用户分页查询SQL: {}", sql);
 
@@ -504,7 +504,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
     @Override
     public List<UserDTO> listPlatformUsers() {
         String sql = "SELECT id, username, real_name, status, admin_flag, user_type, " +
-                    "created_at, updated_at FROM sys_user WHERE tenant_id IS NULL ORDER BY id";
+                    "create_time, update_time FROM sys_user WHERE tenant_id IS NULL ORDER BY id";
         return baseDao.queryListForSql(sql, Maps.newHashMap(), UserDTO.class);
     }
 }

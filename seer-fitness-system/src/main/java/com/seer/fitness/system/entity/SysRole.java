@@ -58,7 +58,7 @@ public class SysRole {
     /**
      * 创建时间
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createTime;
 
     /**
      * 更新人ID
@@ -68,5 +68,5 @@ public class SysRole {
     /**
      * 更新时间
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updateTime;
 }

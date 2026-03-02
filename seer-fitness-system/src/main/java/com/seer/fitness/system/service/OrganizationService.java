@@ -39,7 +39,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         String sql = "SELECT o.id, o.org_code, o.org_name, o.parent_id, " +
                     "o.sort_order, o.leader_id, o.contact_phone, o.email, o.address, " +
-                    "o.description, o.status, o.created_at, o.updated_at, " +
+                    "o.description, o.status, o.create_time, o.update_time, " +
                     "u.real_name as leader_name, " +
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
@@ -91,7 +91,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
             sql += " WHERE " + String.join(" AND ", conditions);
         }
 
-        sql += " ORDER BY o.sort_order ASC, o.created_at DESC";
+        sql += " ORDER BY o.sort_order ASC, o.create_time DESC";
 
         log.info("组织架构分页查询SQL: {}", sql);
 
@@ -161,7 +161,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
     public List<OrganizationDTO> list() {
         String sql = "SELECT o.id, o.org_code, o.org_name, o.parent_id, " +
                     "o.sort_order, o.leader_id, o.contact_phone, o.email, o.address, " +
-                    "o.description, o.status, o.created_at, o.updated_at, " +
+                    "o.description, o.status, o.create_time, o.update_time, " +
                     "u.real_name as leader_name, " +
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
@@ -169,7 +169,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
                     "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
                     "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
-                    "ORDER BY o.sort_order ASC, o.created_at DESC";
+                    "ORDER BY o.sort_order ASC, o.create_time DESC";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class);
     }
@@ -185,7 +185,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
 
         String sql = "SELECT o.id, o.org_code, o.org_name, o.parent_id, " +
                     "o.sort_order, o.leader_id, o.contact_phone, o.email, o.address, " +
-                    "o.description, o.status, o.created_at, o.updated_at, " +
+                    "o.description, o.status, o.create_time, o.update_time, " +
                     "u.real_name as leader_name, " +
                     "COALESCE(child_count.count, 0) as children_count, " +
                     "COALESCE(member_count.count, 0) as member_count " +
