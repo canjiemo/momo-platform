@@ -302,10 +302,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
             throw new BusinessException("用户不存在");
         }
 
-        if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
-            throw new BusinessException("不能对管理员账号进行密码重置");
-        }
-
         // 检查新密码是否与旧密码相同
         if (passwordUtil.verifyPassword(newPassword, user.getPassword())) {
             throw new BusinessException("新密码不能与当前密码相同");

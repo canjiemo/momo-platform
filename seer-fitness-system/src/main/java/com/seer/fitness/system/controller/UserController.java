@@ -176,7 +176,11 @@ public class UserController extends MyBaseController {
         description = "管理员重置用户密码"
     )
     public MyResponseResult resetPasswordAdmin(@Valid @RequestBody ResetPasswordRequest request) {
-        userService.resetPassword(request.getUserId(), request.getNewPassword());
+        UserCacheInfo currentUser = SecurityContextUtil.getCurrentUser();
+        if (currentUser == null || currentUser.getUserId() == null) {
+            throw new BusinessException("无法获取当前用户信息");
+        }
+        userService.resetPassword(currentUser.getUserId(), request.getNewPassword());
         return super.doJsonDefaultMsg();
     }
 
