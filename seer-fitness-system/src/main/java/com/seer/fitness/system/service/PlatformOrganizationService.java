@@ -38,8 +38,8 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
             "COALESCE(member_count.cnt, 0) as member_count " +
             "FROM sys_organization o " +
             "LEFT JOIN sys_user u ON o.leader_id = u.id AND u.tenant_id IS NULL " +
-            "LEFT JOIN (SELECT parent_id, COUNT(*) as cnt FROM sys_organization WHERE delete_flag = 0 AND tenant_id IS NULL GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-            "LEFT JOIN (SELECT org_id, COUNT(*) as cnt FROM sys_user WHERE delete_flag = 0 AND status = 1 AND tenant_id IS NULL GROUP BY org_id) member_count ON o.id = member_count.org_id " +
+            "LEFT JOIN (SELECT parent_id, COUNT(*) as cnt FROM sys_organization WHERE tenant_id IS NULL GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+            "LEFT JOIN (SELECT org_id, COUNT(*) as cnt FROM sys_user WHERE status = 1 AND tenant_id IS NULL GROUP BY org_id) member_count ON o.id = member_count.org_id " +
             "WHERE o.tenant_id IS NULL";
 
     @Override

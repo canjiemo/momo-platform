@@ -45,8 +45,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
-                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id";
+                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id";
 
         List<String> conditions = new ArrayList<>();
 
@@ -113,8 +113,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
-                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
+                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.status = 1 ORDER BY o.sort_order ASC";
 
         List<OrganizationDTO> allOrgs = baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class);
@@ -136,8 +136,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
-                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
+                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.status = 1";
 
         Map<String, Object> params = Maps.newHashMap();
@@ -167,8 +167,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
-                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
+                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "ORDER BY o.sort_order ASC, o.created_at DESC";
 
         return baseDao.queryListForSql(sql, Maps.newHashMap(), OrganizationDTO.class);
@@ -191,8 +191,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     "COALESCE(member_count.count, 0) as member_count " +
                     "FROM sys_organization o " +
                     "LEFT JOIN sys_user u ON o.leader_id = u.id " +
-                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization WHERE delete_flag = 0 GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
-                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE delete_flag = 0 AND status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
+                    "LEFT JOIN (SELECT parent_id, COUNT(*) as count FROM sys_organization GROUP BY parent_id) child_count ON o.id = child_count.parent_id " +
+                    "LEFT JOIN (SELECT org_id, COUNT(*) as count FROM sys_user WHERE status = 1 GROUP BY org_id) member_count ON o.id = member_count.org_id " +
                     "WHERE o.id = :id";
 
         Map<String, Object> params = Maps.newHashMap();
