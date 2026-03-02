@@ -350,6 +350,10 @@ public class UserService extends BaseServiceImpl implements IUserService {
             throw new BusinessException("用户不存在");
         }
 
+        if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
+            throw new BusinessException("不能对管理员账号进行密码初始化");
+        }
+
         // 获取配置的初始密码
         String initialPassword = passwordConfig.getInitialPassword();
 
