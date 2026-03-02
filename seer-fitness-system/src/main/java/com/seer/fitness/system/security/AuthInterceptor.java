@@ -75,9 +75,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 7. 检查是否超级管理员
-        if (isSuperAdmin(currentUser)) {
-            log.debug("超级管理员，绕过权限检查: {}", requestPath);
+        // 7. 检查是否超级管理员（平台超管或租户管理员均绕过权限检查）
+        // - 平台超管：adminFlag=1 且 tenantId=null，可访问一切
+        // - 租户管理员：adminFlag=1 且 tenantId!=null，默认拥有平台为该租户授权的所有权限
+        if (isSuperAdmin(currentUser) || isTenantAdmin(currentUser)) {
+            log.debug("管理员用户，绕过权限检查: user={}, path={}", currentUser.getUsername(), requestPath);
             return true;
         }
 
@@ -140,10 +142,18 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     /**
      * 检查是否平台超级管理员
-     * 必须满足：admin_flag=1 且 tenant_id=null（租户管理员不算平台超管）
+     * 必须满足：admin_flag=1 且 tenant_id=null
      */
     private boolean isSuperAdmin(UserCacheInfo user) {
         return user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() == null;
+    }
+
+    /**
+     * 检查是否租户管理员
+     * 必须满足：admin_flag=1 且 tenant_id!=null
+     */
+    private boolean isTenantAdmin(UserCacheInfo user) {
+        return user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() != null;
     }
 
     /**
