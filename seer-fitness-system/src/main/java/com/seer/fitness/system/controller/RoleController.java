@@ -161,7 +161,7 @@ public class RoleController extends MyBaseController {
      * @return 菜单ID列表
      */
     @GetMapping("/menus/{id}")
-    @RequireAuth(permissions = {"role:view"})
+    @RequireAuth(permissions = {"role:assign"})
     @OperationLog(
         type = OperationType.QUERY,
         module = "role",
