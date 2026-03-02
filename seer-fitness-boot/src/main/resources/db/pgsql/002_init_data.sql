@@ -19,8 +19,9 @@ VALUES
     (10101, NULL, '查看租户', 10100, 2, NULL, 'tenant:view', NULL, 1, 1, 0, NOW(), NOW()),
     (10102, NULL, '创建租户', 10100, 2, NULL, 'tenant:create', NULL, 2, 1, 0, NOW(), NOW()),
     (10103, NULL, '更新租户', 10100, 2, NULL, 'tenant:update', NULL, 3, 1, 0, NOW(), NOW()),
-    (10104, NULL, '禁用租户', 10100, 2, NULL, 'tenant:disable', NULL, 4, 1, 0, NOW(), NOW()),
-    (10105, NULL, '启用租户', 10100, 2, NULL, 'tenant:enable', NULL, 5, 1, 0, NOW(), NOW());
+    (10104, NULL, '禁用租户', 10100, 2, NULL, 'tenant:update', NULL, 4, 1, 0, NOW(), NOW()),
+    (10105, NULL, '启用租户', 10100, 2, NULL, 'tenant:update', NULL, 5, 1, 0, NOW(), NOW()),
+    (10106, NULL, '删除租户', 10100, 2, NULL, 'tenant:delete', NULL, 6, 1, 0, NOW(), NOW());
 
 -- 租户角色管理(菜单 + 按钮)
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
@@ -97,7 +98,7 @@ VALUES
 INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, created_at, updated_at)
 VALUES
     (3200, NULL, '字典数据', 3000, 1, '/dict/data', NULL, 'UnorderedListOutlined', 2, 1, 0, NOW(), NOW()),
-    (3201, NULL, '查看字典数据', 3200, 2, NULL, 'dict:data:view', NULL, 1, 1, 0, NOW(), NOW()),
+    (3201, NULL, '查看字典数据', 3200, 2, NULL, NULL, NULL, 1, 1, 0, NOW(), NOW()),
     (3202, NULL, '创建字典数据', 3200, 2, NULL, 'dict:data:create', NULL, 2, 1, 0, NOW(), NOW()),
     (3203, NULL, '更新字典数据', 3200, 2, NULL, 'dict:data:update', NULL, 3, 1, 0, NOW(), NOW()),
     (3204, NULL, '删除字典数据', 3200, 2, NULL, 'dict:data:delete', NULL, 4, 1, 0, NOW(), NOW());
