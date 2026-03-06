@@ -47,13 +47,6 @@ spring:
       port: 30069
       password: Seer@bigdata
 
-# MyJPA Configuration (多租户配置)
-myjpa:
-  show-sql-time: true # 开启执行时间打印（默认 false）
-  tenant:
-    enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
-    column: tenant_id                    # 租户字段名
-
 # Server Configuration
 server:
   port: 8070
@@ -127,4 +120,10 @@ jwt:
   secret: "9F922B9833DEDAC0176412709F157797"  # JWT密钥(256位)
   expiration: 86400000                   # Token过期时间(毫秒,24小时)
 
-# 日志配置统一由 logback-spring.xml 管理
+# MyJdbc Configuration (多租户配置)
+myjdbc:
+  show-sql:
+    enabled: true        # 开启 MyJDBC SQL 调试日志（Preparing / Parameters / 耗时）
+  tenant:
+    enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
+    column: tenant_id                    # 租户字段名

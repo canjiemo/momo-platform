@@ -6,7 +6,7 @@ import com.seer.fitness.system.config.AccountLockConfig;
 import com.seer.fitness.system.utils.LockMessageBuilder;
 import com.seer.fitness.system.utils.LockTimeCalculator;
 import com.seer.fitness.system.utils.RedisUtil;
-import io.github.mocanjie.base.mycommon.exception.BusinessException;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

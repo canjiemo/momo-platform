@@ -3,7 +3,6 @@ package com.seer.fitness.system.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 组织架构DTO

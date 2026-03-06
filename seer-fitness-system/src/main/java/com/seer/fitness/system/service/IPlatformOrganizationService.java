@@ -1,7 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.seer.fitness.system.dto.*;
-import io.github.mocanjie.base.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.Pager;
 
 import java.util.List;
 

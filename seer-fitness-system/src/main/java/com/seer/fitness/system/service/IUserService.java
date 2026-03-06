@@ -1,7 +1,11 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.system.dto.*;
-import io.github.mocanjie.base.mycommon.pager.Pager;
+import com.seer.fitness.system.dto.UserCreateRequest;
+import com.seer.fitness.system.dto.UserDTO;
+import com.seer.fitness.system.dto.UserQueryParam;
+import com.seer.fitness.system.dto.UserUpdateRequest;
+import io.github.canjiemo.mycommon.pager.Pager;
+
 import java.util.List;
 
 /**

@@ -1,7 +1,7 @@
 package com.seer.fitness.system.entity;
 
-import io.github.mocanjie.base.myjpa.MyTableEntity;
-import io.github.mocanjie.base.myjpa.annotation.MyTable;
+import io.github.canjiemo.base.myjdbc.MyTableEntity;
+import io.github.canjiemo.base.myjdbc.annotation.MyTable;
 import lombok.Data;
 
 import java.time.LocalDateTime;

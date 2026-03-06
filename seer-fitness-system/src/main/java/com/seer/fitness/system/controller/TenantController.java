@@ -6,13 +6,14 @@ import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.ITenantService;
 import com.seer.fitness.system.service.IUserService;
-import io.github.mocanjie.base.mycommon.pager.Pager;
-import io.github.mocanjie.base.mycommon.pager.PagerHandler;
-import io.github.mocanjie.base.mymvc.controller.MyBaseController;
-import io.github.mocanjie.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.base.mymvc.controller.MyBaseController;
+import io.github.canjiemo.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.PagerHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**

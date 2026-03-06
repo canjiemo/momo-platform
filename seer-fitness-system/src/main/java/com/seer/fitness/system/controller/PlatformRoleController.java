@@ -1,14 +1,17 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.system.annotation.OperationLog;
-import com.seer.fitness.system.dto.*;
+import com.seer.fitness.system.dto.RoleCreateRequest;
+import com.seer.fitness.system.dto.RoleDTO;
+import com.seer.fitness.system.dto.RoleQueryParam;
+import com.seer.fitness.system.dto.RoleUpdateRequest;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.IPlatformRoleService;
-import io.github.mocanjie.base.mycommon.pager.Pager;
-import io.github.mocanjie.base.mycommon.pager.PagerHandler;
-import io.github.mocanjie.base.mymvc.controller.MyBaseController;
-import io.github.mocanjie.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.base.mymvc.controller.MyBaseController;
+import io.github.canjiemo.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.PagerHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

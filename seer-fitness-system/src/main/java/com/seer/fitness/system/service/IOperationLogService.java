@@ -3,7 +3,7 @@ package com.seer.fitness.system.service;
 import com.seer.fitness.system.dto.OperationLogDTO;
 import com.seer.fitness.system.dto.OperationLogQueryParam;
 import com.seer.fitness.system.entity.SysOperationLog;
-import io.github.mocanjie.base.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.Pager;
 
 import java.util.List;
 import java.util.Map;

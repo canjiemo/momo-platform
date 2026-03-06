@@ -1,15 +1,15 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
 import com.seer.fitness.system.entity.SysUserRole;
-import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.utils.SecurityContextUtil;
-import io.github.mocanjie.base.mycommon.exception.BusinessException;
-import io.github.mocanjie.base.mycommon.pager.Pager;
-import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
-import io.github.mocanjie.base.myjpa.tenant.TenantContext;
+import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
+import io.github.canjiemo.mycommon.exception.BusinessException;
+import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

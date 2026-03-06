@@ -4,7 +4,7 @@ import com.seer.fitness.system.dto.RoleCreateRequest;
 import com.seer.fitness.system.dto.RoleDTO;
 import com.seer.fitness.system.dto.RoleQueryParam;
 import com.seer.fitness.system.dto.RoleUpdateRequest;
-import io.github.mocanjie.base.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.Pager;
 
 import java.util.List;
 

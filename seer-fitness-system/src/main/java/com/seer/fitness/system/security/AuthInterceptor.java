@@ -1,10 +1,10 @@
 package com.seer.fitness.system.security;
 
 import com.seer.fitness.framework.enums.AuthMode;
-import com.seer.fitness.system.dto.UserCacheInfo;
 import com.seer.fitness.system.config.AuthConfig;
+import com.seer.fitness.system.dto.UserCacheInfo;
 import com.seer.fitness.system.service.AuthService;
-import io.github.mocanjie.base.mycommon.exception.AuthenticationException;
+import io.github.canjiemo.mycommon.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

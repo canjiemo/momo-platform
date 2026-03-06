@@ -1,14 +1,14 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.system.entity.SysDictData;
 import com.seer.fitness.system.dto.DictDataCreateRequest;
 import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
 import com.seer.fitness.system.dto.DictDataUpdateRequest;
+import com.seer.fitness.system.entity.SysDictData;
 import com.seer.fitness.system.utils.SecurityContextUtil;
-import io.github.mocanjie.base.mycommon.exception.BusinessException;
-import io.github.mocanjie.base.mycommon.pager.Pager;
-import io.github.mocanjie.base.myjpa.service.impl.BaseServiceImpl;
+import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.mycommon.exception.BusinessException;
+import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

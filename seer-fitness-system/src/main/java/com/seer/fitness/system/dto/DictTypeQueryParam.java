@@ -1,6 +1,6 @@
 package com.seer.fitness.system.dto;
 
-import io.github.mocanjie.base.mycommon.pager.PagerParam;
+import io.github.canjiemo.mycommon.pager.PagerParam;
 import lombok.Data;
 
 /**

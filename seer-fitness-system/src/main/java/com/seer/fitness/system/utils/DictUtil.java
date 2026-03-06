@@ -2,7 +2,7 @@ package com.seer.fitness.system.utils;
 
 import com.seer.fitness.system.service.DictDataService;
 import com.seer.fitness.system.service.OrganizationService;
-import io.github.mocanjie.tools.dict.IMyDict;
+import io.github.canjiemo.tools.dict.IMyDict;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;

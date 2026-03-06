@@ -1,16 +1,15 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.system.annotation.OperationLog;
-import com.seer.fitness.system.enums.OperationType;
-import com.seer.fitness.system.dto.CaptchaConfigResponse;
 import com.seer.fitness.system.dto.CaptchaResponse;
 import com.seer.fitness.system.dto.LoginRequest;
 import com.seer.fitness.system.dto.LoginResponse;
+import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.AuthService;
 import com.seer.fitness.system.service.CaptchaService;
-import io.github.mocanjie.base.mymvc.controller.MyBaseController;
-import io.github.mocanjie.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.base.mymvc.controller.MyBaseController;
+import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

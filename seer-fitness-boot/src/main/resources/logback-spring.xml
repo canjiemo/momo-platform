@@ -65,10 +65,8 @@
     <!-- ==================== 按环境区分配置 ==================== -->
     <!-- 本地/开发环境：仅控制台，DEBUG 级别 -->
     <springProfile name="local,dev">
-        <logger name="com.seer.fitness" level="DEBUG"/>
-        <logger name="io.github.mocanjie" level="DEBUG"/>
-        <logger name="org.springframework.web" level="DEBUG"/>
-        <logger name="org.springframework.jdbc" level="DEBUG"/>
+        <logger name="com.seer.fitness" level="info"/>
+        <logger name="io.github.canjiemo" level="info"/>
         <logger name="com.alibaba.druid" level="WARN"/>
 
         <root level="INFO">
@@ -79,8 +77,7 @@
     <!-- 生产环境：控制台 + 文件，INFO 级别 -->
     <springProfile name="prod">
         <logger name="com.seer.fitness" level="INFO"/>
-        <logger name="io.github.mocanjie" level="WARN"/>
-        <logger name="org.springframework" level="WARN"/>
+        <logger name="io.github.canjiemo" level="WARN"/>
         <logger name="com.alibaba.druid" level="WARN"/>
 
         <root level="INFO">

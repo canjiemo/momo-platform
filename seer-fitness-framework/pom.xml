@@ -19,19 +19,19 @@
     <dependencies>
 
         <dependency>
-            <groupId>io.github.mocanjie</groupId>
+            <groupId>io.github.canjiemo</groupId>
             <artifactId>mydict-spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- MyJPA Spring Boot Starter -->
+        <!-- MyJdbc Spring Boot Starter -->
         <dependency>
-            <groupId>io.github.mocanjie</groupId>
-            <artifactId>myjpa-spring-boot-starter</artifactId>
+            <groupId>io.github.canjiemo</groupId>
+            <artifactId>myjdbc-spring-boot-starter</artifactId>
         </dependency>
 
         <!-- MyMVC Spring Boot Starter -->
         <dependency>
-            <groupId>io.github.mocanjie</groupId>
+            <groupId>io.github.canjiemo</groupId>
             <artifactId>mymvc-spring-boot-starter</artifactId>
         </dependency>
 

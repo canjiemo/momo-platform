@@ -4,8 +4,8 @@ import com.seer.fitness.system.dto.DictDataCreateRequest;
 import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
 import com.seer.fitness.system.dto.DictDataUpdateRequest;
-import io.github.mocanjie.base.mycommon.pager.Pager;
-import io.github.mocanjie.base.myjpa.service.IBaseService;
+import io.github.canjiemo.base.myjdbc.service.IBaseService;
+import io.github.canjiemo.mycommon.pager.Pager;
 
 import java.util.List;
 
