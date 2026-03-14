@@ -2,7 +2,7 @@ package com.seer.fitness.system.scheduler;
 
 import com.seer.fitness.system.entity.SysJob;
 import com.seer.fitness.system.entity.SysJobLog;
-import io.github.canjiemo.base.myjdbc.dao.BaseDao;
+import io.github.canjiemo.base.myjdbc.dao.IBaseDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +27,7 @@ public class JobScheduleManager {
     private ThreadPoolTaskScheduler taskScheduler;
 
     @Autowired
-    private BaseDao baseDao;
+    private IBaseDao baseDao;
 
     @Autowired
     private ApplicationContext applicationContext;
