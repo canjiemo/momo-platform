@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class SysJobLogService extends BaseServiceImpl {
+public class SysJobLogService extends BaseServiceImpl implements ISysJobLogService {
 
     public Pager<JobLogDTO> search(JobLogQueryParam param, Pager pager) {
         StringBuilder sql = new StringBuilder(

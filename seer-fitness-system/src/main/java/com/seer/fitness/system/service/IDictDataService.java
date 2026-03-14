@@ -23,7 +23,7 @@ public interface IDictDataService extends IBaseService {
      * @param pager 分页参数
      * @return 分页结果
      */
-    Pager<DictDataDTO> search(DictDataQueryParam param, Pager pager);
+    Pager<DictDataDTO> search(DictDataQueryParam param, Pager<DictDataDTO> pager);
 
     /**
      * 根据字典类型获取字典数据列表（优先从缓存获取）

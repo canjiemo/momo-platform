@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 
 @Service
 @Slf4j
-public class SysJobService extends BaseServiceImpl {
+public class SysJobService extends BaseServiceImpl implements ISysJobService {
 
     @Autowired
     private JobScheduleManager scheduleManager;

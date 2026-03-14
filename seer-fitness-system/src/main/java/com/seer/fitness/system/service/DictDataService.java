@@ -33,7 +33,7 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
     /**
      * 分页查询字典数据
      */
-    public Pager<DictDataDTO> search(DictDataQueryParam param, Pager pager) {
+    public Pager<DictDataDTO> search(DictDataQueryParam param, Pager<DictDataDTO> pager) {
         return lambdaQuery(SysDictData.class, DictDataDTO.class)
                 .eq(SysDictData::getDictType, param.getDictType())
                 .like(SysDictData::getDictLabel, param.getDictLabel())

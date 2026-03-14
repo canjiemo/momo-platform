@@ -9,8 +9,8 @@ import com.seer.fitness.system.dto.JobQueryParam;
 import com.seer.fitness.system.dto.JobUpdateRequest;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.SysJobLogService;
-import com.seer.fitness.system.service.SysJobService;
+import com.seer.fitness.system.service.ISysJobLogService;
+import com.seer.fitness.system.service.ISysJobService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.*;
 public class SysJobController extends MyBaseController {
 
     @Autowired
-    private SysJobService jobService;
+    private ISysJobService jobService;
 
     @Autowired
-    private SysJobLogService jobLogService;
+    private ISysJobLogService jobLogService;
 
     @PostMapping("/search")
     @RequireAuth(permissions = {"job:view"})
