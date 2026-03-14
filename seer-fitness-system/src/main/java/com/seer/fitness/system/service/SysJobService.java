@@ -1,6 +1,5 @@
 package com.seer.fitness.system.service;
 
-import com.google.common.collect.Maps;
 import com.seer.fitness.system.dto.JobCreateRequest;
 import com.seer.fitness.system.dto.JobDTO;
 import com.seer.fitness.system.dto.JobQueryParam;
@@ -12,13 +11,13 @@ import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -27,36 +26,22 @@ public class SysJobService extends BaseServiceImpl {
     @Autowired
     private JobScheduleManager scheduleManager;
 
-    public Pager<JobDTO> search(JobQueryParam param, Pager pager) {
-        StringBuilder sql = new StringBuilder(
-            "SELECT id, job_name, job_group, handler_name, cron_expression, job_params, " +
-            "status, remark, create_time, update_time FROM sys_job WHERE 1=1");
-        Map<String, Object> params = Maps.newHashMap();
-
-        if (param.getJobName() != null && !param.getJobName().isBlank()) {
-            sql.append(" AND job_name LIKE :jobName");
-            params.put("jobName", "%" + param.getJobName() + "%");
-        }
-        if (param.getJobGroup() != null && !param.getJobGroup().isBlank()) {
-            sql.append(" AND job_group = :jobGroup");
-            params.put("jobGroup", param.getJobGroup());
-        }
-        if (param.getHandlerName() != null && !param.getHandlerName().isBlank()) {
-            sql.append(" AND handler_name = :handlerName");
-            params.put("handlerName", param.getHandlerName());
-        }
-        if (param.getStatus() != null) {
-            sql.append(" AND status = :status");
-            params.put("status", param.getStatus());
-        }
-        sql.append(" ORDER BY create_time DESC");
-        return baseDao.queryPageForSql(sql.toString(), params, pager, JobDTO.class);
+    public Pager<JobDTO> search(JobQueryParam param, Pager<JobDTO> pager) {
+        return lambdaQuery(SysJob.class, JobDTO.class)
+            .like(SysJob::getJobName, param.getJobName())
+            .eq(SysJob::getJobGroup, param.getJobGroup())
+            .eq(SysJob::getHandlerName, param.getHandlerName())
+            .eq(SysJob::getStatus, param.getStatus())
+            .orderByDesc(SysJob::getCreateTime)
+            .page(pager);
     }
 
     public JobDTO getById(Long id) {
         SysJob job = baseDao.queryById(id, SysJob.class);
         if (job == null) throw new BusinessException("任务不存在");
-        return convertToDTO(job);
+        JobDTO dto = new JobDTO();
+        BeanUtils.copyProperties(job, dto);
+        return dto;
     }
 
     @Transactional
@@ -81,7 +66,6 @@ public class SysJobService extends BaseServiceImpl {
         job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
 
         baseDao.insertPO(job, true);
-
         if (job.getStatus() == 1) {
             scheduleManager.register(job);
         }
@@ -157,20 +141,5 @@ public class SysJobService extends BaseServiceImpl {
         var q = lambdaQuery(SysJob.class).eq(SysJob::getJobName, jobName);
         if (excludeId != null) q.ne(SysJob::getId, excludeId);
         return q.exists();
-    }
-
-    private JobDTO convertToDTO(SysJob job) {
-        JobDTO dto = new JobDTO();
-        dto.setId(job.getId());
-        dto.setJobName(job.getJobName());
-        dto.setJobGroup(job.getJobGroup());
-        dto.setHandlerName(job.getHandlerName());
-        dto.setCronExpression(job.getCronExpression());
-        dto.setJobParams(job.getJobParams());
-        dto.setStatus(job.getStatus());
-        dto.setRemark(job.getRemark());
-        dto.setCreateTime(job.getCreateTime());
-        dto.setUpdateTime(job.getUpdateTime());
-        return dto;
     }
 }

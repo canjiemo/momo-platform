@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysOrganization;
@@ -138,8 +139,8 @@ public class UserService extends BaseServiceImpl implements IUserService {
             throw new BusinessException("用户不存在");
         }
 
-        // 转换为DTO
-        UserDTO userDTO = convertToDTO(user);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(user, userDTO);
 
         // 查询用户角色
         String rolesSql = "SELECT r.id, r.role_name, r.description " +
@@ -439,24 +440,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
         for (SysUserRole userRole : userRoles) {
             baseDao.delPO(userRole);
         }
-    }
-
-    /**
-     * 转换为DTO
-     */
-    private UserDTO convertToDTO(SysUser user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setTenantId(user.getTenantId());
-        dto.setUsername(user.getUsername());
-        dto.setRealName(user.getRealName());
-        dto.setStatus(user.getStatus());
-        dto.setAdminFlag(user.getAdminFlag());
-        dto.setUserType(user.getUserType());
-        dto.setOrgId(user.getOrgId());
-        dto.setCreateTime(user.getCreateTime());
-        dto.setUpdateTime(user.getUpdateTime());
-        return dto;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
@@ -129,7 +130,9 @@ public class RoleService extends BaseServiceImpl {
 //        List<MenuDTO> menus = baseDao.queryListForSql(menusSql, menuParams, MenuDTO.class);
 //        roleDTO.setMenus(menus);
 
-        return convertToDTO(role);
+        RoleDTO dto = new RoleDTO();
+        BeanUtils.copyProperties(role, dto);
+        return dto;
     }
 
     /**
@@ -336,18 +339,4 @@ public class RoleService extends BaseServiceImpl {
         }
     }
 
-    /**
-     * 转换为DTO
-     */
-    private RoleDTO convertToDTO(SysRole role) {
-        RoleDTO dto = new RoleDTO();
-        dto.setId(role.getId());
-        dto.setRoleName(role.getRoleName());
-        dto.setRoleCode(role.getRoleCode());
-        dto.setDescription(role.getDescription());
-        dto.setStatus(role.getStatus());
-        dto.setCreateTime(role.getCreateTime());
-        dto.setUpdateTime(role.getUpdateTime());
-        return dto;
-    }
 }

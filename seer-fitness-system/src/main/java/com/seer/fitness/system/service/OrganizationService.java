@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysOrganization;
 import com.seer.fitness.system.entity.SysUser;
@@ -425,7 +426,9 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         SysOrganization current = baseDao.queryById(orgId, SysOrganization.class);
 
         while (current != null) {
-            OrganizationDTO dto = convertToDTO(current);
+            OrganizationDTO dto = new OrganizationDTO();
+            BeanUtils.copyProperties(current, dto);
+            dto.setParentId(current.getParentId() != null ? current.getParentId() : 0L);
             path.add(0, dto); // 插入到开头
 
             if (current.getParentId() != null) {
@@ -469,7 +472,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
                     return parentId.equals(org.getParentId());
                 })
                 .map(org -> {
-                    OrganizationTreeVO treeNode = convertToTreeVO(org);
+                    OrganizationTreeVO treeNode = new OrganizationTreeVO();
+                    BeanUtils.copyProperties(org, treeNode);
                     treeNode.setChildren(buildOrganizationTree(orgs, org.getId()));
                     return treeNode;
                 })
@@ -529,46 +533,6 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         }
     }
 
-
-    /**
-     * 转换为DTO
-     */
-    private OrganizationDTO convertToDTO(SysOrganization org) {
-        OrganizationDTO dto = new OrganizationDTO();
-        dto.setId(org.getId());
-        dto.setOrgCode(org.getOrgCode());
-        dto.setOrgName(org.getOrgName());
-        dto.setParentId(org.getParentId() != null ? org.getParentId() : 0L);
-        dto.setSortOrder(org.getSortOrder());
-        dto.setLeaderId(org.getLeaderId());
-        dto.setContactPhone(org.getContactPhone());
-        dto.setEmail(org.getEmail());
-        dto.setAddress(org.getAddress());
-        dto.setDescription(org.getDescription());
-        dto.setStatus(org.getStatus());
-        dto.setCreateTime(org.getCreateTime());
-        dto.setUpdateTime(org.getUpdateTime());
-        return dto;
-    }
-
-    /**
-     * 转换为TreeVO
-     */
-    private OrganizationTreeVO convertToTreeVO(OrganizationDTO org) {
-        OrganizationTreeVO vo = new OrganizationTreeVO();
-        vo.setId(org.getId());
-        vo.setOrgCode(org.getOrgCode());
-        vo.setOrgName(org.getOrgName());
-        vo.setParentId(org.getParentId());
-        vo.setSortOrder(org.getSortOrder());
-        vo.setLeaderId(org.getLeaderId());
-        vo.setLeaderName(org.getLeaderName());
-        vo.setContactPhone(org.getContactPhone());
-        vo.setStatus(org.getStatus());
-        vo.setChildrenCount(org.getChildrenCount());
-        vo.setMemberCount(org.getMemberCount());
-        return vo;
-    }
 
     /**
      * 标准化parentId处理

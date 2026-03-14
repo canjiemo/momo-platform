@@ -73,7 +73,7 @@ public class DictUtil implements IMyDict {
     }
 
     @Override
-    public String getDesc(String s, Object o) {
+    public String getDesc(String s, String o) {
         return getLabel(s,o);
     }
 }

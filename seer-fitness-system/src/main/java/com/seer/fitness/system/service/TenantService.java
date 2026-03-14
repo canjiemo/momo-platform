@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.TenantCreateRequest;
 import com.seer.fitness.system.dto.TenantDTO;
@@ -333,22 +334,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     private TenantDTO convertToDTO(SysTenant tenant) {
         TenantDTO dto = new TenantDTO();
-        dto.setId(tenant.getId());
-        dto.setTenantCode(tenant.getTenantCode());
-        dto.setTenantName(tenant.getTenantName());
-        dto.setRealName(tenant.getRealName());
-        dto.setContactPhone(tenant.getContactPhone());
-        dto.setContactEmail(tenant.getContactEmail());
-        dto.setAddress(tenant.getAddress());
-        dto.setDescription(tenant.getDescription());
-        dto.setStatus(tenant.getStatus());
-        dto.setActivatedAt(tenant.getActivatedAt());
-        dto.setExpiredAt(tenant.getExpiredAt());
-        dto.setMaxUsers(tenant.getMaxUsers());
-        dto.setCreateTime(tenant.getCreateTime());
-        dto.setUpdateTime(tenant.getUpdateTime());
-        dto.setCreatedBy(tenant.getCreatedBy());
-        dto.setUpdatedBy(tenant.getUpdatedBy());
+        BeanUtils.copyProperties(tenant, dto);
         return dto;
     }
 

@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.MenuCreateRequest;
 import com.seer.fitness.system.dto.MenuDTO;
 import com.seer.fitness.system.dto.MenuTreeVO;
@@ -255,7 +256,10 @@ public class MenuService extends BaseServiceImpl {
             throw new BusinessException("菜单不存在");
         }
 
-        return convertToDTO(menu);
+        MenuDTO dto = new MenuDTO();
+        BeanUtils.copyProperties(menu, dto);
+        dto.setParentId(menu.getParentId() != null ? menu.getParentId() : 0L);
+        return dto;
     }
 
     /**
@@ -386,7 +390,8 @@ public class MenuService extends BaseServiceImpl {
                     return parentId.equals(menu.getParentId());
                 })
                 .map(menu -> {
-                    MenuTreeVO treeNode = convertToTreeVO(menu);
+                    MenuTreeVO treeNode = new MenuTreeVO();
+                    BeanUtils.copyProperties(menu, treeNode);
                     treeNode.setChildren(buildMenuTree(menus, menu.getId()));
                     return treeNode;
                 })
@@ -417,40 +422,6 @@ public class MenuService extends BaseServiceImpl {
         for (SysRoleMenu roleMenu : roleMenus) {
             baseDao.delByIds(SysRoleMenu.class, roleMenu.getId().toString());
         }
-    }
-
-    /**
-     * 转换为DTO
-     */
-    private MenuDTO convertToDTO(SysMenu menu) {
-        MenuDTO dto = new MenuDTO();
-        dto.setId(menu.getId());
-        dto.setMenuName(menu.getMenuName());
-        dto.setPath(menu.getPath());
-        dto.setParentId(menu.getParentId() != null ? menu.getParentId() : 0L);
-        dto.setType(menu.getType());
-        dto.setPermission(menu.getPermission());
-        dto.setIcon(menu.getIcon());
-        dto.setSortOrder(menu.getSortOrder());
-        dto.setStatus(menu.getStatus());
-        return dto;
-    }
-
-    /**
-     * 转换为TreeVO
-     */
-    private MenuTreeVO convertToTreeVO(MenuDTO menu) {
-        MenuTreeVO vo = new MenuTreeVO();
-        vo.setId(menu.getId());
-        vo.setMenuName(menu.getMenuName());
-        vo.setPath(menu.getPath());
-        vo.setParentId(menu.getParentId()); // MenuDTO中已经处理过了，直接使用
-        vo.setType(menu.getType());
-        vo.setPermission(menu.getPermission());
-        vo.setIcon(menu.getIcon());
-        vo.setSortOrder(menu.getSortOrder());
-        vo.setStatus(menu.getStatus());
-        return vo;
     }
 
     /**

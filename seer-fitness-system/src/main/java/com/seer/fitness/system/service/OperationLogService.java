@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.OperationLogDTO;
 import com.seer.fitness.system.dto.OperationLogQueryParam;
 import com.seer.fitness.system.entity.SysOperationLog;
@@ -187,7 +188,8 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
             return null;
         }
 
-        OperationLogDTO dto = convertToDTO(operationLog);
+        OperationLogDTO dto = new OperationLogDTO();
+        BeanUtils.copyProperties(operationLog, dto);
         enrichSingleOperationLogData(dto);
         return dto;
     }
@@ -293,32 +295,5 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
         if (log.getOperationResult() != null) {
             log.setOperationResultDesc(log.getOperationResult() == 1 ? "成功" : "失败");
         }
-    }
-
-    /**
-     * 转换实体为DTO
-     */
-    private OperationLogDTO convertToDTO(SysOperationLog operationLog) {
-        OperationLogDTO dto = new OperationLogDTO();
-        dto.setId(operationLog.getId());
-        dto.setUserId(operationLog.getUserId());
-        dto.setUsername(operationLog.getUsername());
-        dto.setRealName(operationLog.getRealName());
-        dto.setOperationType(operationLog.getOperationType());
-        dto.setModuleName(operationLog.getModuleName());
-        dto.setBusinessId(operationLog.getBusinessId());
-        dto.setBusinessName(operationLog.getBusinessName());
-        dto.setOperationDesc(operationLog.getOperationDesc());
-        dto.setRequestMethod(operationLog.getRequestMethod());
-        dto.setRequestUrl(operationLog.getRequestUrl());
-        dto.setRequestParams(operationLog.getRequestParams());
-        dto.setResponseData(operationLog.getResponseData());
-        dto.setIpAddress(operationLog.getIpAddress());
-        dto.setUserAgent(operationLog.getUserAgent());
-        dto.setOperationResult(operationLog.getOperationResult());
-        dto.setErrorMessage(operationLog.getErrorMessage());
-        dto.setExecutionTime(operationLog.getExecutionTime());
-        dto.setCreateTime(operationLog.getCreateTime());
-        return dto;
     }
 }
