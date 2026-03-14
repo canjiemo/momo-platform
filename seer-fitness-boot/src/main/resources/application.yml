@@ -127,3 +127,7 @@ myjdbc:
   tenant:
     enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
     column: tenant_id                    # 租户字段名
+
+# 定时任务线程池配置
+scheduler:
+  pool-size: 5
