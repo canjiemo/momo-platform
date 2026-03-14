@@ -28,7 +28,7 @@ import java.util.List;
 public class DictDataService extends BaseServiceImpl implements IDictDataService {
 
     @Autowired
-    private DictCacheService dictCacheService;
+    private IDictCacheService dictCacheService;
 
     /**
      * 分页查询字典数据

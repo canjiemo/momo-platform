@@ -29,7 +29,7 @@ import java.util.List;
 public class DictCacheInitializer {
 
     @Autowired
-    private DictCacheService dictCacheService;
+    private IDictCacheService dictCacheService;
 
     @Lazy
     @Autowired

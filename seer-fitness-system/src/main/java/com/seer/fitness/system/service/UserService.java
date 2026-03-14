@@ -41,14 +41,14 @@ public class UserService extends BaseServiceImpl implements IUserService {
     private PasswordPolicyConfig passwordConfig;
 
     @Autowired
-    private MenuService menuService;
+    private IMenuService menuService;
 
     /**
      * 分页查询用户
      * 支持复杂查询条件、分页、排序
      */
     @Override
-    public Pager<UserDTO> search(UserQueryParam param, Pager pager) {
+    public Pager<UserDTO> search(UserQueryParam param, Pager<UserDTO> pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
         String sql = "SELECT u.id, u.username, u.real_name, u.status, u.admin_flag, " +

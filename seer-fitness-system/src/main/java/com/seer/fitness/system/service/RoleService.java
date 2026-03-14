@@ -34,12 +34,12 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class RoleService extends BaseServiceImpl {
+public class RoleService extends BaseServiceImpl implements IRoleService {
 
     /**
      * 分页查询角色
      */
-    public Pager<RoleDTO> search(RoleQueryParam param, Pager pager) {
+    public Pager<RoleDTO> search(RoleQueryParam param, Pager<RoleDTO> pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
         String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +

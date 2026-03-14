@@ -4,6 +4,7 @@ import com.seer.fitness.system.dto.UserCreateRequest;
 import com.seer.fitness.system.dto.UserDTO;
 import com.seer.fitness.system.dto.UserQueryParam;
 import com.seer.fitness.system.dto.UserUpdateRequest;
+import com.seer.fitness.system.entity.SysUser;
 import io.github.canjiemo.mycommon.pager.Pager;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public interface IUserService {
      * @param pager 分页信息
      * @return 分页结果
      */
-    Pager<UserDTO> search(UserQueryParam param, Pager pager);
+    Pager<UserDTO> search(UserQueryParam param, Pager<UserDTO> pager);
 
     /**
      * 根据ID获取用户详情
@@ -99,4 +100,6 @@ public interface IUserService {
      * @return 平台用户列表
      */
     List<UserDTO> listPlatformUsers();
+
+    SysUser findByUsernameAndTenantId(String username, Long tenantId);
 }

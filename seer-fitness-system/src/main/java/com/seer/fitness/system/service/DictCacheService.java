@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class DictCacheService {
+public class DictCacheService implements IDictCacheService {
 
     @Autowired
     private RedisUtil redisUtil;

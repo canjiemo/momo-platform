@@ -38,7 +38,7 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
      * 支持复杂查询条件、分页、排序
      */
     @Override
-    public Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager pager) {
+    public Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager<OrganizationDTO> pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
         String sql = "SELECT o.id, o.org_code, o.org_name, o.parent_id, " +

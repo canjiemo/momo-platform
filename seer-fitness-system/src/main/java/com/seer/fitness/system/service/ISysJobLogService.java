@@ -9,5 +9,6 @@ public interface ISysJobLogService extends IBaseService {
 
     Pager<JobLogDTO> search(JobLogQueryParam param, Pager<JobLogDTO> pager);
 
+
     JobLogDTO getById(Long id);
 }

@@ -21,7 +21,7 @@ public interface IOrganizationService {
      * @param pager 分页信息
      * @return 分页结果
      */
-    Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager pager);
+    Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager<OrganizationDTO> pager);
 
     /**
      * 获取完整的组织架构树形结构

@@ -6,8 +6,8 @@ import com.seer.fitness.system.dto.LoginRequest;
 import com.seer.fitness.system.dto.LoginResponse;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.AuthService;
-import com.seer.fitness.system.service.CaptchaService;
+import com.seer.fitness.system.service.IAuthService;
+import com.seer.fitness.system.service.ICaptchaService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController extends MyBaseController {
 
     @Autowired
-    private AuthService authService;
+    private IAuthService authService;
 
     @Autowired
-    private CaptchaService captchaService;
+    private ICaptchaService captchaService;
 
     /**
      * 用户登录

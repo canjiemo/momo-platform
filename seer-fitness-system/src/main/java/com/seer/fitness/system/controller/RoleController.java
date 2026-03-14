@@ -4,7 +4,7 @@ import com.seer.fitness.system.annotation.OperationLog;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.RoleService;
+import com.seer.fitness.system.service.IRoleService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -32,7 +32,7 @@ import java.util.List;
 public class RoleController extends MyBaseController {
 
     @Autowired
-    private RoleService roleService;
+    private IRoleService roleService;
 
     /**
      * 分页查询角色列表

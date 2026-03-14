@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
-public class CaptchaService {
+public class CaptchaService implements ICaptchaService {
 
     @Autowired
     private CaptchaConfig captchaConfig;

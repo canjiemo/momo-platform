@@ -43,7 +43,7 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
             "WHERE o.tenant_id IS NULL";
 
     @Override
-    public Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager pager) {
+    public Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager<OrganizationDTO> pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
         StringBuilder sql = new StringBuilder(BASE_SELECT);
 

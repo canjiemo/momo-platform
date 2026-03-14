@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 public class SysJobLogService extends BaseServiceImpl implements ISysJobLogService {
 
-    public Pager<JobLogDTO> search(JobLogQueryParam param, Pager pager) {
+    public Pager<JobLogDTO> search(JobLogQueryParam param, Pager<JobLogDTO> pager) {
         StringBuilder sql = new StringBuilder(
             "SELECT id, job_id, job_name, handler_name, trigger_type, start_time, end_time, " +
             "duration_ms, status, error_msg, operator_id FROM sys_job_log WHERE 1=1");

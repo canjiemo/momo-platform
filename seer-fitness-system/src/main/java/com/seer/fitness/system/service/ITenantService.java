@@ -26,7 +26,7 @@ public interface ITenantService {
      * @param pager 分页信息
      * @return 分页结果
      */
-    Pager<TenantDTO> search(TenantQueryParam param, Pager pager);
+    Pager<TenantDTO> search(TenantQueryParam param, Pager<TenantDTO> pager);
 
     /**
      * 根据ID获取租户详情

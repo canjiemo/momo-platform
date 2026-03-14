@@ -33,30 +33,14 @@ import java.util.stream.Collectors;
 public class PlatformRoleService extends BaseServiceImpl implements IPlatformRoleService {
 
     @Override
-    public Pager<RoleDTO> search(RoleQueryParam param, Pager pager) {
-        Map<String, Object> queryMap = Maps.newHashMap();
-        List<String> conditions = new ArrayList<>();
-        conditions.add("tenant_id IS NULL");
-
-        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time FROM sys_role";
-
-        if (StringUtils.hasText(param.getRoleName())) {
-            conditions.add("role_name LIKE :roleName");
-            queryMap.put("roleName", "%" + param.getRoleName() + "%");
-        }
-        if (StringUtils.hasText(param.getRoleCode())) {
-            conditions.add("role_code = :roleCode");
-            queryMap.put("roleCode", param.getRoleCode());
-        }
-        if (param.getStatus() != null) {
-            conditions.add("status = :status");
-            queryMap.put("status", param.getStatus());
-        }
-
-        final String finalSql = sql + " WHERE " + String.join(" AND ", conditions) + " ORDER BY create_time DESC";
-
-        return TenantContext.withoutTenant(() ->
-                baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class));
+    public Pager<RoleDTO> search(RoleQueryParam param, Pager<RoleDTO> pager) {
+        return lambdaQuery(SysRole.class, RoleDTO.class)
+                .isNull(SysRole::getTenantId)
+                .like(SysRole::getRoleName, param.getRoleName())
+                .eq(SysRole::getRoleCode, param.getRoleCode())
+                .eq(SysRole::getStatus, param.getStatus())
+                .orderByDesc(SysRole::getCreateTime)
+                .page(pager);
     }
 
     @Override

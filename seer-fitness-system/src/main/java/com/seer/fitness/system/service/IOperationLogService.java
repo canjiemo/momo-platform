@@ -32,7 +32,7 @@ public interface IOperationLogService {
      * @param pager 分页参数
      * @return 分页结果
      */
-    Pager<OperationLogDTO> search(OperationLogQueryParam param, Pager pager);
+    Pager<OperationLogDTO> search(OperationLogQueryParam param, Pager<OperationLogDTO> pager);
 
     /**
      * 根据ID获取操作日志详情

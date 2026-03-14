@@ -3,7 +3,7 @@ package com.seer.fitness.system.security;
 import com.seer.fitness.framework.enums.AuthMode;
 import com.seer.fitness.system.config.AuthConfig;
 import com.seer.fitness.system.dto.UserCacheInfo;
-import com.seer.fitness.system.service.AuthService;
+import com.seer.fitness.system.service.IAuthService;
 import io.github.canjiemo.mycommon.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,7 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     private AuthConfig authConfig;
 
     @Autowired
-    private AuthService authService;
+    private IAuthService authService;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 

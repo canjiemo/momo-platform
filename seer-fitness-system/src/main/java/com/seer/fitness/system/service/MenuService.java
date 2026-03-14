@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class MenuService extends BaseServiceImpl {
+public class MenuService extends BaseServiceImpl implements IMenuService {
 
     @Autowired
-    private RoleService roleService;
+    private IRoleService roleService;
 
     /**
      * 获取菜单树形结构

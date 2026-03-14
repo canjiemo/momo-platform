@@ -49,7 +49,7 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
      * 分页查询操作日志
      */
     @Override
-    public Pager<OperationLogDTO> search(OperationLogQueryParam param, Pager pager) {
+    public Pager<OperationLogDTO> search(OperationLogQueryParam param, Pager<OperationLogDTO> pager) {
         Map<String, Object> queryMap = Maps.newHashMap();
 
         String sql = "SELECT ol.id, ol.user_id, ol.username, ol.real_name, ol.operation_type, " +

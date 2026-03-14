@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface IPlatformOrganizationService {
 
-    Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager pager);
+    Pager<OrganizationDTO> search(OrganizationQueryParam param, Pager<OrganizationDTO> pager);
 
     List<OrganizationTreeVO> getOrganizationTree();
 

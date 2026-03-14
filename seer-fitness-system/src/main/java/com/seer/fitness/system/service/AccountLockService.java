@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
-public class AccountLockService {
+public class AccountLockService implements IAccountLockService {
 
     @Autowired
     private RedisUtil redisUtil;

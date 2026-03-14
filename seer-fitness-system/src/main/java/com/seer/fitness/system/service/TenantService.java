@@ -45,47 +45,17 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
     private PasswordPolicyConfig passwordConfig;
 
     @Override
-    public Pager<TenantDTO> search(TenantQueryParam param, Pager pager) {
-        Map<String, Object> queryMap = Maps.newHashMap();
-
-        String sql = "SELECT id, tenant_code, tenant_name, real_name, contact_phone, contact_email, " +
-                    "address, description, status, activated_at, expired_at, " +
-                    "max_users, create_time, update_time, created_by, updated_by " +
-                    "FROM sys_tenant";
-
-        List<String> conditions = new ArrayList<>();
-
-        if (StringUtils.hasText(param.getTenantCode())) {
-            conditions.add("tenant_code LIKE :tenantCode");
-            queryMap.put("tenantCode", "%" + param.getTenantCode() + "%");
-        }
-
-        if (StringUtils.hasText(param.getTenantName())) {
-            conditions.add("tenant_name LIKE :tenantName");
-            queryMap.put("tenantName", "%" + param.getTenantName() + "%");
-        }
-
-        if (param.getStatus() != null) {
-            conditions.add("status = :status");
-            queryMap.put("status", param.getStatus());
-        }
-
-        if (StringUtils.hasText(param.getContactPhone())) {
-            conditions.add("contact_phone LIKE :contactPhone");
-            queryMap.put("contactPhone", "%" + param.getContactPhone() + "%");
-        }
-
-        if (!conditions.isEmpty()) {
-            sql += " WHERE " + String.join(" AND ", conditions);
-        }
-        sql += " ORDER BY create_time DESC";
-
-        Pager<TenantDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, TenantDTO.class);
-
+    public Pager<TenantDTO> search(TenantQueryParam param, Pager<TenantDTO> pager) {
+        Pager<TenantDTO> result = lambdaQuery(SysTenant.class, TenantDTO.class)
+                .like(SysTenant::getTenantCode, param.getTenantCode())
+                .like(SysTenant::getTenantName, param.getTenantName())
+                .eq(SysTenant::getStatus, param.getStatus())
+                .like(SysTenant::getContactPhone, param.getContactPhone())
+                .orderByDesc(SysTenant::getCreateTime)
+                .page(pager);
         if (result.getPageData() != null) {
             result.getPageData().forEach(this::enrichTenantDTO);
         }
-
         return result;
     }
 

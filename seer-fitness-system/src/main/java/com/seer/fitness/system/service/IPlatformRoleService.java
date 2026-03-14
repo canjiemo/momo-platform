@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface IPlatformRoleService {
 
-    Pager<RoleDTO> search(RoleQueryParam param, Pager pager);
+    Pager<RoleDTO> search(RoleQueryParam param, Pager<RoleDTO> pager);
 
     List<RoleDTO> list();
 

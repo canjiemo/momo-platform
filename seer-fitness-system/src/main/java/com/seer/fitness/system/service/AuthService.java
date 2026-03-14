@@ -24,19 +24,19 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
-public class AuthService {
+public class AuthService implements IAuthService {
 
     @Autowired
-    private UserService userService;
+    private IUserService userService;
 
     @Autowired
-    private RoleService roleService;
+    private IRoleService roleService;
 
     @Autowired
-    private MenuService menuService;
+    private IMenuService menuService;
 
     @Autowired
-    private AccountLockService accountLockService;
+    private IAccountLockService accountLockService;
 
     @Autowired
     private PasswordUtil passwordUtil;
@@ -48,7 +48,7 @@ public class AuthService {
     private RedisUtil redisUtil;
 
     @Autowired
-    private CaptchaService captchaService;
+    private ICaptchaService captchaService;
 
     @Autowired(required = false)
     private ITenantService tenantService;

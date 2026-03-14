@@ -28,7 +28,7 @@ import java.util.List;
 public class DictTypeService extends BaseServiceImpl implements IDictTypeService {
 
     @Autowired
-    private DictCacheService dictCacheService;
+    private IDictCacheService dictCacheService;
 
     @Autowired
     private IDictDataService dictDataService;
@@ -36,7 +36,7 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
     /**
      * 分页查询字典类型
      */
-    public Pager<DictTypeDTO> search(DictTypeQueryParam param, Pager pager) {
+    public Pager<DictTypeDTO> search(DictTypeQueryParam param, Pager<DictTypeDTO> pager) {
         return lambdaQuery(SysDictType.class, DictTypeDTO.class)
                 .like(SysDictType::getDictName, param.getDictName())
                 .like(SysDictType::getDictType, param.getDictType())

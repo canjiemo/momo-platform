@@ -7,7 +7,7 @@ import com.seer.fitness.system.dto.MenuTreeVO;
 import com.seer.fitness.system.dto.MenuUpdateRequest;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
-import com.seer.fitness.system.service.MenuService;
+import com.seer.fitness.system.service.IMenuService;
 import com.seer.fitness.system.utils.SecurityContextUtil;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
@@ -26,7 +26,7 @@ import java.util.List;
 public class MenuController extends MyBaseController {
 
     @Autowired
-    private MenuService menuService;
+    private IMenuService menuService;
 
     /**
      * 获取菜单树
