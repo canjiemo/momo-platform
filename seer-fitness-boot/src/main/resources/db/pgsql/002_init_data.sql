@@ -158,3 +158,18 @@ VALUES
     (11, NULL, 'tenant_status', '正常', '1', 2, 1, 0, 0, NOW(), NOW()),
     (12, NULL, 'tenant_status', '已禁用', '2', 3, 1, 0, 0, NOW(), NOW()),
     (13, NULL, 'tenant_status', '已过期', '3', 4, 1, 0, 0, NOW(), NOW());
+
+-- ====================================================================================================
+-- 定时任务菜单初始化（平台管理员菜单，tenant_id=NULL）
+-- ====================================================================================================
+INSERT INTO sys_menu (id, menu_name, parent_id, path, permission, type, icon, sort_order, status, delete_flag, create_time, update_time)
+VALUES (1, '定时任务', 10000, '/platform/job', NULL, 1, 'clock', 4, 1, 0, NOW(), NOW());
+
+INSERT INTO sys_menu (id, menu_name, parent_id, path, permission, type, icon, sort_order, status, delete_flag, create_time, update_time)
+VALUES
+  (2, '任务列表', 1, '/platform/job/list', 'job:view',    2, NULL, 1, 1, 0, NOW(), NOW()),
+  (3, '创建任务', 1, NULL,                 'job:create',  3, NULL, 2, 1, 0, NOW(), NOW()),
+  (4, '编辑任务', 1, NULL,                 'job:update',  3, NULL, 3, 1, 0, NOW(), NOW()),
+  (5, '删除任务', 1, NULL,                 'job:delete',  3, NULL, 4, 1, 0, NOW(), NOW()),
+  (6, '手动触发', 1, NULL,                 'job:trigger', 3, NULL, 5, 1, 0, NOW(), NOW()),
+  (7, '查看日志', 1, NULL,                 'job:view',    3, NULL, 6, 1, 0, NOW(), NOW());
