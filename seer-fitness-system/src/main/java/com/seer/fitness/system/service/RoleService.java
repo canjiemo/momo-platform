@@ -7,7 +7,6 @@ import com.seer.fitness.system.entity.SysRoleMenu;
 import com.seer.fitness.system.entity.SysUserRole;
 import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
-import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,71 +38,39 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
      * 分页查询角色
      */
     public Pager<RoleDTO> search(RoleQueryParam param, Pager<RoleDTO> pager) {
-        Map<String, Object> queryMap = Maps.newHashMap();
+        var q = lambdaQuery(SysRole.class, RoleDTO.class)
+                .like(SysRole::getRoleName, param.getRoleName())
+                .eq(SysRole::getRoleCode, param.getRoleCode())
+                .eq(SysRole::getStatus, param.getStatus())
+                .orderByDesc(SysRole::getCreateTime);
 
-        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
-                    "FROM sys_role";
-
-        // 动态添加查询条件
-        List<String> conditions = new ArrayList<>();
-
-        if (StringUtils.hasText(param.getRoleName())) {
-            conditions.add("role_name LIKE :roleName");
-            queryMap.put("roleName", "%" + param.getRoleName() + "%");
+        // 平台管理员可按 tenantId 过滤特定租户数据（TenantIdProvider 返回 null 不自动注入）
+        if (SecurityContextUtil.isPlatformAdmin() && param.getTenantId() != null) {
+            q.eq(SysRole::getTenantId, param.getTenantId());
         }
 
-        if (StringUtils.hasText(param.getRoleCode())) {
-            conditions.add("role_code = :roleCode");
-            queryMap.put("roleCode", param.getRoleCode());
-        }
-
-        if (param.getStatus() != null) {
-            conditions.add("status = :status");
-            queryMap.put("status", param.getStatus());
-        }
-
-        // 平台管理员可按 tenantId 过滤特定租户数据
-        boolean isPlatformAdmin = SecurityContextUtil.isPlatformAdmin();
-        if (isPlatformAdmin && param.getTenantId() != null) {
-            conditions.add("tenant_id = :tenantId");
-            queryMap.put("tenantId", param.getTenantId());
-        }
-
-        // 拼接WHERE条件
-        if (!conditions.isEmpty()) {
-            sql += " WHERE " + String.join(" AND ", conditions);
-        }
-
-        // 排序
-        sql += " ORDER BY create_time DESC";
-
-        log.info("角色分页查询SQL: {}", sql);
-
-        final String finalSql = sql;
-        return (isPlatformAdmin && param.getTenantId() != null)
-                ? TenantContext.withoutTenant(() -> baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class))
-                : baseDao.queryPageForSql(finalSql, queryMap, pager, RoleDTO.class);
+        return q.page(pager);
     }
 
     /**
      * 获取角色列表（不分页）
-     * tenantId != null 时：平台用户查询指定租户的角色列表（需绕过 myjpa 自动注入）
+     * tenantId != null 时：平台用户查询指定租户的角色列表
      * tenantId == null 时：租户用户查询自身角色（myjpa 自动注入 tenant_id）
      */
     public List<RoleDTO> list(Long tenantId) {
+        var q = lambdaQuery(SysRole.class, RoleDTO.class)
+                .eq(SysRole::getStatus, 1)
+                .orderByDesc(SysRole::getCreateTime);
+
         if (tenantId != null) {
-            // 平台用户指定租户ID查询
-            String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
-                        "FROM sys_role WHERE tenant_id = :tenantId AND status = 1 ORDER BY create_time DESC";
-            Map<String, Object> params = Maps.newHashMap();
-            params.put("tenantId", tenantId);
-            return TenantContext.withoutTenant(() ->
-                    baseDao.queryListForSql(sql, params, RoleDTO.class));
+            // 平台用户指定租户查询（TenantIdProvider 返回 null 不自动注入）
+            q.eq(SysRole::getTenantId, tenantId);
+        } else {
+            // isNotNull 确保平台管理员调用时不混入平台角色（tenant_id=NULL）
+            q.isNotNull(SysRole::getTenantId);
         }
-        // tenant_id IS NOT NULL 确保只返回租户角色，防止平台管理员误调此接口混入平台角色
-        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
-                    "FROM sys_role WHERE tenant_id IS NOT NULL AND status = 1 ORDER BY create_time DESC";
-        return baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class);
+
+        return q.list();
     }
 
     /**
