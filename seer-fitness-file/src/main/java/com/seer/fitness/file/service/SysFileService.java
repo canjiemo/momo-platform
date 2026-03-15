@@ -5,6 +5,8 @@ import com.seer.fitness.file.entity.SysFile;
 import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.file.storage.IFileStorageAdapter;
 import com.seer.fitness.file.storage.model.FileUploadResult;
+import com.seer.fitness.framework.dto.UserCacheInfo;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -13,7 +15,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
@@ -26,7 +32,12 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
     @Transactional
     public SysFileDTO upload(MultipartFile file, String bizType, String bizId) throws Exception {
         IFileStorageAdapter adapter = fileStorageManager.getActive();
-        String directory = bizType != null ? bizType : "common";
+        UserCacheInfo user = SecurityContextUtil.getCurrentUser();
+        String tenantSegment = (user != null && user.getTenantId() != null)
+                ? String.valueOf(user.getTenantId()) : "platform";
+        String typeSegment = StringUtils.hasText(bizType) ? bizType : "common";
+        String dateSegment = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String directory = tenantSegment + "/" + typeSegment + "/" + dateSegment;
         FileUploadResult result = adapter.upload(file, directory);
 
         SysFile sysFile = new SysFile();
