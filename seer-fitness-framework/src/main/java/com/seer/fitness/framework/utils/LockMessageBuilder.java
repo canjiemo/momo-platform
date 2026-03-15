@@ -55,6 +55,7 @@ public class LockMessageBuilder {
     public String buildFailMessage(int attempts, int maxFailCount) {
         int remaining = maxFailCount - attempts;
         return config.getMessages().getFailTemplate()
-                .replace("{remaining}", String.valueOf(remaining));
+                .replace("{remaining}", String.valueOf(remaining))
+                .replace("{max}", String.valueOf(maxFailCount));
     }
 }

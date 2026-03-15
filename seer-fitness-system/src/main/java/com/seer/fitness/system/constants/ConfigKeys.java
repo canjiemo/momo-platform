@@ -9,6 +9,7 @@ public final class ConfigKeys {
     public static final String CAPTCHA_ENABLED        = "security.captcha.enabled";
     public static final String CAPTCHA_EXPIRE_SECONDS = "security.captcha.expire-seconds";
     public static final String CAPTCHA_LENGTH         = "security.captcha.length";
+    public static final String CAPTCHA_TYPE           = "security.captcha.type";
 
     // 密码策略
     public static final String PASSWORD_INITIAL           = "security.password.initial-password";

@@ -131,7 +131,7 @@ public class CaptchaService implements ICaptchaService {
      * 生成随机验证码文本
      */
     private String generateRandomCode() {
-        String typeStr = ConfigUtil.getString("security.captcha.type", "DIGIT");
+        String typeStr = ConfigUtil.getString(ConfigKeys.CAPTCHA_TYPE, "DIGIT");
         CaptchaType type;
         try {
             type = CaptchaType.valueOf(typeStr.toUpperCase());
@@ -267,7 +267,7 @@ public class CaptchaService implements ICaptchaService {
      * 获取验证码配置信息
      */
     public CaptchaConfigResponse getCaptchaConfig() {
-        String typeStr = ConfigUtil.getString("security.captcha.type", "DIGIT");
+        String typeStr = ConfigUtil.getString(ConfigKeys.CAPTCHA_TYPE, "DIGIT");
         CaptchaType type;
         try {
             type = CaptchaType.valueOf(typeStr.toUpperCase());

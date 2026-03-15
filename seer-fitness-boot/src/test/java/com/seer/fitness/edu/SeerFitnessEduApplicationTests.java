@@ -1,6 +1,6 @@
 package com.seer.fitness.edu;
 
-import com.seer.fitness.system.utils.PasswordUtil;
+import com.seer.fitness.framework.utils.PasswordUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -4,6 +4,7 @@ INSERT INTO sys_config (config_key, config_value, config_name, config_type, rema
 ('security.captcha.enabled',       'true',        '验证码开关',           1, '是否启用图形验证码', 'system', NOW(), 'system', NOW(), 0),
 ('security.captcha.expire-seconds','300',          '验证码过期时间(秒)',    1, '验证码Redis缓存过期秒数', 'system', NOW(), 'system', NOW(), 0),
 ('security.captcha.length',        '4',            '验证码位数',           1, '验证码字符个数（4-8）', 'system', NOW(), 'system', NOW(), 0),
+('security.captcha.type',          'DIGIT',        '验证码类型',           1, 'DIGIT=纯数字 CHAR=字母 MIXED=混合', 'system', NOW(), 'system', NOW(), 0),
 
 -- 密码策略
 ('security.password.initial-password',        'Aa123456!', '用户初始密码',             1, '管理员重置/初始化密码时使用的默认值', 'system', NOW(), 'system', NOW(), 0),
@@ -22,6 +23,8 @@ INSERT INTO sys_config (config_key, config_value, config_name, config_type, rema
 ('security.account-lock.ip-lock.enabled',          'true',         'IP锁定开关',             1, '同一IP失败过多时锁定', 'system', NOW(), 'system', NOW(), 0),
 ('security.account-lock.ip-lock.max-attempts',     '20',           'IP最大失败次数',         1, '超过后锁定该IP', 'system', NOW(), 'system', NOW(), 0),
 ('security.account-lock.ip-lock.lock-minutes',     '60',           'IP锁定时长(分钟)',       1, 'IP被锁定的持续时间', 'system', NOW(), 'system', NOW(), 0),
+('security.account-lock.ip-lock.record-hours',     '2',            'IP失败记录保留时长(小时)', 1, 'N小时内IP失败次数会被累计', 'system', NOW(), 'system', NOW(), 0),
+('security.account-lock.reset.on-success',         'true',         '登录成功重置失败记录',   1, 'true=登录成功后清除该用户的失败计数', 'system', NOW(), 'system', NOW(), 0),
 ('security.account-lock.whitelist.users',          'admin,system', '账户白名单',             1, '不受锁定限制的用户名，英文逗号分隔', 'system', NOW(), 'system', NOW(), 0),
 ('security.account-lock.whitelist.ips',            '127.0.0.1',    'IP白名单',               1, '不受锁定限制的IP，英文逗号分隔', 'system', NOW(), 'system', NOW(), 0),
 
