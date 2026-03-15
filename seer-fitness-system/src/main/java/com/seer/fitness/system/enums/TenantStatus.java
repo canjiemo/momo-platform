@@ -1,11 +1,14 @@
 package com.seer.fitness.system.enums;
 
+import lombok.Getter;
+
 /**
  * 租户状态枚举
  * 定义租户（学校）的所有可能状态
  *
  * @author seer-fitness
  */
+@Getter
 public enum TenantStatus {
 
     /**
@@ -45,14 +48,6 @@ public enum TenantStatus {
     TenantStatus(Integer code, String description) {
         this.code = code;
         this.description = description;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.canjiemo.tools.dict.MyDict;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -96,12 +97,8 @@ public class OperationLogDTO {
     /**
      * 操作结果：1成功 0失败
      */
+    @MyDict(type = "operation_result")
     private Integer operationResult;
-
-    /**
-     * 操作结果描述
-     */
-    private String operationResultDesc;
 
     /**
      * 错误信息（操作失败时记录）

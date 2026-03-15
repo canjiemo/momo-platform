@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.canjiemo.tools.dict.MyDict;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -72,6 +73,7 @@ public class OrganizationDTO {
     /**
      * 状态：1启用 0禁用
      */
+    @MyDict(type = "common_status")
     private Integer status;
 
     /**

@@ -1,7 +1,6 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.MenuCreateRequest;
 import com.seer.fitness.system.dto.MenuDTO;
 import com.seer.fitness.system.dto.MenuTreeVO;
@@ -14,7 +13,7 @@ import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,8 +32,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MenuService extends BaseServiceImpl implements IMenuService {
 
-    @Autowired
-    private IRoleService roleService;
 
     /**
      * 获取菜单树形结构

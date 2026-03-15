@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.canjiemo.tools.dict.MyDict;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -37,17 +38,20 @@ public class UserDTO {
     /**
      * 状态：1启用 0禁用
      */
+    @MyDict(type = "user_status")
     private Integer status;
 
     /**
      * 管理员标识：1管理员 0普通用户
      */
+    @MyDict(type = "admin_flag")
     private Integer adminFlag;
 
     /**
      * 用户类型：0-运维人员 1-教师 2-学生
      * @see com.seer.fitness.framework.enums.UserType
      */
+    @MyDict(type = "user_type")
     private Integer userType;
 
     /**

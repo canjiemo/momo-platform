@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.canjiemo.tools.dict.MyDict;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -39,12 +40,14 @@ public class MenuDTO {
      * 菜单 - 对应具体页面路由
      * 按钮 - 对应操作权限
      */
+    @MyDict(type = "menu_type")
     private Integer type;
 
     /**
      * 菜单类型：1-平台菜单 2-租户模板菜单
      * (2025-10-17 新增)
      */
+    @MyDict(type = "menu_display_type")
     private Integer menuType;
 
     /**
@@ -71,6 +74,7 @@ public class MenuDTO {
     /**
      * 状态：1启用 0禁用
      */
+    @MyDict(type = "common_status")
     private Integer status;
 
     /**

@@ -1,7 +1,6 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.TenantCreateRequest;
 import com.seer.fitness.system.dto.TenantDTO;
@@ -15,6 +14,7 @@ import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,17 +45,13 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     @Override
     public Pager<TenantDTO> search(TenantQueryParam param, Pager<TenantDTO> pager) {
-        Pager<TenantDTO> result = lambdaQuery(SysTenant.class, TenantDTO.class)
+        return lambdaQuery(SysTenant.class, TenantDTO.class)
                 .like(SysTenant::getTenantCode, param.getTenantCode())
                 .like(SysTenant::getTenantName, param.getTenantName())
                 .eq(SysTenant::getStatus, param.getStatus())
                 .like(SysTenant::getContactPhone, param.getContactPhone())
                 .orderByDesc(SysTenant::getCreateTime)
                 .page(pager);
-        if (result.getPageData() != null) {
-            result.getPageData().forEach(this::enrichTenantDTO);
-        }
-        return result;
     }
 
     @Override
@@ -66,9 +61,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         SysTenant tenant = baseDao.queryById(id, SysTenant.class);
         if (tenant == null) return null;
 
-        TenantDTO dto = convertToDTO(tenant);
-        enrichTenantDTO(dto);
-        return dto;
+        return convertToDTO(tenant);
     }
 
     @Override
@@ -82,9 +75,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         SysTenant tenant = baseDao.querySingleForSql(sql, params, SysTenant.class);
         if (tenant == null) return null;
 
-        TenantDTO dto = convertToDTO(tenant);
-        enrichTenantDTO(dto);
-        return dto;
+        return convertToDTO(tenant);
     }
 
     /**
@@ -288,7 +279,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         SysTenant tenant = baseDao.queryById(id, SysTenant.class);
         if (tenant == null) throw new BusinessException("租户不存在");
 
-        baseDao.delByIds(SysTenant.class, new String[]{String.valueOf(id)});
+        baseDao.delByIds(SysTenant.class, String.valueOf(id));
 
         log.info("删除租户成功: id={}, tenantCode={}", id, tenant.getTenantCode());
     }
@@ -306,10 +297,5 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         TenantDTO dto = new TenantDTO();
         BeanUtils.copyProperties(tenant, dto);
         return dto;
-    }
-
-    private void enrichTenantDTO(TenantDTO dto) {
-        TenantStatus status = TenantStatus.fromCode(dto.getStatus());
-        if (status != null) dto.setStatusText(status.getDescription());
     }
 }

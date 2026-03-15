@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -62,7 +63,7 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         job.setDeleteFlag(0);
         job.setCreateTime(LocalDateTime.now());
         job.setUpdateTime(LocalDateTime.now());
-        job.setCreatedBy(SecurityContextUtil.getCurrentUser().getUserId());
+        job.setCreatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
         job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
 
         baseDao.insertPO(job, true);
@@ -88,7 +89,7 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         job.setStatus(request.getStatus());
         job.setRemark(request.getRemark());
         job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
+        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
 
         baseDao.updatePO(job);
         scheduleManager.refresh(job);
@@ -108,7 +109,7 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         if (job == null) throw new BusinessException("任务不存在");
         job.setStatus(1);
         job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
+        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
         baseDao.updatePO(job);
         scheduleManager.refresh(job);
     }
@@ -119,7 +120,7 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         if (job == null) throw new BusinessException("任务不存在");
         job.setStatus(0);
         job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
+        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
         baseDao.updatePO(job);
         scheduleManager.cancel(id);
     }
@@ -127,7 +128,7 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
     public void trigger(Long id) {
         SysJob job = baseDao.queryById(id, SysJob.class);
         if (job == null) throw new BusinessException("任务不存在");
-        Long operatorId = SecurityContextUtil.getCurrentUser().getUserId();
+        Long operatorId = Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId();
         scheduleManager.triggerOnce(id, job.getJobName(), job.getHandlerName(), job.getJobParams(), operatorId);
     }
 

@@ -3,6 +3,7 @@ package com.seer.fitness.system.scheduler;
 import com.seer.fitness.system.entity.SysJob;
 import com.seer.fitness.system.entity.SysJobLog;
 import io.github.canjiemo.base.myjdbc.dao.IBaseDao;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -11,7 +12,6 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;

@@ -1,12 +1,7 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.system.annotation.OperationLog;
-import com.seer.fitness.system.dto.JobCreateRequest;
-import com.seer.fitness.system.dto.JobDTO;
-import com.seer.fitness.system.dto.JobLogDTO;
-import com.seer.fitness.system.dto.JobLogQueryParam;
-import com.seer.fitness.system.dto.JobQueryParam;
-import com.seer.fitness.system.dto.JobUpdateRequest;
+import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.enums.OperationType;
 import com.seer.fitness.system.security.RequireAuth;
 import com.seer.fitness.system.service.ISysJobLogService;

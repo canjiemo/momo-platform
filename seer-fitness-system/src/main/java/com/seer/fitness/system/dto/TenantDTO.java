@@ -1,5 +1,6 @@
 package com.seer.fitness.system.dto;
 
+import io.github.canjiemo.tools.dict.MyDict;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -56,12 +57,8 @@ public class TenantDTO {
     /**
      * 状态码：0-待激活 1-正常 2-已禁用 3-已过期
      */
+    @MyDict(type = "tenant_status")
     private Integer status;
-
-    /**
-     * 状态文本：待激活/正常/已禁用/已过期
-     */
-    private String statusText;
 
     /**
      * 激活时间

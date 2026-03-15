@@ -1,7 +1,6 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import org.springframework.beans.BeanUtils;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
@@ -12,6 +11,7 @@ import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
