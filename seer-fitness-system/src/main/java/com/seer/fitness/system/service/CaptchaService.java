@@ -1,9 +1,10 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.system.config.CaptchaConfig;
+import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.CaptchaConfigResponse;
 import com.seer.fitness.system.dto.CaptchaResponse;
 import com.seer.fitness.framework.utils.RedisUtil;
+import com.seer.fitness.system.utils.ConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,6 @@ import java.util.concurrent.TimeUnit;
 public class CaptchaService implements ICaptchaService {
 
     @Autowired
-    private CaptchaConfig captchaConfig;
-
-    @Autowired
     private RedisUtil redisUtil;
 
     private final SecureRandom random = new SecureRandom();
@@ -39,12 +37,31 @@ public class CaptchaService implements ICaptchaService {
     private static final String[] FONT_NAMES = {"Arial", "Times New Roman", "Courier New"};
 
     /**
+     * 验证码类型枚举
+     */
+    private enum CaptchaType {
+        DIGIT("0123456789"),
+        LETTER("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+        MIXED("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+        private final String characters;
+
+        CaptchaType(String characters) {
+            this.characters = characters;
+        }
+
+        public String getCharacters() {
+            return characters;
+        }
+    }
+
+    /**
      * 生成验证码
      *
      * @return 包含验证码ID和图片Base64的响应对象
      */
     public CaptchaResponse generateCaptcha() {
-        if (!captchaConfig.isEnabled()) {
+        if (!ConfigUtil.getBoolean(ConfigKeys.CAPTCHA_ENABLED, true)) {
             return null;
         }
 
@@ -62,7 +79,8 @@ public class CaptchaService implements ICaptchaService {
 
         // 存储到Redis
         String redisKey = "captcha:" + captchaId;
-        redisUtil.set(redisKey, code.toUpperCase(), captchaConfig.getExpireSeconds(), TimeUnit.SECONDS);
+        int expireSeconds = ConfigUtil.getInt(ConfigKeys.CAPTCHA_EXPIRE_SECONDS, 300);
+        redisUtil.set(redisKey, code.toUpperCase(), expireSeconds, TimeUnit.SECONDS);
 
         log.info("生成验证码: id={}, code={}", captchaId, code);
 
@@ -70,7 +88,7 @@ public class CaptchaService implements ICaptchaService {
         return new CaptchaResponse(
                 captchaId,
                 "data:image/png;base64," + base64Image,
-                captchaConfig.getExpireSeconds()
+                expireSeconds
         );
     }
 
@@ -83,7 +101,7 @@ public class CaptchaService implements ICaptchaService {
      * @return 是否验证成功
      */
     public boolean verifyCaptcha(String captchaId, String userInput) {
-        if (!captchaConfig.isEnabled()) {
+        if (!ConfigUtil.getBoolean(ConfigKeys.CAPTCHA_ENABLED, true)) {
             return true; // 如果禁用了验证码，直接返回true
         }
 
@@ -113,14 +131,19 @@ public class CaptchaService implements ICaptchaService {
      * 生成随机验证码文本
      */
     private String generateRandomCode() {
-        String characters = captchaConfig.getType().getCharacters();
-        StringBuilder code = new StringBuilder();
-
-        for (int i = 0; i < captchaConfig.getLength(); i++) {
-            int index = random.nextInt(characters.length());
-            code.append(characters.charAt(index));
+        String typeStr = ConfigUtil.getString("security.captcha.type", "DIGIT");
+        CaptchaType type;
+        try {
+            type = CaptchaType.valueOf(typeStr.toUpperCase());
+        } catch (Exception e) {
+            type = CaptchaType.DIGIT;
         }
-
+        int length = ConfigUtil.getInt(ConfigKeys.CAPTCHA_LENGTH, 4);
+        String characters = type.getCharacters();
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
         return code.toString();
     }
 
@@ -128,8 +151,8 @@ public class CaptchaService implements ICaptchaService {
      * 创建验证码图片
      */
     private BufferedImage createCaptchaImage(String code) {
-        int width = captchaConfig.getWidth();
-        int height = captchaConfig.getHeight();
+        int width = 120;
+        int height = 40;
 
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = image.createGraphics();
@@ -142,7 +165,7 @@ public class CaptchaService implements ICaptchaService {
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, width, height);
 
-        // 绘制干扰线
+        // 绘制干扰线（lineCount=0，不绘制）
         drawInterferenceLines(g2d, width, height);
 
         // 绘制验证码文本
@@ -161,7 +184,7 @@ public class CaptchaService implements ICaptchaService {
     private void drawInterferenceLines(Graphics2D g2d, int width, int height) {
         g2d.setStroke(new BasicStroke(2.0f));
 
-        for (int i = 0; i < captchaConfig.getLineCount(); i++) {
+        for (int i = 0; i < 0; i++) {
             // 随机颜色
             g2d.setColor(new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
 
@@ -244,11 +267,18 @@ public class CaptchaService implements ICaptchaService {
      * 获取验证码配置信息
      */
     public CaptchaConfigResponse getCaptchaConfig() {
+        String typeStr = ConfigUtil.getString("security.captcha.type", "DIGIT");
+        CaptchaType type;
+        try {
+            type = CaptchaType.valueOf(typeStr.toUpperCase());
+        } catch (Exception e) {
+            type = CaptchaType.DIGIT;
+        }
         return new CaptchaConfigResponse(
-                captchaConfig.isEnabled(),
-                captchaConfig.getType().name(),
-                captchaConfig.getLength(),
-                captchaConfig.getExpireSeconds()
+                ConfigUtil.getBoolean(ConfigKeys.CAPTCHA_ENABLED, true),
+                type.name(),
+                ConfigUtil.getInt(ConfigKeys.CAPTCHA_LENGTH, 4),
+                ConfigUtil.getInt(ConfigKeys.CAPTCHA_EXPIRE_SECONDS, 300)
         );
     }
 }
