@@ -233,12 +233,10 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
      */
     public List<String> getRoleMenuIds(String roleIdStr) {
         Long roleId = Long.parseLong(roleIdStr);
-        String sql = "SELECT menu_id FROM sys_role_menu WHERE role_id = :roleId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-
-        List<Long> menuIds = baseDao.queryListForSql(sql, params, Long.class);
-        return menuIds.stream().map(String::valueOf).collect(Collectors.toList());
+        return lambdaQuery(SysRoleMenu.class)
+                .eq(SysRoleMenu::getRoleId, roleId)
+                .list()
+                .stream().map(r -> String.valueOf(r.getMenuId())).collect(Collectors.toList());
     }
 
     /**
@@ -295,11 +293,9 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
      * 移除角色菜单关联
      */
     private void removeRoleMenus(Long roleId) {
-        String sql = "SELECT * FROM sys_role_menu WHERE role_id = :roleId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-
-        List<SysRoleMenu> roleMenus = baseDao.queryListForSql(sql, params, SysRoleMenu.class);
+        List<SysRoleMenu> roleMenus = lambdaQuery(SysRoleMenu.class)
+                .eq(SysRoleMenu::getRoleId, roleId)
+                .list();
         for (SysRoleMenu roleMenu : roleMenus) {
             baseDao.delPO(roleMenu);
         }
