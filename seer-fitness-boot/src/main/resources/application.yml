@@ -39,6 +39,11 @@ spring:
         login-username: admin
         login-password: admin123
 
+  servlet:
+    multipart:
+      max-file-size: 10GB
+      max-request-size: 10GB
+
   data:
     redis:
       host: localhost

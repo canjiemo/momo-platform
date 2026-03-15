@@ -29,4 +29,9 @@ INSERT INTO sys_config (config_key, config_value, config_name, config_type, rema
 ('security.account-lock.whitelist.ips',            '127.0.0.1',    'IP白名单',               1, '不受锁定限制的IP，英文逗号分隔', 'system', NOW(), 'system', NOW(), 0),
 
 -- 定时任务
-('scheduler.pool-size', '5', '定时任务线程池大小', 1, '修改后重启生效', 'system', NOW(), 'system', NOW(), 0);
+('scheduler.pool-size', '5', '定时任务线程池大小', 1, '修改后重启生效', 'system', NOW(), 'system', NOW(), 0),
+
+-- 文件上传限制
+('file.upload.image-max-mb', '10',  '图片上传大小限制(MB)', 1, '图片类文件最大允许上传大小', 'system', NOW(), 'system', NOW(), 0),
+('file.upload.video-max-mb', '500', '视频上传大小限制(MB)', 1, '视频类文件最大允许上传大小', 'system', NOW(), 'system', NOW(), 0),
+('file.upload.other-max-mb', '100', '其他文件上传大小限制(MB)', 1, '非图片非视频文件最大允许上传大小', 'system', NOW(), 'system', NOW(), 0);

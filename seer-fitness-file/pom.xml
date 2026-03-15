@@ -23,6 +23,13 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- System 模块（ConfigUtil、ConfigKeys） -->
+        <dependency>
+            <groupId>com.seer</groupId>
+            <artifactId>seer-fitness-system</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Web（Controller + Multipart） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

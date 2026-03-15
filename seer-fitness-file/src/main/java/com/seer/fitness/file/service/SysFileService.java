@@ -7,6 +7,8 @@ import com.seer.fitness.file.storage.IFileStorageAdapter;
 import com.seer.fitness.file.storage.model.FileUploadResult;
 import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.framework.utils.SecurityContextUtil;
+import com.seer.fitness.system.constants.ConfigKeys;
+import com.seer.fitness.system.utils.ConfigUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -28,9 +30,25 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
     @Autowired
     private FileStorageManager fileStorageManager;
 
+    private void validateFile(MultipartFile file) {
+        String contentType = file.getContentType() != null ? file.getContentType().toLowerCase() : "";
+        long size = file.getSize();
+        if (contentType.startsWith("image/")) {
+            long max = ConfigUtil.getInt(ConfigKeys.FILE_IMAGE_MAX_MB, 10) * 1024 * 1024L;
+            if (size > max) throw new BusinessException("图片文件不能超过 " + ConfigUtil.getInt(ConfigKeys.FILE_IMAGE_MAX_MB, 10) + "MB");
+        } else if (contentType.startsWith("video/")) {
+            long max = ConfigUtil.getInt(ConfigKeys.FILE_VIDEO_MAX_MB, 500) * 1024 * 1024L;
+            if (size > max) throw new BusinessException("视频文件不能超过 " + ConfigUtil.getInt(ConfigKeys.FILE_VIDEO_MAX_MB, 500) + "MB");
+        } else {
+            long max = ConfigUtil.getInt(ConfigKeys.FILE_OTHER_MAX_MB, 100) * 1024 * 1024L;
+            if (size > max) throw new BusinessException("文件不能超过 " + ConfigUtil.getInt(ConfigKeys.FILE_OTHER_MAX_MB, 100) + "MB");
+        }
+    }
+
     @Override
     @Transactional
     public SysFileDTO upload(MultipartFile file, String bizType, String bizId) throws Exception {
+        validateFile(file);
         IFileStorageAdapter adapter = fileStorageManager.getActive();
         UserCacheInfo user = SecurityContextUtil.getCurrentUser();
         String tenantSegment = (user != null && user.getTenantId() != null)

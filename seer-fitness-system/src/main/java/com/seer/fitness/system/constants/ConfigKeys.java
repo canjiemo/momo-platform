@@ -35,4 +35,9 @@ public final class ConfigKeys {
 
     // 定时任务
     public static final String SCHEDULER_POOL_SIZE = "scheduler.pool-size";
+
+    // 文件上传限制（单位：MB）
+    public static final String FILE_IMAGE_MAX_MB = "file.upload.image-max-mb";
+    public static final String FILE_VIDEO_MAX_MB = "file.upload.video-max-mb";
+    public static final String FILE_OTHER_MAX_MB = "file.upload.other-max-mb";
 }
