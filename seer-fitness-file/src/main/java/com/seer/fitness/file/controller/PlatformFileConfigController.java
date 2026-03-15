@@ -4,6 +4,7 @@ import com.seer.fitness.file.dto.SysFileConfigCreateRequest;
 import com.seer.fitness.file.dto.SysFileConfigDTO;
 import com.seer.fitness.file.dto.SysFileConfigUpdateRequest;
 import com.seer.fitness.file.service.ISysFileConfigService;
+import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.framework.annotation.RequireAuth;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
@@ -19,6 +20,9 @@ public class PlatformFileConfigController extends MyBaseController {
 
     @Autowired
     private ISysFileConfigService fileConfigService;
+
+    @Autowired
+    private FileStorageManager fileStorageManager;
 
     @GetMapping("/list")
     @RequireAuth(permissions = {"file:config:view"})
@@ -36,7 +40,9 @@ public class PlatformFileConfigController extends MyBaseController {
     @PostMapping("/update")
     @RequireAuth(permissions = {"file:config:update"})
     public MyResponseResult update(@Valid @RequestBody SysFileConfigUpdateRequest request) {
-        fileConfigService.update(request);
+        if (fileConfigService.update(request)) {
+            fileStorageManager.invalidate();
+        }
         return doJsonDefaultMsg();
     }
 
@@ -44,6 +50,7 @@ public class PlatformFileConfigController extends MyBaseController {
     @RequireAuth(permissions = {"file:config:update"})
     public MyResponseResult activate(@PathVariable Long id) {
         fileConfigService.activate(id);
+        fileStorageManager.invalidate();
         return doJsonDefaultMsg();
     }
 

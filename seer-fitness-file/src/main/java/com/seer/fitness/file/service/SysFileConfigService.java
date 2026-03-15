@@ -4,12 +4,9 @@ import com.seer.fitness.file.dto.SysFileConfigCreateRequest;
 import com.seer.fitness.file.dto.SysFileConfigDTO;
 import com.seer.fitness.file.dto.SysFileConfigUpdateRequest;
 import com.seer.fitness.file.entity.SysFileConfig;
-import com.seer.fitness.file.storage.FileStorageManager;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +15,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class SysFileConfigService extends BaseServiceImpl implements ISysFileConfigService {
-
-    @Lazy
-    @Autowired
-    private FileStorageManager fileStorageManager;
 
     @Override
     public List<SysFileConfigDTO> list() {
@@ -52,17 +45,15 @@ public class SysFileConfigService extends BaseServiceImpl implements ISysFileCon
 
     @Override
     @Transactional
-    public void update(SysFileConfigUpdateRequest request) {
+    public boolean update(SysFileConfigUpdateRequest request) {
         SysFileConfig config = baseDao.queryById(request.getId(), SysFileConfig.class);
         if (config == null) throw new BusinessException("配置不存在");
         if (request.getConfigName() != null) config.setConfigName(request.getConfigName());
         if (request.getConfig()     != null) config.setConfig(request.getConfig());
         if (request.getRemark()     != null) config.setRemark(request.getRemark());
         baseDao.updatePO(config);
-        // 若更新的是当前激活配置，使缓存失效
-        if (config.getIsActive() != null && config.getIsActive() == 1) {
-            fileStorageManager.invalidate();
-        }
+        // 返回是否影响激活配置，由调用方决定是否刷新缓存
+        return config.getIsActive() != null && config.getIsActive() == 1;
     }
 
     @Override
@@ -81,9 +72,6 @@ public class SysFileConfigService extends BaseServiceImpl implements ISysFileCon
         // 激活目标
         target.setIsActive(1);
         baseDao.updatePO(target);
-
-        // 刷新 Manager
-        fileStorageManager.invalidate();
         log.info("文件存储配置已激活: id={}, type={}", id, target.getStorageType());
     }
 
