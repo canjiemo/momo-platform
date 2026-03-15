@@ -1,8 +1,9 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.framework.config.PasswordPolicyConfig;
+import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.*;
+import com.seer.fitness.system.utils.ConfigUtil;
 import com.seer.fitness.system.entity.SysOrganization;
 import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.entity.SysUserRole;
@@ -36,9 +37,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
 
     @Autowired
     private PasswordUtil passwordUtil;
-
-    @Autowired
-    private PasswordPolicyConfig passwordConfig;
 
     @Autowired
     private IMenuService menuService;
@@ -169,7 +167,17 @@ public class UserService extends BaseServiceImpl implements IUserService {
         }
 
         // 加密密码
-        String encryptedPassword = passwordUtil.encryptPassword(request.getPassword());
+        String encryptedPassword = passwordUtil.encryptPassword(
+                    request.getPassword(),
+                    ConfigUtil.getInt(ConfigKeys.PASSWORD_MIN_LENGTH, 8),
+                    ConfigUtil.getInt(ConfigKeys.PASSWORD_MAX_LENGTH, 15),
+                    ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_LOWERCASE, true),
+                    ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_UPPERCASE, true),
+                    ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_DIGIT, true),
+                    ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_SPECIAL, true),
+                    "!@#$%^&*()_+-=[]{}|;:,.<>?",
+                    12
+            );
 
         // 验证组织ID是否存在（如果提供了）
         if (request.getOrgId() != null) {
@@ -307,7 +315,17 @@ public class UserService extends BaseServiceImpl implements IUserService {
             throw new BusinessException("新密码不能与当前密码相同");
         }
 
-        String encryptedPassword = passwordUtil.encryptPassword(newPassword);
+        String encryptedPassword = passwordUtil.encryptPassword(
+                newPassword,
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MIN_LENGTH, 8),
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MAX_LENGTH, 15),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_LOWERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_UPPERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_DIGIT, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_SPECIAL, true),
+                "!@#$%^&*()_+-=[]{}|;:,.<>?",
+                12
+        );
         user.setPassword(encryptedPassword);
         user.setUpdateTime(LocalDateTime.now());
 
@@ -339,7 +357,17 @@ public class UserService extends BaseServiceImpl implements IUserService {
         }
 
         // 加密并更新新密码
-        String encryptedPassword = passwordUtil.encryptPassword(newPassword);
+        String encryptedPassword = passwordUtil.encryptPassword(
+                newPassword,
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MIN_LENGTH, 8),
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MAX_LENGTH, 15),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_LOWERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_UPPERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_DIGIT, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_SPECIAL, true),
+                "!@#$%^&*()_+-=[]{}|;:,.<>?",
+                12
+        );
         user.setPassword(encryptedPassword);
         user.setUpdateTime(LocalDateTime.now());
 
@@ -364,7 +392,7 @@ public class UserService extends BaseServiceImpl implements IUserService {
         }
 
         // 获取配置的初始密码
-        String initialPassword = passwordConfig.getInitialPassword();
+        String initialPassword = ConfigUtil.getString(ConfigKeys.PASSWORD_INITIAL, "Aa123456!");
 
         // 检查初始密码是否与当前密码相同
         if (passwordUtil.verifyPassword(initialPassword, user.getPassword())) {
@@ -372,7 +400,17 @@ public class UserService extends BaseServiceImpl implements IUserService {
         }
 
         // 加密并设置初始密码
-        String encryptedPassword = passwordUtil.encryptPassword(initialPassword);
+        String encryptedPassword = passwordUtil.encryptPassword(
+                initialPassword,
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MIN_LENGTH, 8),
+                ConfigUtil.getInt(ConfigKeys.PASSWORD_MAX_LENGTH, 15),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_LOWERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_UPPERCASE, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_DIGIT, true),
+                ConfigUtil.getBoolean(ConfigKeys.PASSWORD_REQUIRE_SPECIAL, true),
+                "!@#$%^&*()_+-=[]{}|;:,.<>?",
+                12
+        );
         user.setPassword(encryptedPassword);
         user.setUpdateTime(LocalDateTime.now());
 

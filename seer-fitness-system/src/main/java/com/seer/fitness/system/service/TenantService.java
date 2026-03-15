@@ -1,8 +1,9 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.framework.config.PasswordPolicyConfig;
+import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.TenantCreateRequest;
+import com.seer.fitness.system.utils.ConfigUtil;
 import com.seer.fitness.system.dto.TenantDTO;
 import com.seer.fitness.system.dto.TenantQueryParam;
 import com.seer.fitness.system.dto.TenantUpdateRequest;
@@ -39,9 +40,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     @Value("${myjpa.tenant.enabled:false}")
     private boolean tenantEnabled;
-
-    @Autowired
-    private PasswordPolicyConfig passwordConfig;
 
     @Override
     public Pager<TenantDTO> search(TenantQueryParam param, Pager<TenantDTO> pager) {
@@ -153,8 +151,8 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             return;
         }
 
-        String initialPassword = passwordConfig.getInitialPassword();
-        int bcryptStrength = passwordConfig.getBackend().getBcryptStrength();
+        String initialPassword = ConfigUtil.getString(ConfigKeys.PASSWORD_INITIAL, "Aa123456!");
+        int bcryptStrength = 12;
         String encodedPassword = BCrypt.hashpw(initialPassword, BCrypt.gensalt(bcryptStrength));
 
         SysUser admin = new SysUser();

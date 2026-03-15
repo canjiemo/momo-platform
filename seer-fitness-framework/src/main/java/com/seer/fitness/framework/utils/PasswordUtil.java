@@ -111,4 +111,52 @@ public class PasswordUtil {
 
         return config;
     }
+
+    /**
+     * 验证密码强度（参数化版本，不依赖注入的 Config Bean）
+     */
+    public void validatePasswordStrength(String password,
+                                         int minLen, int maxLen,
+                                         boolean requireLower, boolean requireUpper,
+                                         boolean requireDigit, boolean requireSpecial,
+                                         String specialChars) {
+        if (password == null || password.length() < minLen) {
+            throw new BusinessException(String.format("密码长度不能少于%d位", minLen));
+        }
+        if (password.length() > maxLen) {
+            throw new BusinessException(String.format("密码长度不能超过%d位", maxLen));
+        }
+        if (requireLower && !password.matches(".*[a-z].*")) {
+            throw new BusinessException("密码必须包含小写字母");
+        }
+        if (requireUpper && !password.matches(".*[A-Z].*")) {
+            throw new BusinessException("密码必须包含大写字母");
+        }
+        if (requireDigit && !password.matches(".*\\d.*")) {
+            throw new BusinessException("密码必须包含数字");
+        }
+        if (requireSpecial && specialChars != null) {
+            String pattern = ".*[" + Pattern.quote(specialChars) + "].*";
+            if (!password.matches(pattern)) {
+                throw new BusinessException("密码必须包含特殊字符：" + specialChars);
+            }
+        }
+        log.info("密码强度验证通过");
+    }
+
+    /**
+     * 加密密码（参数化版本，不依赖注入的 Config Bean）
+     */
+    public String encryptPassword(String plainPassword,
+                                   int minLen, int maxLen,
+                                   boolean requireLower, boolean requireUpper,
+                                   boolean requireDigit, boolean requireSpecial,
+                                   String specialChars, int bcryptStrength) {
+        validatePassword(plainPassword);
+        validatePasswordStrength(plainPassword, minLen, maxLen,
+                requireLower, requireUpper, requireDigit, requireSpecial, specialChars);
+        String bcryptPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt(bcryptStrength));
+        log.info("密码BCrypt加密完成，强度: {}", bcryptStrength);
+        return bcryptPassword;
+    }
 }
