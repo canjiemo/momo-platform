@@ -1,9 +1,9 @@
 package com.seer.fitness.system.service;
 
+import com.seer.fitness.framework.utils.RedisUtil;
 import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.CaptchaConfigResponse;
 import com.seer.fitness.system.dto.CaptchaResponse;
-import com.seer.fitness.framework.utils.RedisUtil;
 import com.seer.fitness.system.utils.ConfigUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

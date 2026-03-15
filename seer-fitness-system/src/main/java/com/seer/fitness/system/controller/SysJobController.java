@@ -1,9 +1,9 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.framework.annotation.OperationLog;
-import com.seer.fitness.system.dto.*;
-import com.seer.fitness.framework.enums.OperationType;
 import com.seer.fitness.framework.annotation.RequireAuth;
+import com.seer.fitness.framework.enums.OperationType;
+import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.service.ISysJobLogService;
 import com.seer.fitness.system.service.ISysJobService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;

@@ -1,12 +1,12 @@
 package com.seer.fitness.system.service;
 
+import com.seer.fitness.framework.utils.RedisUtil;
 import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.SysConfigCreateRequest;
 import com.seer.fitness.system.dto.SysConfigDTO;
 import com.seer.fitness.system.dto.SysConfigQueryParam;
 import com.seer.fitness.system.dto.SysConfigUpdateRequest;
 import com.seer.fitness.system.entity.SysConfig;
-import com.seer.fitness.framework.utils.RedisUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;

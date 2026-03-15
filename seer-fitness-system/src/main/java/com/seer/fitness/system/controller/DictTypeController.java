@@ -1,7 +1,7 @@
 package com.seer.fitness.system.controller;
 
-import com.seer.fitness.system.dto.*;
 import com.seer.fitness.framework.annotation.RequireAuth;
+import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.service.DictCacheInitializer;
 import com.seer.fitness.system.service.IDictTypeService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;

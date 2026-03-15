@@ -1,6 +1,7 @@
 package com.seer.fitness.system.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data

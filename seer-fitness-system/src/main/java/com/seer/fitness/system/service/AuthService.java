@@ -1,13 +1,13 @@
 package com.seer.fitness.system.service;
 
-import com.seer.fitness.system.dto.LoginRequest;
-import com.seer.fitness.system.dto.LoginResponse;
-import com.seer.fitness.system.dto.RoleDTO;
 import com.seer.fitness.framework.dto.UserCacheInfo;
-import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.framework.utils.JwtUtil;
 import com.seer.fitness.framework.utils.PasswordUtil;
 import com.seer.fitness.framework.utils.RedisUtil;
+import com.seer.fitness.system.dto.LoginRequest;
+import com.seer.fitness.system.dto.LoginResponse;
+import com.seer.fitness.system.dto.RoleDTO;
+import com.seer.fitness.system.entity.SysUser;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

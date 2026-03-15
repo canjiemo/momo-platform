@@ -1,12 +1,12 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.framework.annotation.OperationLog;
-import com.seer.fitness.framework.dto.UserCacheInfo;
-import com.seer.fitness.system.dto.*;
-import com.seer.fitness.framework.enums.OperationType;
 import com.seer.fitness.framework.annotation.RequireAuth;
-import com.seer.fitness.system.service.IUserService;
+import com.seer.fitness.framework.dto.UserCacheInfo;
+import com.seer.fitness.framework.enums.OperationType;
 import com.seer.fitness.framework.utils.SecurityContextUtil;
+import com.seer.fitness.system.dto.*;
+import com.seer.fitness.system.service.IUserService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import io.github.canjiemo.mycommon.exception.BusinessException;

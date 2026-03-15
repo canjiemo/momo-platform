@@ -1,7 +1,7 @@
 package com.seer.fitness.system.interceptor;
 
-import com.seer.fitness.system.tenant.TenantContext;
 import com.seer.fitness.framework.utils.JwtUtil;
+import com.seer.fitness.system.tenant.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

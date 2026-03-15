@@ -1,8 +1,8 @@
 package com.seer.fitness.system.service;
 
+import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.system.dto.LoginRequest;
 import com.seer.fitness.system.dto.LoginResponse;
-import com.seer.fitness.framework.dto.UserCacheInfo;
 
 import java.util.Map;
 

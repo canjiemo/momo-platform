@@ -1,9 +1,9 @@
 package com.seer.fitness.system.security;
 
 import com.seer.fitness.framework.annotation.RequireAuth;
+import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.framework.enums.AuthMode;
 import com.seer.fitness.system.config.AuthConfig;
-import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.system.service.IAuthService;
 import io.github.canjiemo.mycommon.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;

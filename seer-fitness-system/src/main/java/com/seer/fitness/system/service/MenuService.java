@@ -1,6 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import com.seer.fitness.system.dto.MenuCreateRequest;
 import com.seer.fitness.system.dto.MenuDTO;
 import com.seer.fitness.system.dto.MenuTreeVO;
@@ -8,7 +9,6 @@ import com.seer.fitness.system.dto.MenuUpdateRequest;
 import com.seer.fitness.system.entity.SysMenu;
 import com.seer.fitness.system.entity.SysRoleMenu;
 import com.seer.fitness.system.entity.SysUser;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;

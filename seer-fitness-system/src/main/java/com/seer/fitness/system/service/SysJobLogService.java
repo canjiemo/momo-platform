@@ -1,6 +1,5 @@
 package com.seer.fitness.system.service;
 
-import com.google.common.collect.Maps;
 import com.seer.fitness.system.dto.JobLogDTO;
 import com.seer.fitness.system.dto.JobLogQueryParam;
 import com.seer.fitness.system.entity.SysJobLog;
@@ -9,8 +8,6 @@ import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @Slf4j

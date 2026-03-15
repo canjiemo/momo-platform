@@ -1,11 +1,11 @@
 package com.seer.fitness.system.controller;
 
 import com.seer.fitness.framework.annotation.OperationLog;
+import com.seer.fitness.framework.annotation.RequireAuth;
+import com.seer.fitness.framework.enums.OperationType;
 import com.seer.fitness.system.dto.CaptchaResponse;
 import com.seer.fitness.system.dto.LoginRequest;
 import com.seer.fitness.system.dto.LoginResponse;
-import com.seer.fitness.framework.enums.OperationType;
-import com.seer.fitness.framework.annotation.RequireAuth;
 import com.seer.fitness.system.service.IAuthService;
 import com.seer.fitness.system.service.ICaptchaService;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
