@@ -1,6 +1,8 @@
 package com.seer.fitness.system.entity;
 
 import io.github.canjiemo.base.myjdbc.MyTableEntity;
+import io.github.canjiemo.base.myjdbc.annotation.AuditFill;
+import io.github.canjiemo.base.myjdbc.annotation.MyField;
 import io.github.canjiemo.base.myjdbc.annotation.MyTable;
 import lombok.Data;
 
@@ -111,8 +113,6 @@ public class SysOperationLog implements MyTableEntity {
      */
     private Integer executionTime;
 
-    /**
-     * 操作时间
-     */
+    @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;
 }

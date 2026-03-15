@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,8 +107,6 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setDeleteFlag(0);
-        role.setCreateTime(LocalDateTime.now());
-        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(role, true);
 
@@ -146,7 +143,6 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
         role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
-        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(role);
 
@@ -207,7 +203,6 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
             SysRoleMenu roleMenu = new SysRoleMenu();
             roleMenu.setRoleId(roleId);
             roleMenu.setMenuId(menuId);
-            roleMenu.setCreateTime(LocalDateTime.now());
 
             baseDao.insertPO(roleMenu, true);
         }

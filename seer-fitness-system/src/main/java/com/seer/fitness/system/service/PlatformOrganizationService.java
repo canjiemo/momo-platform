@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -122,8 +121,6 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
         org.setDeleteFlag(0);
-        org.setCreateTime(LocalDateTime.now());
-        org.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.insertPO(org, true);
@@ -160,7 +157,6 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
         org.setAddress(request.getAddress());
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
-        org.setUpdateTime(LocalDateTime.now());
 
         TenantContext.withoutTenant(() -> {
             baseDao.updatePO(org);

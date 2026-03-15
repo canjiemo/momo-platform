@@ -17,7 +17,6 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -61,10 +60,6 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         job.setStatus(request.getStatus());
         job.setRemark(request.getRemark());
         job.setDeleteFlag(0);
-        job.setCreateTime(LocalDateTime.now());
-        job.setUpdateTime(LocalDateTime.now());
-        job.setCreatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
-        job.setUpdatedBy(SecurityContextUtil.getCurrentUser().getUserId());
 
         baseDao.insertPO(job, true);
         if (job.getStatus() == 1) {
@@ -88,8 +83,6 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         job.setJobParams(request.getJobParams());
         job.setStatus(request.getStatus());
         job.setRemark(request.getRemark());
-        job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
 
         baseDao.updatePO(job);
         scheduleManager.refresh(job);
@@ -108,8 +101,6 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         SysJob job = baseDao.queryById(id, SysJob.class);
         if (job == null) throw new BusinessException("任务不存在");
         job.setStatus(1);
-        job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
         baseDao.updatePO(job);
         scheduleManager.refresh(job);
     }
@@ -119,8 +110,6 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         SysJob job = baseDao.queryById(id, SysJob.class);
         if (job == null) throw new BusinessException("任务不存在");
         job.setStatus(0);
-        job.setUpdateTime(LocalDateTime.now());
-        job.setUpdatedBy(Objects.requireNonNull(SecurityContextUtil.getCurrentUser()).getUserId());
         baseDao.updatePO(job);
         scheduleManager.cancel(id);
     }

@@ -95,8 +95,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         tenant.setActivatedAt(LocalDateTime.now());
         tenant.setMaxUsers(request.getMaxUsers() != null ? request.getMaxUsers() : 1000);
         tenant.setDeleteFlag(0);
-        tenant.setCreateTime(LocalDateTime.now());
-        tenant.setUpdateTime(LocalDateTime.now());
 
         if (StringUtils.hasText(request.getExpiredAt())) {
             try {
@@ -115,7 +113,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             SysTenantRole tenantRole = new SysTenantRole();
             tenantRole.setTenantId(tenant.getId());
             tenantRole.setRoleId(roleId);
-            tenantRole.setCreateTime(LocalDateTime.now());
             baseDao.insertPO(tenantRole, true);
         }
         log.info("租户角色映射创建成功: tenantId={}, roleIds={}", tenant.getId(), request.getRoleIds());
@@ -158,8 +155,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         admin.setStatus(1);
         admin.setAdminFlag(1);
         admin.setDeleteFlag(0);
-        admin.setCreateTime(LocalDateTime.now());
-        admin.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(admin, true);
         log.info("租户管理员创建成功: tenantId={}, username={}", tenant.getId(), username);
@@ -204,7 +199,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             SysTenantRole tenantRole = new SysTenantRole();
             tenantRole.setTenantId(tenantId);
             tenantRole.setRoleId(roleId);
-            tenantRole.setCreateTime(LocalDateTime.now());
             baseDao.insertPO(tenantRole, true);
         }
         log.info("租户角色分配成功: tenantId={}, roleIds={}", tenantId, roleIds);
@@ -232,7 +226,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
             }
         }
 
-        tenant.setUpdateTime(LocalDateTime.now());
         baseDao.updatePO(tenant);
 
         log.info("更新租户成功: id={}", request.getId());
@@ -247,7 +240,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
         tenant.setStatus(TenantStatus.ACTIVE.getCode());
         if (tenant.getActivatedAt() == null) tenant.setActivatedAt(LocalDateTime.now());
-        tenant.setUpdateTime(LocalDateTime.now());
         baseDao.updatePO(tenant);
 
         log.info("启用租户成功: id={}, tenantCode={}", id, tenant.getTenantCode());
@@ -261,7 +253,6 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         if (TenantStatus.DISABLED.getCode().equals(tenant.getStatus())) throw new BusinessException("租户已是禁用状态");
 
         tenant.setStatus(TenantStatus.DISABLED.getCode());
-        tenant.setUpdateTime(LocalDateTime.now());
         baseDao.updatePO(tenant);
 
         log.info("禁用租户成功: id={}, tenantCode={}", id, tenant.getTenantCode());

@@ -1,6 +1,8 @@
 package com.seer.fitness.system.entity;
 
 import io.github.canjiemo.base.myjdbc.MyTableEntity;
+import io.github.canjiemo.base.myjdbc.annotation.AuditFill;
+import io.github.canjiemo.base.myjdbc.annotation.MyField;
 import io.github.canjiemo.base.myjdbc.annotation.MyTable;
 import lombok.Data;
 
@@ -56,24 +58,16 @@ public class SysDictType implements MyTableEntity {
      */
     private String remark;
 
-    /**
-     * 创建者
-     */
+    @MyField(fill = AuditFill.CREATE_BY)
     private String createBy;
 
-    /**
-     * 创建时间
-     */
+    @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;
 
-    /**
-     * 更新者
-     */
+    @MyField(fill = AuditFill.UPDATE_BY)
     private String updateBy;
 
-    /**
-     * 更新时间
-     */
+    @MyField(fill = AuditFill.UPDATE_TIME)
     private LocalDateTime updateTime;
 
     /**

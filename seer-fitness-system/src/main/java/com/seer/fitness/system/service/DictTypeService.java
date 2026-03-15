@@ -5,7 +5,6 @@ import com.seer.fitness.system.dto.DictTypeDTO;
 import com.seer.fitness.system.dto.DictTypeQueryParam;
 import com.seer.fitness.system.dto.DictTypeUpdateRequest;
 import com.seer.fitness.system.entity.SysDictType;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -121,9 +119,6 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
             throw new BusinessException("字典类型已存在: " + request.getDictType());
         }
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         SysDictType dictType = new SysDictType();
         dictType.setDictName(request.getDictName());
         dictType.setDictType(request.getDictType());
@@ -131,10 +126,6 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
         dictType.setStatus(request.getStatus());
         dictType.setSortOrder(request.getSortOrder());
         dictType.setRemark(request.getRemark());
-        dictType.setCreateBy(currentUser);
-        dictType.setCreateTime(now);
-        dictType.setUpdateBy(currentUser);
-        dictType.setUpdateTime(now);
         dictType.setDeleteFlag(0);
 
         baseDao.insertPO(dictType, true);
@@ -158,17 +149,12 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
             throw new BusinessException("字典类型已存在: " + request.getDictType());
         }
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         existingDict.setDictName(request.getDictName());
         existingDict.setDictType(request.getDictType());
         existingDict.setDictDescription(request.getDictDescription());
         existingDict.setStatus(request.getStatus());
         existingDict.setSortOrder(request.getSortOrder());
         existingDict.setRemark(request.getRemark());
-        existingDict.setUpdateBy(currentUser);
-        existingDict.setUpdateTime(now);
 
         baseDao.updatePO(existingDict);
 

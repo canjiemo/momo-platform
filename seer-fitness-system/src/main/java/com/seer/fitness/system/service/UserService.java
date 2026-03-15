@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -196,8 +195,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
         user.setOrgId(request.getOrgId());  // 设置组织ID（可为空）
         user.setUserType(request.getUserType() != null ? request.getUserType() : 0);  // 默认为运维人员
         user.setDeleteFlag(0);
-        user.setCreateTime(LocalDateTime.now());
-        user.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(user, true);
 
@@ -223,7 +220,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
         // 管理员账号只允许修改姓名
         if (user.getAdminFlag() != null && user.getAdminFlag() == 1) {
             user.setRealName(request.getRealName());
-            user.setUpdateTime(LocalDateTime.now());
             baseDao.updatePO(user);
             log.info("更新管理员用户姓名成功: id={}, realName={}", request.getId(), request.getRealName());
             return;
@@ -244,7 +240,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
         if (request.getUserType() != null) {
             user.setUserType(request.getUserType());  // 更新用户类型
         }
-        user.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(user);
 
@@ -327,7 +322,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
                 12
         );
         user.setPassword(encryptedPassword);
-        user.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(user);
 
@@ -369,7 +363,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
                 12
         );
         user.setPassword(encryptedPassword);
-        user.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(user);
         log.info("个人修改密码成功: userId={}", currentUserId);
@@ -412,7 +405,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
                 12
         );
         user.setPassword(encryptedPassword);
-        user.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(user);
         log.info("管理员初始化密码成功: userId={}, initialPassword={}", userId, initialPassword);
@@ -458,7 +450,6 @@ public class UserService extends BaseServiceImpl implements IUserService {
             SysUserRole userRole = new SysUserRole();
             userRole.setUserId(userId);
             userRole.setRoleId(Long.valueOf(roleId));
-            userRole.setCreateTime(LocalDateTime.now());
 
             baseDao.insertPO(userRole, true);
         }

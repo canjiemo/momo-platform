@@ -7,7 +7,6 @@ import com.seer.fitness.system.dto.SysConfigQueryParam;
 import com.seer.fitness.system.dto.SysConfigUpdateRequest;
 import com.seer.fitness.system.entity.SysConfig;
 import com.seer.fitness.framework.utils.RedisUtil;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -75,19 +73,12 @@ public class SysConfigService extends BaseServiceImpl implements ISysConfigServi
                 .exists();
         if (exists) throw new BusinessException("配置键已存在: " + request.getConfigKey());
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         SysConfig config = new SysConfig();
         config.setConfigKey(request.getConfigKey());
         config.setConfigValue(request.getConfigValue());
         config.setConfigName(request.getConfigName());
         config.setConfigType(2);
         config.setRemark(request.getRemark());
-        config.setCreateBy(currentUser);
-        config.setCreateTime(now);
-        config.setUpdateBy(currentUser);
-        config.setUpdateTime(now);
         config.setDeleteFlag(0);
 
         baseDao.insertPO(config, true);
@@ -100,13 +91,9 @@ public class SysConfigService extends BaseServiceImpl implements ISysConfigServi
         SysConfig config = baseDao.queryById(request.getId(), SysConfig.class);
         if (config == null) throw new BusinessException("配置项不存在");
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-
         if (request.getConfigValue() != null) config.setConfigValue(request.getConfigValue());
         if (request.getConfigName() != null) config.setConfigName(request.getConfigName());
         if (request.getRemark() != null) config.setRemark(request.getRemark());
-        config.setUpdateBy(currentUser);
-        config.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(config);
         redisUtil.delete(ConfigKeys.CACHE_PREFIX + config.getConfigKey());

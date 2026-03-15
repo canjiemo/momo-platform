@@ -5,7 +5,6 @@ import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
 import com.seer.fitness.system.dto.DictDataUpdateRequest;
 import com.seer.fitness.system.entity.SysDictData;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -120,9 +118,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             clearDefaultStatus(request.getDictType());
         }
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         SysDictData dictData = new SysDictData();
         dictData.setDictType(request.getDictType());
         dictData.setDictLabel(request.getDictLabel());
@@ -134,10 +129,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         dictData.setStatus(request.getStatus());
         dictData.setSortOrder(request.getSortOrder());
         dictData.setRemark(request.getRemark());
-        dictData.setCreateBy(currentUser);
-        dictData.setCreateTime(now);
-        dictData.setUpdateBy(currentUser);
-        dictData.setUpdateTime(now);
         dictData.setDeleteFlag(0);
 
         baseDao.insertPO(dictData, true);
@@ -165,9 +156,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             clearDefaultStatus(request.getDictType());
         }
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         existingData.setDictType(request.getDictType());
         existingData.setDictLabel(request.getDictLabel());
         existingData.setDictValue(request.getDictValue());
@@ -178,8 +166,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         existingData.setStatus(request.getStatus());
         existingData.setSortOrder(request.getSortOrder());
         existingData.setRemark(request.getRemark());
-        existingData.setUpdateBy(currentUser);
-        existingData.setUpdateTime(now);
 
         baseDao.updatePO(existingData);
 
@@ -229,8 +215,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             throw new BusinessException("参数错误");
         }
 
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
         String dictType = null;
 
         for (int i = 0; i < ids.size(); i++) {
@@ -240,8 +224,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
             if (dictType == null) dictType = dictData.getDictType();
 
             dictData.setSortOrder(sortOrders.get(i));
-            dictData.setUpdateBy(currentUser);
-            dictData.setUpdateTime(now);
             baseDao.updatePO(dictData);
         }
 
@@ -264,16 +246,11 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
      */
     @Transactional(readOnly = false)
     public void updateDictTypeInData(String oldDictType, String newDictType) {
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         List<SysDictData> dictDataList = lambdaQuery(SysDictData.class)
                 .eq(SysDictData::getDictType, oldDictType).list();
 
         for (SysDictData dictData : dictDataList) {
             dictData.setDictType(newDictType);
-            dictData.setUpdateBy(currentUser);
-            dictData.setUpdateTime(now);
             baseDao.updatePO(dictData);
         }
 
@@ -289,9 +266,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
     }
 
     private void clearDefaultStatus(String dictType) {
-        String currentUser = SecurityContextUtil.getCurrentUsername();
-        LocalDateTime now = LocalDateTime.now();
-
         List<SysDictData> dictDataList = lambdaQuery(SysDictData.class)
                 .eq(SysDictData::getDictType, dictType)
                 .eq(SysDictData::getIsDefault, 1)
@@ -299,8 +273,6 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
 
         for (SysDictData dictData : dictDataList) {
             dictData.setIsDefault(0);
-            dictData.setUpdateBy(currentUser);
-            dictData.setUpdateTime(now);
             baseDao.updatePO(dictData);
         }
     }

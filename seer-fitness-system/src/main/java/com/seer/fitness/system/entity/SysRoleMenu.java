@@ -1,6 +1,8 @@
 package com.seer.fitness.system.entity;
 
 import io.github.canjiemo.base.myjdbc.MyTableEntity;
+import io.github.canjiemo.base.myjdbc.annotation.AuditFill;
+import io.github.canjiemo.base.myjdbc.annotation.MyField;
 import io.github.canjiemo.base.myjdbc.annotation.MyTable;
 import lombok.Data;
 
@@ -36,13 +38,9 @@ public class SysRoleMenu implements MyTableEntity {
      */
     private Long menuId;
 
-    /**
-     * 分配人ID（谁分配的权限）
-     */
+    @MyField(fill = AuditFill.CREATE_BY)
     private Long createdBy;
 
-    /**
-     * 创建时间
-     */
+    @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;
 }

@@ -5,7 +5,6 @@ import com.seer.fitness.file.dto.SysFileConfigDTO;
 import com.seer.fitness.file.dto.SysFileConfigUpdateRequest;
 import com.seer.fitness.file.entity.SysFileConfig;
 import com.seer.fitness.file.storage.FileStorageManager;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -46,10 +44,6 @@ public class SysFileConfigService extends BaseServiceImpl implements ISysFileCon
         config.setIsActive(0);
         config.setConfig(request.getConfig());
         config.setRemark(request.getRemark());
-        config.setCreateBy(SecurityContextUtil.getCurrentUsername());
-        config.setCreateTime(LocalDateTime.now());
-        config.setUpdateBy(SecurityContextUtil.getCurrentUsername());
-        config.setUpdateTime(LocalDateTime.now());
         config.setDeleteFlag(0);
         baseDao.insertPO(config, true);
     }
@@ -62,8 +56,6 @@ public class SysFileConfigService extends BaseServiceImpl implements ISysFileCon
         if (request.getConfigName() != null) config.setConfigName(request.getConfigName());
         if (request.getConfig()     != null) config.setConfig(request.getConfig());
         if (request.getRemark()     != null) config.setRemark(request.getRemark());
-        config.setUpdateBy(SecurityContextUtil.getCurrentUsername());
-        config.setUpdateTime(LocalDateTime.now());
         baseDao.updatePO(config);
         // 若更新的是当前激活配置，使缓存失效
         if (config.getIsActive() != null && config.getIsActive() == 1) {
@@ -81,15 +73,11 @@ public class SysFileConfigService extends BaseServiceImpl implements ISysFileCon
         List<SysFileConfig> all = lambdaQuery(SysFileConfig.class).eq(SysFileConfig::getIsActive, 1).list();
         for (SysFileConfig c : all) {
             c.setIsActive(0);
-            c.setUpdateBy(SecurityContextUtil.getCurrentUsername());
-            c.setUpdateTime(LocalDateTime.now());
             baseDao.updatePO(c);
         }
 
         // 激活目标
         target.setIsActive(1);
-        target.setUpdateBy(SecurityContextUtil.getCurrentUsername());
-        target.setUpdateTime(LocalDateTime.now());
         baseDao.updatePO(target);
 
         // 刷新 Manager

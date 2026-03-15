@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -252,9 +251,6 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
         org.setDeleteFlag(0);
-        // TODO: 设置创建人
-        org.setCreateTime(LocalDateTime.now());
-        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(org, true);
 
@@ -315,8 +311,6 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         org.setAddress(request.getAddress());
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
-        // TODO: 设置更新人
-        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(org);
 
@@ -392,7 +386,6 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         }
 
         org.setParentId("0".equals(parentIdStr) ? 0L : Long.parseLong(parentIdStr));
-        org.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(org);
 

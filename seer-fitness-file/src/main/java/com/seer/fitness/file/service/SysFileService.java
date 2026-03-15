@@ -5,7 +5,6 @@ import com.seer.fitness.file.entity.SysFile;
 import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.file.storage.IFileStorageAdapter;
 import com.seer.fitness.file.storage.model.FileUploadResult;
-import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
@@ -15,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -41,8 +38,6 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
         sysFile.setStorageType(adapter.getType());
         sysFile.setBizType(bizType);
         sysFile.setBizId(bizId);
-        sysFile.setCreateBy(SecurityContextUtil.getCurrentUsername());
-        sysFile.setCreateTime(LocalDateTime.now());
         sysFile.setDeleteFlag(0);
         baseDao.insertPO(sysFile, true);
 

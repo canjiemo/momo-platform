@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -288,8 +287,6 @@ public class MenuService extends BaseServiceImpl implements IMenuService {
         menu.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0);
         menu.setStatus(request.getStatus());
         menu.setDeleteFlag(0);
-        menu.setCreateTime(LocalDateTime.now());
-        menu.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(menu, true);
 
@@ -332,7 +329,6 @@ public class MenuService extends BaseServiceImpl implements IMenuService {
         menu.setIcon(request.getIcon());
         menu.setSortOrder(request.getSortOrder());
         menu.setStatus(request.getStatus());
-        menu.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(menu);
 

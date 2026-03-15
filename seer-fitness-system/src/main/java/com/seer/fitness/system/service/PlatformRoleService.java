@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,8 +70,6 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
         role.setDeleteFlag(0);
-        role.setCreateTime(LocalDateTime.now());
-        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.insertPO(role, true);
 
@@ -99,7 +96,6 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setRoleCode(request.getRoleCode());
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
-        role.setUpdateTime(LocalDateTime.now());
 
         baseDao.updatePO(role);
 
@@ -155,7 +151,6 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
             roleMenu.setTenantId(null);
             roleMenu.setRoleId(roleId);
             roleMenu.setMenuId(Long.parseLong(menuIdStr));
-            roleMenu.setCreateTime(LocalDateTime.now());
             baseDao.insertPO(roleMenu, true);
         }
 
