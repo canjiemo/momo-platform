@@ -12,8 +12,7 @@
     <artifactId>seer-fitness-framework</artifactId>
 
     <description>
-        框架层模块，提供系统级通用功能：字典管理、认证授权基础、菜单类型等
-        可独立作为其他项目的基础框架使用
+        框架基础设施层：认证安全（@RequireAuth/@OperationLog/UserCacheInfo）、JWT/Redis/密码/账号锁定工具类和配置，供所有业务模块复用。
     </description>
 
     <dependencies>
