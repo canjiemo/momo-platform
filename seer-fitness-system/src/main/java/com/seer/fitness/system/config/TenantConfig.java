@@ -1,7 +1,7 @@
 package com.seer.fitness.system.config;
 
-import com.seer.fitness.system.dto.UserCacheInfo;
-import com.seer.fitness.system.utils.SecurityContextUtil;
+import com.seer.fitness.framework.dto.UserCacheInfo;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.tenant.TenantIdProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,10 +2,10 @@ package com.seer.fitness.system.service;
 
 import com.seer.fitness.framework.model.AccountFailRecord;
 import com.seer.fitness.framework.model.AccountLockInfo;
-import com.seer.fitness.system.config.AccountLockConfig;
-import com.seer.fitness.system.utils.LockMessageBuilder;
-import com.seer.fitness.system.utils.LockTimeCalculator;
-import com.seer.fitness.system.utils.RedisUtil;
+import com.seer.fitness.framework.config.AccountLockConfig;
+import com.seer.fitness.framework.utils.LockMessageBuilder;
+import com.seer.fitness.framework.utils.LockTimeCalculator;
+import com.seer.fitness.framework.utils.RedisUtil;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

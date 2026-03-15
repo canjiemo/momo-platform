@@ -3,7 +3,7 @@ package com.seer.fitness.system.service;
 import com.seer.fitness.system.constants.DictConstants;
 import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictTypeDTO;
-import com.seer.fitness.system.utils.RedisUtil;
+import com.seer.fitness.framework.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

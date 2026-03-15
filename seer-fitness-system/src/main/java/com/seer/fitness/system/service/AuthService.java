@@ -3,11 +3,11 @@ package com.seer.fitness.system.service;
 import com.seer.fitness.system.dto.LoginRequest;
 import com.seer.fitness.system.dto.LoginResponse;
 import com.seer.fitness.system.dto.RoleDTO;
-import com.seer.fitness.system.dto.UserCacheInfo;
+import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.system.entity.SysUser;
-import com.seer.fitness.system.utils.JwtUtil;
-import com.seer.fitness.system.utils.PasswordUtil;
-import com.seer.fitness.system.utils.RedisUtil;
+import com.seer.fitness.framework.utils.JwtUtil;
+import com.seer.fitness.framework.utils.PasswordUtil;
+import com.seer.fitness.framework.utils.RedisUtil;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 认证服务
@@ -116,7 +117,10 @@ public class AuthService implements IAuthService {
         String tokenId = jwtUtil.getTokenIdFromToken(token);
 
         // 8. 获取用户角色和权限
-        List<RoleDTO> roles = roleService.getUserRoles(user.getId());
+        List<String> roleCodes = roleService.getUserRoles(user.getId())
+                .stream()
+                .map(RoleDTO::getRoleCode)
+                .collect(Collectors.toList());
         List<String> permissions = menuService.getUserPermissions(user.getId());
 
         // 9. 缓存用户信息到Redis
@@ -124,13 +128,13 @@ public class AuthService implements IAuthService {
         if (tenant != null) {
             userCacheInfo = new UserCacheInfo(
                     user.getId(), user.getUsername(), user.getRealName(),
-                    roles, permissions, user.getAdminFlag(), user.getUserType(), tokenId,
+                    roleCodes, permissions, user.getAdminFlag(), user.getUserType(), tokenId,
                     tenant.getId(), tenant.getTenantCode()
             );
         } else {
             userCacheInfo = new UserCacheInfo(
                     user.getId(), user.getUsername(), user.getRealName(),
-                    roles, permissions, user.getAdminFlag(), user.getUserType(), tokenId
+                    roleCodes, permissions, user.getAdminFlag(), user.getUserType(), tokenId
             );
         }
         redisUtil.set("user:token:" + tokenId, userCacheInfo, 24, TimeUnit.HOURS);
@@ -207,6 +211,6 @@ public class AuthService implements IAuthService {
             return false;
         }
 
-        return user.getRoles() != null && user.getRoles().contains(role);
+        return user.getRoleCodes() != null && user.getRoleCodes().contains(role);
     }
 }

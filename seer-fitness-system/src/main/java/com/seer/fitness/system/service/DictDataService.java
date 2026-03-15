@@ -5,7 +5,7 @@ import com.seer.fitness.system.dto.DictDataDTO;
 import com.seer.fitness.system.dto.DictDataQueryParam;
 import com.seer.fitness.system.dto.DictDataUpdateRequest;
 import com.seer.fitness.system.entity.SysDictData;
-import com.seer.fitness.system.utils.SecurityContextUtil;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;

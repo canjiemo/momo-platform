@@ -1,7 +1,7 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.system.config.PasswordPolicyConfig;
+import com.seer.fitness.framework.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.TenantCreateRequest;
 import com.seer.fitness.system.dto.TenantDTO;
 import com.seer.fitness.system.dto.TenantQueryParam;

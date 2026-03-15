@@ -1,8 +1,9 @@
 package com.seer.fitness.system.security;
 
+import com.seer.fitness.framework.annotation.RequireAuth;
 import com.seer.fitness.framework.enums.AuthMode;
 import com.seer.fitness.system.config.AuthConfig;
-import com.seer.fitness.system.dto.UserCacheInfo;
+import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.system.service.IAuthService;
 import io.github.canjiemo.mycommon.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -165,7 +166,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             boolean hasRole = checkRoles(user, auth.roles(), auth.mode());
             if (!hasRole) {
                 log.warn("权限不足-缺少角色: user={}, requiredRoles={}, userRoles={}, path={}",
-                        user.getUsername(), Arrays.toString(auth.roles()), user.getRoles(), requestPath);
+                        user.getUsername(), Arrays.toString(auth.roles()), user.getRoleCodes(), requestPath);
                 throw new AuthenticationException("权限不足：缺少必要角色");
             }
         }
@@ -188,16 +189,16 @@ public class AuthInterceptor implements HandlerInterceptor {
      * 检查角色
      */
     private boolean checkRoles(UserCacheInfo user, String[] requiredRoles, AuthMode mode) {
-        if (user.getRoles() == null) {
+        if (user.getRoleCodes() == null) {
             return false;
         }
 
         if (mode == AuthMode.ALL) {
             // 需要所有角色
-            return user.getRoles().containsAll(Arrays.asList(requiredRoles));
+            return user.getRoleCodes().containsAll(Arrays.asList(requiredRoles));
         } else {
             // 任意一个角色即可
-            return user.getRoles().stream()
+            return user.getRoleCodes().stream()
                     .anyMatch(role -> Arrays.asList(requiredRoles).contains(role));
         }
     }

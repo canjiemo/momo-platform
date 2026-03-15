@@ -8,7 +8,7 @@ import com.seer.fitness.system.dto.MenuUpdateRequest;
 import com.seer.fitness.system.entity.SysMenu;
 import com.seer.fitness.system.entity.SysRoleMenu;
 import com.seer.fitness.system.entity.SysUser;
-import com.seer.fitness.system.utils.SecurityContextUtil;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
@@ -39,7 +39,7 @@ public class MenuService extends BaseServiceImpl implements IMenuService {
      * - 租户管理员：仅返回平台为该租户授权的菜单（用于角色分配菜单选择框）
      */
     public List<MenuTreeVO> getMenuTree() {
-        com.seer.fitness.system.dto.UserCacheInfo currentUser =
+        com.seer.fitness.framework.dto.UserCacheInfo currentUser =
                 SecurityContextUtil.getCurrentUser();
 
         boolean isTenantAdmin = currentUser != null

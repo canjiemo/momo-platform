@@ -1,13 +1,13 @@
 package com.seer.fitness.system.service;
 
 import com.google.common.collect.Maps;
-import com.seer.fitness.system.config.PasswordPolicyConfig;
+import com.seer.fitness.framework.config.PasswordPolicyConfig;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysOrganization;
 import com.seer.fitness.system.entity.SysUser;
 import com.seer.fitness.system.entity.SysUserRole;
-import com.seer.fitness.system.utils.PasswordUtil;
-import com.seer.fitness.system.utils.SecurityContextUtil;
+import com.seer.fitness.framework.utils.PasswordUtil;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;

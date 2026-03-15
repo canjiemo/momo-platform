@@ -2,10 +2,10 @@ package com.seer.fitness.system.aspect;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.seer.fitness.system.annotation.OperationLog;
+import com.seer.fitness.framework.annotation.OperationLog;
 import com.seer.fitness.system.entity.SysOperationLog;
 import com.seer.fitness.system.service.IOperationLogService;
-import com.seer.fitness.system.utils.SecurityContextUtil;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,7 @@ public class OperationLogAspect {
     /**
      * 定义切点：所有带有@OperationLog注解的方法
      */
-    @Pointcut("@annotation(com.seer.fitness.system.annotation.OperationLog)")
+    @Pointcut("@annotation(com.seer.fitness.framework.annotation.OperationLog)")
     public void operationLogPointcut() {}
 
     /**

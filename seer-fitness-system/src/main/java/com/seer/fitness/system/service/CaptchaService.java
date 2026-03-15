@@ -3,7 +3,7 @@ package com.seer.fitness.system.service;
 import com.seer.fitness.system.config.CaptchaConfig;
 import com.seer.fitness.system.dto.CaptchaConfigResponse;
 import com.seer.fitness.system.dto.CaptchaResponse;
-import com.seer.fitness.system.utils.RedisUtil;
+import com.seer.fitness.framework.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
