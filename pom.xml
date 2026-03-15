@@ -18,7 +18,7 @@
     <properties>
         <java.version>21</java.version>
         <!-- 第三方依赖版本管理 -->
-        <myjdbc.version>1.0.6-jdk21</myjdbc.version>
+        <myjdbc.version>1.0.7-jdk21</myjdbc.version>
         <mymvc.version>1.0.2-jdk21</mymvc.version>
         <mydict.version>1.0.6-jdk21</mydict.version>
         <jwt.version>0.11.5</jwt.version>

@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 logs
 .mvn
+.mcp.json
+.claude/
+docs/
 
 ### STS ###
 .apt_generated
