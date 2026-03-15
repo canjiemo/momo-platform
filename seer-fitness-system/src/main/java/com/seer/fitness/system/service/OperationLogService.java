@@ -63,8 +63,10 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
                 .like(SysOperationLog::getRequestUrl, param.getRequestUrl())
                 .eq(SysOperationLog::getIpAddress, param.getIpAddress())
                 .eq(SysOperationLog::getOperationResult, param.getOperationResult())
-                .between(SysOperationLog::getCreateTime, param.getStartTime(), param.getEndTime())
-                .between(SysOperationLog::getExecutionTime, param.getMinExecutionTime(), param.getMaxExecutionTime())
+                .ge(SysOperationLog::getCreateTime, param.getStartTime())
+                .le(SysOperationLog::getCreateTime, param.getEndTime())
+                .ge(SysOperationLog::getExecutionTime, param.getMinExecutionTime())
+                .le(SysOperationLog::getExecutionTime, param.getMaxExecutionTime())
                 .orderByDesc(SysOperationLog::getCreateTime)
                 .page(pager);
 
