@@ -1,0 +1,110 @@
+package com.seer.fitness.file.service;
+
+import com.seer.fitness.file.dto.SysFileConfigCreateRequest;
+import com.seer.fitness.file.dto.SysFileConfigDTO;
+import com.seer.fitness.file.dto.SysFileConfigUpdateRequest;
+import com.seer.fitness.file.entity.SysFileConfig;
+import com.seer.fitness.file.storage.FileStorageManager;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
+import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.mycommon.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Slf4j
+@Service
+public class SysFileConfigService extends BaseServiceImpl implements ISysFileConfigService {
+
+    @Autowired
+    private FileStorageManager fileStorageManager;
+
+    @Override
+    public List<SysFileConfigDTO> list() {
+        return lambdaQuery(SysFileConfig.class, SysFileConfigDTO.class)
+                .orderByDesc(SysFileConfig::getCreateTime)
+                .list();
+    }
+
+    @Override
+    public SysFileConfig getActiveConfig() {
+        return lambdaQuery(SysFileConfig.class)
+                .eq(SysFileConfig::getIsActive, 1)
+                .one();
+    }
+
+    @Override
+    @Transactional
+    public void create(SysFileConfigCreateRequest request) {
+        SysFileConfig config = new SysFileConfig();
+        config.setConfigName(request.getConfigName());
+        config.setStorageType(request.getStorageType());
+        config.setIsActive(0);
+        config.setConfig(request.getConfig());
+        config.setRemark(request.getRemark());
+        config.setCreateBy(SecurityContextUtil.getCurrentUsername());
+        config.setCreateTime(LocalDateTime.now());
+        config.setUpdateBy(SecurityContextUtil.getCurrentUsername());
+        config.setUpdateTime(LocalDateTime.now());
+        config.setDeleteFlag(0);
+        baseDao.insertPO(config, true);
+    }
+
+    @Override
+    @Transactional
+    public void update(SysFileConfigUpdateRequest request) {
+        SysFileConfig config = baseDao.queryById(request.getId(), SysFileConfig.class);
+        if (config == null) throw new BusinessException("配置不存在");
+        if (request.getConfigName() != null) config.setConfigName(request.getConfigName());
+        if (request.getConfig()     != null) config.setConfig(request.getConfig());
+        if (request.getRemark()     != null) config.setRemark(request.getRemark());
+        config.setUpdateBy(SecurityContextUtil.getCurrentUsername());
+        config.setUpdateTime(LocalDateTime.now());
+        baseDao.updatePO(config);
+        // 若更新的是当前激活配置，使缓存失效
+        if (config.getIsActive() != null && config.getIsActive() == 1) {
+            fileStorageManager.invalidate();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void activate(Long id) {
+        SysFileConfig target = baseDao.queryById(id, SysFileConfig.class);
+        if (target == null) throw new BusinessException("配置不存在");
+
+        // 先将全部激活的置为未激活
+        List<SysFileConfig> all = lambdaQuery(SysFileConfig.class).eq(SysFileConfig::getIsActive, 1).list();
+        for (SysFileConfig c : all) {
+            c.setIsActive(0);
+            c.setUpdateBy(SecurityContextUtil.getCurrentUsername());
+            c.setUpdateTime(LocalDateTime.now());
+            baseDao.updatePO(c);
+        }
+
+        // 激活目标
+        target.setIsActive(1);
+        target.setUpdateBy(SecurityContextUtil.getCurrentUsername());
+        target.setUpdateTime(LocalDateTime.now());
+        baseDao.updatePO(target);
+
+        // 刷新 Manager
+        fileStorageManager.invalidate();
+        log.info("文件存储配置已激活: id={}, type={}", id, target.getStorageType());
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        SysFileConfig config = baseDao.queryById(id, SysFileConfig.class);
+        if (config == null) throw new BusinessException("配置不存在");
+        if (config.getIsActive() != null && config.getIsActive() == 1) {
+            throw new BusinessException("当前激活的配置不允许删除，请先激活其他配置");
+        }
+        baseDao.delByIds(SysFileConfig.class, String.valueOf(id));
+    }
+}

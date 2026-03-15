@@ -23,6 +23,13 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- 文件存储模块 -->
+        <dependency>
+            <groupId>com.seer</groupId>
+            <artifactId>seer-fitness-file</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Web Starter with Undertow -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

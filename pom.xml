@@ -32,6 +32,7 @@
     <modules>
         <module>seer-fitness-framework</module>
         <module>seer-fitness-system</module>
+        <module>seer-fitness-file</module>
         <module>seer-fitness-business</module>
         <module>seer-fitness-boot</module>
     </modules>
@@ -116,6 +117,13 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+
+            <!-- MinIO 对象存储 SDK -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>8.5.11</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
