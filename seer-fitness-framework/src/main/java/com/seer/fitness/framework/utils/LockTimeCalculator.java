@@ -68,4 +68,14 @@ public class LockTimeCalculator {
 
         return lockMinutes > 0 ? lockMinutes : steps.values().stream().min(Integer::compareTo).orElse(30);
     }
+
+    /**
+     * 渐进式锁定时间计算（参数化版本，不依赖注入的 Config Bean）
+     */
+    public long calculateProgressiveLockMinutes(int failAttempts, int maxFailCount,
+                                                 int baseMinutes, double multiplier, int maxMinutes) {
+        int overAttempts = failAttempts - maxFailCount;
+        long lockMinutes = (long) (baseMinutes * Math.pow(multiplier, overAttempts));
+        return Math.min(lockMinutes, maxMinutes);
+    }
 }

@@ -2,10 +2,11 @@ package com.seer.fitness.system.service;
 
 import com.seer.fitness.framework.model.AccountFailRecord;
 import com.seer.fitness.framework.model.AccountLockInfo;
-import com.seer.fitness.framework.config.AccountLockConfig;
 import com.seer.fitness.framework.utils.LockMessageBuilder;
 import com.seer.fitness.framework.utils.LockTimeCalculator;
 import com.seer.fitness.framework.utils.RedisUtil;
+import com.seer.fitness.system.utils.ConfigUtil;
+import com.seer.fitness.system.constants.ConfigKeys;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,6 @@ public class AccountLockService implements IAccountLockService {
     private RedisUtil redisUtil;
 
     @Autowired
-    private AccountLockConfig lockConfig;
-
-    @Autowired
     private LockTimeCalculator lockTimeCalculator;
 
     @Autowired
@@ -46,7 +44,7 @@ public class AccountLockService implements IAccountLockService {
      * 记录登录失败
      */
     public void recordFailedAttempt(String username, String ip) {
-        if (!lockConfig.isEnabled()) {
+        if (!ConfigUtil.getBoolean(ConfigKeys.LOCK_ENABLED, true)) {
             return;
         }
 
@@ -62,7 +60,7 @@ public class AccountLockService implements IAccountLockService {
         }
 
         // 2. 检查IP是否被锁定
-        if (lockConfig.getIpLock().isEnabled() && isIpLocked(ip)) {
+        if (ConfigUtil.getBoolean(ConfigKeys.LOCK_IP_ENABLED, true) && isIpLocked(ip)) {
             throw new BusinessException(messageBuilder.getIpLockMessage());
         }
 
@@ -70,7 +68,7 @@ public class AccountLockService implements IAccountLockService {
         recordAccountFailure(username);
 
         // 4. 记录IP失败次数 (如果启用)
-        if (lockConfig.getIpLock().isEnabled()) {
+        if (ConfigUtil.getBoolean(ConfigKeys.LOCK_IP_ENABLED, true)) {
             recordIpFailure(ip);
         }
     }
@@ -79,8 +77,8 @@ public class AccountLockService implements IAccountLockService {
      * 检查是否在白名单中
      */
     private boolean isInWhitelist(String username, String ip) {
-        return lockConfig.getWhitelist().getUsers().contains(username) ||
-                lockConfig.getWhitelist().getIps().contains(ip);
+        return ConfigUtil.getList(ConfigKeys.LOCK_WHITELIST_USERS).contains(username) ||
+                ConfigUtil.getList(ConfigKeys.LOCK_WHITELIST_IPS).contains(ip);
     }
 
     /**
@@ -99,14 +97,14 @@ public class AccountLockService implements IAccountLockService {
         record.incrementAttempts();
 
         // 检查是否需要锁定
-        if (record.getAttempts() >= lockConfig.getAttempts().getMaxFailCount()) {
+        if (record.getAttempts() >= ConfigUtil.getInt(ConfigKeys.LOCK_MAX_FAIL_COUNT, 5)) {
             lockAccount(username, record.getAttempts());
         } else {
             // 保存失败记录，过期时间为自动重置时间
-            long resetHours = lockConfig.getReset().getAutoResetHours();
+            long resetHours = ConfigUtil.getInt(ConfigKeys.LOCK_AUTO_RESET_HOURS, 24);
             redisUtil.set(key, record, resetHours, TimeUnit.HOURS);
 
-            String message = messageBuilder.buildFailMessage(record.getAttempts());
+            String message = messageBuilder.buildFailMessage(record.getAttempts(), ConfigUtil.getInt(ConfigKeys.LOCK_MAX_FAIL_COUNT, 5));
             throw new BusinessException(message);
         }
     }
@@ -115,7 +113,7 @@ public class AccountLockService implements IAccountLockService {
      * 锁定账户
      */
     private void lockAccount(String username, int failAttempts) {
-        long lockMinutes = lockTimeCalculator.calculateLockMinutes(failAttempts);
+        long lockMinutes = lockTimeCalculator.calculateProgressiveLockMinutes(failAttempts, ConfigUtil.getInt(ConfigKeys.LOCK_MAX_FAIL_COUNT, 5), ConfigUtil.getInt(ConfigKeys.LOCK_BASE_MINUTES, 30), 2.0, 1440);
 
         AccountLockInfo lockInfo = new AccountLockInfo();
         lockInfo.setUsername(username);
@@ -145,11 +143,11 @@ public class AccountLockService implements IAccountLockService {
 
         // 设置过期时间
         if (attempts == 1) {
-            redisUtil.expire(key, lockConfig.getIpLock().getRecordHours(), TimeUnit.HOURS);
+            redisUtil.expire(key, ConfigUtil.getInt(ConfigKeys.LOCK_IP_RECORD_HOURS, 2), TimeUnit.HOURS);
         }
 
         // 检查是否需要锁定IP
-        if (attempts >= lockConfig.getIpLock().getMaxAttempts()) {
+        if (attempts >= ConfigUtil.getInt(ConfigKeys.LOCK_IP_MAX_ATTEMPTS, 20)) {
             lockIp(ip);
         }
     }
@@ -159,7 +157,7 @@ public class AccountLockService implements IAccountLockService {
      */
     private void lockIp(String ip) {
         String lockKey = IP_LOCK_KEY + ip;
-        long lockMinutes = lockConfig.getIpLock().getLockMinutes();
+        long lockMinutes = ConfigUtil.getInt(ConfigKeys.LOCK_IP_LOCK_MINUTES, 60);
 
         redisUtil.set(lockKey, "locked", lockMinutes, TimeUnit.MINUTES);
         redisUtil.delete(IP_FAIL_KEY + ip);
@@ -197,7 +195,7 @@ public class AccountLockService implements IAccountLockService {
      * 登录成功后的处理
      */
     public void onLoginSuccess(String username, String ip) {
-        if (lockConfig.getReset().isOnSuccess()) {
+        if (ConfigUtil.getBoolean(ConfigKeys.LOCK_RESET_ON_SUCCESS, true)) {
             // 清除失败记录
             redisUtil.delete(ACCOUNT_FAIL_KEY + username);
             redisUtil.delete(IP_FAIL_KEY + ip);

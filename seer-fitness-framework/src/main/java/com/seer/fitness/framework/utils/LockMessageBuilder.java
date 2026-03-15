@@ -48,4 +48,13 @@ public class LockMessageBuilder {
     public String getIpLockMessage() {
         return config.getMessages().getIpLockMessage();
     }
+
+    /**
+     * 构造登录失败提示（参数化版本，maxFailCount 从外部传入）
+     */
+    public String buildFailMessage(int attempts, int maxFailCount) {
+        int remaining = maxFailCount - attempts;
+        return config.getMessages().getFailTemplate()
+                .replace("{remaining}", String.valueOf(remaining));
+    }
 }
