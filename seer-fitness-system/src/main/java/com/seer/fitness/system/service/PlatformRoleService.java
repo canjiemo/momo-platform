@@ -1,14 +1,13 @@
 package com.seer.fitness.system.service;
 
-import com.google.common.collect.Maps;
 import com.seer.fitness.system.dto.RoleCreateRequest;
 import com.seer.fitness.system.dto.RoleDTO;
 import com.seer.fitness.system.dto.RoleQueryParam;
 import com.seer.fitness.system.dto.RoleUpdateRequest;
 import com.seer.fitness.system.entity.SysRole;
 import com.seer.fitness.system.entity.SysRoleMenu;
+import com.seer.fitness.system.entity.SysTenantRole;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
-import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -43,22 +41,21 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
 
     @Override
     public List<RoleDTO> list() {
-        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
-                "FROM sys_role WHERE tenant_id IS NULL AND status = 1 ORDER BY create_time DESC";
-        return TenantContext.withoutTenant(() ->
-                baseDao.queryListForSql(sql, Maps.newHashMap(), RoleDTO.class));
+        return lambdaQuery(SysRole.class, RoleDTO.class)
+                .isNull(SysRole::getTenantId)
+                .eq(SysRole::getStatus, 1)
+                .orderByDesc(SysRole::getCreateTime)
+                .list();
     }
 
     @Override
     public RoleDTO getById(Long id) {
-        String sql = "SELECT id, role_name, role_code, description, status, create_time, update_time " +
-                "FROM sys_role WHERE id = :id AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("id", id);
-        SysRole role = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, SysRole.class));
-        if (role == null) throw new BusinessException("平台角色不存在");
-        return convertToDTO(role);
+        RoleDTO dto = lambdaQuery(SysRole.class, RoleDTO.class)
+                .eq(SysRole::getId, id)
+                .isNull(SysRole::getTenantId)
+                .one();
+        if (dto == null) throw new BusinessException("平台角色不存在");
+        return dto;
     }
 
     @Override
@@ -77,10 +74,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setCreateTime(LocalDateTime.now());
         role.setUpdateTime(LocalDateTime.now());
 
-        TenantContext.withoutTenant(() -> {
-            baseDao.insertPO(role, true);
-            return null;
-        });
+        baseDao.insertPO(role, true);
 
         if (request.getMenuIds() != null && !request.getMenuIds().isEmpty()) {
             assignMenus(role.getId(), request.getMenuIds());
@@ -107,10 +101,7 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setStatus(request.getStatus());
         role.setUpdateTime(LocalDateTime.now());
 
-        TenantContext.withoutTenant(() -> {
-            baseDao.updatePO(role);
-            return null;
-        });
+        baseDao.updatePO(role);
 
         if (request.getMenuIds() != null) {
             removeRoleMenus(request.getId());
@@ -128,11 +119,10 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         getPlatformRoleEntity(id); // 验证存在且是平台角色
 
         // 检查是否有租户正在使用该角色
-        String checkSql = "SELECT COUNT(*) FROM sys_tenant_role WHERE role_id = :roleId";
-        Map<String, Object> checkParams = Maps.newHashMap();
-        checkParams.put("roleId", id);
-        Long count = baseDao.querySingleForSql(checkSql, checkParams, Long.class);
-        if (count != null && count > 0) {
+        boolean inUse = lambdaQuery(SysTenantRole.class)
+                .eq(SysTenantRole::getRoleId, id)
+                .exists();
+        if (inUse) {
             throw new BusinessException("该角色已被租户使用，无法删除");
         }
 
@@ -145,12 +135,13 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
     @Override
     public List<String> getRoleMenuIds(Long roleId) {
         getPlatformRoleEntity(roleId); // 验证存在且是平台角色
-        String sql = "SELECT menu_id FROM sys_role_menu WHERE role_id = :roleId AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-        List<Long> menuIds = TenantContext.withoutTenant(() ->
-                baseDao.queryListForSql(sql, params, Long.class));
-        return menuIds.stream().map(String::valueOf).collect(Collectors.toList());
+        List<SysRoleMenu> roleMenus = lambdaQuery(SysRoleMenu.class)
+                .eq(SysRoleMenu::getRoleId, roleId)
+                .isNull(SysRoleMenu::getTenantId)
+                .list();
+        return roleMenus.stream()
+                .map(rm -> String.valueOf(rm.getMenuId()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -165,68 +156,43 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
             roleMenu.setRoleId(roleId);
             roleMenu.setMenuId(Long.parseLong(menuIdStr));
             roleMenu.setCreateTime(LocalDateTime.now());
-            TenantContext.withoutTenant(() -> {
-                baseDao.insertPO(roleMenu, true);
-                return null;
-            });
+            baseDao.insertPO(roleMenu, true);
         }
 
         log.info("分配平台角色菜单成功: roleId={}, menuCount={}", roleId, menuIds.size());
     }
 
     private SysRole getPlatformRoleEntity(Long id) {
-        String sql = "SELECT * FROM sys_role WHERE id = :id AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("id", id);
-        SysRole role = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, SysRole.class));
+        SysRole role = lambdaQuery(SysRole.class)
+                .eq(SysRole::getId, id)
+                .isNull(SysRole::getTenantId)
+                .one();
         if (role == null) throw new BusinessException("平台角色不存在");
         return role;
     }
 
     private void removeRoleMenus(Long roleId) {
-        String sql = "SELECT * FROM sys_role_menu WHERE role_id = :roleId AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleId", roleId);
-        List<SysRoleMenu> roleMenus = TenantContext.withoutTenant(() ->
-                baseDao.queryListForSql(sql, params, SysRoleMenu.class));
+        List<SysRoleMenu> roleMenus = lambdaQuery(SysRoleMenu.class)
+                .eq(SysRoleMenu::getRoleId, roleId)
+                .isNull(SysRoleMenu::getTenantId)
+                .list();
         for (SysRoleMenu rm : roleMenus) {
             baseDao.delPO(rm);
         }
     }
 
     private boolean isRoleNameExists(String roleName) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_name = :roleName AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleName", roleName);
-        Long count = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, Long.class));
-        return count != null && count > 0;
+        return lambdaQuery(SysRole.class)
+                .eq(SysRole::getRoleName, roleName)
+                .isNull(SysRole::getTenantId)
+                .exists();
     }
 
     private boolean isRoleCodeExists(String roleCode, Long excludeId) {
-        String sql = "SELECT COUNT(*) FROM sys_role WHERE role_code = :roleCode AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("roleCode", roleCode);
-        if (excludeId != null) {
-            sql += " AND id != :excludeId";
-            params.put("excludeId", excludeId);
-        }
-        final String finalSql = sql;
-        Long count = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(finalSql, params, Long.class));
-        return count != null && count > 0;
-    }
-
-    private RoleDTO convertToDTO(SysRole role) {
-        RoleDTO dto = new RoleDTO();
-        dto.setId(role.getId());
-        dto.setRoleName(role.getRoleName());
-        dto.setRoleCode(role.getRoleCode());
-        dto.setDescription(role.getDescription());
-        dto.setStatus(role.getStatus());
-        dto.setCreateTime(role.getCreateTime());
-        dto.setUpdateTime(role.getUpdateTime());
-        return dto;
+        var q = lambdaQuery(SysRole.class)
+                .eq(SysRole::getRoleCode, roleCode)
+                .isNull(SysRole::getTenantId);
+        if (excludeId != null) q.ne(SysRole::getId, excludeId);
+        return q.exists();
     }
 }

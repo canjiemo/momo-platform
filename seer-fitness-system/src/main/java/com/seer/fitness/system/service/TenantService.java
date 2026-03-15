@@ -1,6 +1,5 @@
 package com.seer.fitness.system.service;
 
-import com.google.common.collect.Maps;
 import com.seer.fitness.system.constants.ConfigKeys;
 import com.seer.fitness.system.dto.TenantCreateRequest;
 import com.seer.fitness.system.utils.ConfigUtil;
@@ -26,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 租户管理服务（简化版 - tenant_id 模式）
@@ -66,11 +64,9 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
     public TenantDTO getByCode(String tenantCode) {
         if (!StringUtils.hasText(tenantCode)) throw new BusinessException("租户编码不能为空");
 
-        String sql = "SELECT * FROM sys_tenant WHERE tenant_code = :tenantCode";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("tenantCode", tenantCode);
-
-        SysTenant tenant = baseDao.querySingleForSql(sql, params, SysTenant.class);
+        SysTenant tenant = lambdaQuery(SysTenant.class)
+                .eq(SysTenant::getTenantCode, tenantCode)
+                .one();
         if (tenant == null) return null;
 
         return convertToDTO(tenant);
@@ -141,12 +137,11 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         String username = tenant.getTenantName();
 
         // 检查该租户下用户名是否已存在（tenant_id + username 联合唯一）
-        String checkSql = "SELECT COUNT(*) FROM sys_user WHERE username = :username AND tenant_id = :tenantId";
-        Map<String, Object> checkParams = Maps.newHashMap();
-        checkParams.put("username", username);
-        checkParams.put("tenantId", tenant.getId());
-        Long count = baseDao.querySingleForSql(checkSql, checkParams, Long.class);
-        if (count != null && count > 0) {
+        boolean exists = lambdaQuery(SysUser.class)
+                .eq(SysUser::getUsername, username)
+                .eq(SysUser::getTenantId, tenant.getId())
+                .exists();
+        if (exists) {
             log.warn("租户管理员账号已存在，跳过创建: tenantId={}, username={}", tenant.getId(), username);
             return;
         }
@@ -175,10 +170,12 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
      */
     @Override
     public List<Long> getTenantRoleIds(Long tenantId) {
-        String sql = "SELECT role_id FROM sys_tenant_role WHERE tenant_id = :tenantId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("tenantId", tenantId);
-        return baseDao.queryListForSql(sql, params, Long.class);
+        return lambdaQuery(SysTenantRole.class)
+                .eq(SysTenantRole::getTenantId, tenantId)
+                .list()
+                .stream()
+                .map(SysTenantRole::getRoleId)
+                .toList();
     }
 
     /**
@@ -195,10 +192,9 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         if (tenant == null) throw new BusinessException("租户不存在");
 
         // 删除旧的映射（SysTenantRole 无 deleteFlag，myjpa 执行物理删除）
-        String selectSql = "SELECT * FROM sys_tenant_role WHERE tenant_id = :tenantId";
-        Map<String, Object> selectParams = Maps.newHashMap();
-        selectParams.put("tenantId", tenantId);
-        List<SysTenantRole> existing = baseDao.queryListForSql(selectSql, selectParams, SysTenantRole.class);
+        List<SysTenantRole> existing = lambdaQuery(SysTenantRole.class)
+                .eq(SysTenantRole::getTenantId, tenantId)
+                .list();
         for (SysTenantRole old : existing) {
             baseDao.delPO(old);
         }
@@ -284,11 +280,9 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     @Override
     public boolean existsByCode(String tenantCode) {
-        String sql = "SELECT COUNT(*) FROM sys_tenant WHERE tenant_code = :tenantCode";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("tenantCode", tenantCode);
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysTenant.class)
+                .eq(SysTenant::getTenantCode, tenantCode)
+                .exists();
     }
 
     private TenantDTO convertToDTO(SysTenant tenant) {

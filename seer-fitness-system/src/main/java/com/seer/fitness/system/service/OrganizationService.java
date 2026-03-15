@@ -446,17 +446,11 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
      */
     @Override
     public boolean isOrgCodeUnique(String orgCode, Long excludeId) {
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE org_code = :orgCode";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("orgCode", orgCode);
-
+        var q = lambdaQuery(SysOrganization.class).eq(SysOrganization::getOrgCode, orgCode);
         if (excludeId != null) {
-            sql += " AND id != :excludeId";
-            params.put("excludeId", excludeId);
+            q.ne(SysOrganization::getId, excludeId);
         }
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count == null || count == 0;
+        return !q.exists();
     }
 
     /**
@@ -484,24 +478,14 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
      * 检查是否有子组织
      */
     private boolean hasChildren(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE parent_id = :parentId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("parentId", orgId);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysOrganization.class).eq(SysOrganization::getParentId, orgId).exists();
     }
 
     /**
      * 检查是否有关联用户
      */
     private boolean hasMembers(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND status = 1";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("orgId", orgId);
-
-        Long count = baseDao.querySingleForSql(sql, params, Long.class);
-        return count != null && count > 0;
+        return lambdaQuery(SysUser.class).eq(SysUser::getOrgId, orgId).eq(SysUser::getStatus, 1).exists();
     }
 
     /**
@@ -520,11 +504,12 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
      * 递归收集所有子级组织ID
      */
     private void collectChildrenIds(Long parentId, List<Long> result) {
-        String sql = "SELECT id FROM sys_organization WHERE parent_id = :parentId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("parentId", parentId);
-
-        List<Long> directChildren = baseDao.queryListForSql(sql, params, Long.class);
+        List<Long> directChildren = lambdaQuery(SysOrganization.class)
+                .eq(SysOrganization::getParentId, parentId)
+                .list()
+                .stream()
+                .map(SysOrganization::getId)
+                .collect(Collectors.toList());
         result.addAll(directChildren);
 
         // 递归查找子级的子级

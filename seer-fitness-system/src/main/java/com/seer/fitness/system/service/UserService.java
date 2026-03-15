@@ -423,26 +423,24 @@ public class UserService extends BaseServiceImpl implements IUserService {
      * tenantId=NULL 表示平台管理员
      */
     public SysUser findByUsernameAndTenantId(String username, Long tenantId) {
-        String sql;
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("username", username);
         if (tenantId == null) {
-            sql = "SELECT * FROM sys_user WHERE username = :username AND tenant_id IS NULL";
+            return lambdaQuery(SysUser.class)
+                    .eq(SysUser::getUsername, username)
+                    .isNull(SysUser::getTenantId)
+                    .one();
         } else {
-            sql = "SELECT * FROM sys_user WHERE username = :username AND tenant_id = :tenantId";
-            params.put("tenantId", tenantId);
+            return lambdaQuery(SysUser.class)
+                    .eq(SysUser::getUsername, username)
+                    .eq(SysUser::getTenantId, tenantId)
+                    .one();
         }
-        return baseDao.querySingleForSql(sql, params, SysUser.class);
     }
 
     /**
      * 根据用户名查询用户
      */
     public SysUser findByUsername(String username) {
-        String sql = "SELECT * FROM sys_user WHERE username = :username";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("username", username);
-        return baseDao.querySingleForSql(sql, params, SysUser.class);
+        return lambdaQuery(SysUser.class).eq(SysUser::getUsername, username).one();
     }
 
     /**
@@ -470,11 +468,9 @@ public class UserService extends BaseServiceImpl implements IUserService {
      * 移除用户角色关联
      */
     private void removeUserRoles(Long userId) {
-        String sql = "SELECT * FROM sys_user_role WHERE user_id = :userId";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("userId", userId);
-
-        List<SysUserRole> userRoles = baseDao.queryListForSql(sql, params, SysUserRole.class);
+        List<SysUserRole> userRoles = lambdaQuery(SysUserRole.class)
+                .eq(SysUserRole::getUserId, userId)
+                .list();
         for (SysUserRole userRole : userRoles) {
             baseDao.delPO(userRole);
         }
@@ -518,8 +514,9 @@ public class UserService extends BaseServiceImpl implements IUserService {
      */
     @Override
     public List<UserDTO> listPlatformUsers() {
-        String sql = "SELECT id, username, real_name, status, admin_flag, user_type, " +
-                    "create_time, update_time FROM sys_user WHERE tenant_id IS NULL ORDER BY id";
-        return baseDao.queryListForSql(sql, Maps.newHashMap(), UserDTO.class);
+        return lambdaQuery(SysUser.class, UserDTO.class)
+                .isNull(SysUser::getTenantId)
+                .orderByAsc(SysUser::getId)
+                .list();
     }
 }

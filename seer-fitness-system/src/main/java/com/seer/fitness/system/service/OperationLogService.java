@@ -50,121 +50,23 @@ public class OperationLogService extends BaseServiceImpl implements IOperationLo
      */
     @Override
     public Pager<OperationLogDTO> search(OperationLogQueryParam param, Pager<OperationLogDTO> pager) {
-        Map<String, Object> queryMap = Maps.newHashMap();
-
-        String sql = "SELECT ol.id, ol.user_id, ol.username, ol.real_name, ol.operation_type, " +
-                    "ol.module_name, ol.business_id, ol.business_name, ol.operation_desc, " +
-                    "ol.request_method, ol.request_url, ol.request_params, ol.response_data, " +
-                    "ol.ip_address, ol.user_agent, ol.operation_result, ol.error_message, " +
-                    "ol.execution_time, ol.create_time " +
-                    "FROM sys_operation_log ol";
-
-        List<String> conditions = new ArrayList<>();
-
-        // 用户ID条件
-        if (param.getUserId() != null) {
-            conditions.add("ol.user_id = :userId");
-            queryMap.put("userId", param.getUserId());
-        }
-
-        // 用户名模糊查询
-        if (StringUtils.hasText(param.getUsername())) {
-            conditions.add("ol.username LIKE :username");
-            queryMap.put("username", "%" + param.getUsername() + "%");
-        }
-
-        // 真实姓名模糊查询
-        if (StringUtils.hasText(param.getRealName())) {
-            conditions.add("ol.real_name LIKE :realName");
-            queryMap.put("realName", "%" + param.getRealName() + "%");
-        }
-
-        // 操作类型条件
-        if (StringUtils.hasText(param.getOperationType())) {
-            conditions.add("ol.operation_type = :operationType");
-            queryMap.put("operationType", param.getOperationType());
-        }
-
-        // 模块名称条件
-        if (StringUtils.hasText(param.getModuleName())) {
-            conditions.add("ol.module_name = :moduleName");
-            queryMap.put("moduleName", param.getModuleName());
-        }
-
-        // 业务ID条件
-        if (StringUtils.hasText(param.getBusinessId())) {
-            conditions.add("ol.business_id = :businessId");
-            queryMap.put("businessId", param.getBusinessId());
-        }
-
-        // 业务名称模糊查询
-        if (StringUtils.hasText(param.getBusinessName())) {
-            conditions.add("ol.business_name LIKE :businessName");
-            queryMap.put("businessName", "%" + param.getBusinessName() + "%");
-        }
-
-        // 操作描述模糊查询
-        if (StringUtils.hasText(param.getOperationDesc())) {
-            conditions.add("ol.operation_desc LIKE :operationDesc");
-            queryMap.put("operationDesc", "%" + param.getOperationDesc() + "%");
-        }
-
-        // 请求方式条件
-        if (StringUtils.hasText(param.getRequestMethod())) {
-            conditions.add("ol.request_method = :requestMethod");
-            queryMap.put("requestMethod", param.getRequestMethod());
-        }
-
-        // 请求URL模糊查询
-        if (StringUtils.hasText(param.getRequestUrl())) {
-            conditions.add("ol.request_url LIKE :requestUrl");
-            queryMap.put("requestUrl", "%" + param.getRequestUrl() + "%");
-        }
-
-        // IP地址条件
-        if (StringUtils.hasText(param.getIpAddress())) {
-            conditions.add("ol.ip_address = :ipAddress");
-            queryMap.put("ipAddress", param.getIpAddress());
-        }
-
-        // 操作结果条件
-        if (param.getOperationResult() != null) {
-            conditions.add("ol.operation_result = :operationResult");
-            queryMap.put("operationResult", param.getOperationResult());
-        }
-
-        // 时间范围条件
-        if (param.getStartTime() != null) {
-            conditions.add("ol.create_time >= :startTime");
-            queryMap.put("startTime", param.getStartTime());
-        }
-
-        if (param.getEndTime() != null) {
-            conditions.add("ol.create_time <= :endTime");
-            queryMap.put("endTime", param.getEndTime());
-        }
-
-        // 执行耗时范围条件
-        if (param.getMinExecutionTime() != null) {
-            conditions.add("ol.execution_time >= :minExecutionTime");
-            queryMap.put("minExecutionTime", param.getMinExecutionTime());
-        }
-
-        if (param.getMaxExecutionTime() != null) {
-            conditions.add("ol.execution_time <= :maxExecutionTime");
-            queryMap.put("maxExecutionTime", param.getMaxExecutionTime());
-        }
-
-        // 拼接查询条件
-        if (!conditions.isEmpty()) {
-            sql += " WHERE " + String.join(" AND ", conditions);
-        }
-
-        sql += " ORDER BY ol.create_time DESC";
-
-        log.info("操作日志分页查询SQL: {}", sql);
-
-        Pager<OperationLogDTO> result = baseDao.queryPageForSql(sql, queryMap, pager, OperationLogDTO.class);
+        Pager<OperationLogDTO> result = lambdaQuery(SysOperationLog.class, OperationLogDTO.class)
+                .eq(SysOperationLog::getUserId, param.getUserId())
+                .like(SysOperationLog::getUsername, param.getUsername())
+                .like(SysOperationLog::getRealName, param.getRealName())
+                .eq(SysOperationLog::getOperationType, param.getOperationType())
+                .eq(SysOperationLog::getModuleName, param.getModuleName())
+                .eq(SysOperationLog::getBusinessId, param.getBusinessId())
+                .like(SysOperationLog::getBusinessName, param.getBusinessName())
+                .like(SysOperationLog::getOperationDesc, param.getOperationDesc())
+                .eq(SysOperationLog::getRequestMethod, param.getRequestMethod())
+                .like(SysOperationLog::getRequestUrl, param.getRequestUrl())
+                .eq(SysOperationLog::getIpAddress, param.getIpAddress())
+                .eq(SysOperationLog::getOperationResult, param.getOperationResult())
+                .between(SysOperationLog::getCreateTime, param.getStartTime(), param.getEndTime())
+                .between(SysOperationLog::getExecutionTime, param.getMinExecutionTime(), param.getMaxExecutionTime())
+                .orderByDesc(SysOperationLog::getCreateTime)
+                .page(pager);
 
         // 补充扩展信息
         if (result.getPageData() != null && !result.getPageData().isEmpty()) {

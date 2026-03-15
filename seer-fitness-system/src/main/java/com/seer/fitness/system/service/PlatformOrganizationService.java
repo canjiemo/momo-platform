@@ -3,6 +3,7 @@ package com.seer.fitness.system.service;
 import com.google.common.collect.Maps;
 import com.seer.fitness.system.dto.*;
 import com.seer.fitness.system.entity.SysOrganization;
+import com.seer.fitness.system.entity.SysUser;
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.base.myjdbc.tenant.TenantContext;
 import io.github.canjiemo.mycommon.exception.BusinessException;
@@ -191,46 +192,41 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private SysOrganization getPlatformOrgEntity(Long id) {
-        String sql = "SELECT * FROM sys_organization WHERE id = :id AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("id", id);
         SysOrganization org = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, SysOrganization.class));
+                lambdaQuery(SysOrganization.class)
+                        .eq(SysOrganization::getId, id)
+                        .isNull(SysOrganization::getTenantId)
+                        .one());
         if (org == null) throw new BusinessException("平台组织不存在");
         return org;
     }
 
     private boolean isOrgCodeUnique(String orgCode, Long excludeId) {
         if (!StringUtils.hasText(orgCode)) return true;
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE org_code = :orgCode AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("orgCode", orgCode);
+        var q = lambdaQuery(SysOrganization.class)
+                .eq(SysOrganization::getOrgCode, orgCode)
+                .isNull(SysOrganization::getTenantId);
         if (excludeId != null) {
-            sql += " AND id != :excludeId";
-            params.put("excludeId", excludeId);
+            q.ne(SysOrganization::getId, excludeId);
         }
-        final String finalSql = sql;
-        Long count = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(finalSql, params, Long.class));
-        return count == null || count == 0;
+        boolean exists = TenantContext.withoutTenant(() -> q.exists());
+        return !exists;
     }
 
     private boolean hasChildren(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("parentId", orgId);
-        Long count = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, Long.class));
-        return count != null && count > 0;
+        return TenantContext.withoutTenant(() ->
+                lambdaQuery(SysOrganization.class)
+                        .eq(SysOrganization::getParentId, orgId)
+                        .isNull(SysOrganization::getTenantId)
+                        .exists());
     }
 
     private boolean hasMembers(Long orgId) {
-        String sql = "SELECT COUNT(*) FROM sys_user WHERE org_id = :orgId AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("orgId", orgId);
-        Long count = TenantContext.withoutTenant(() ->
-                baseDao.querySingleForSql(sql, params, Long.class));
-        return count != null && count > 0;
+        return TenantContext.withoutTenant(() ->
+                lambdaQuery(SysUser.class)
+                        .eq(SysUser::getOrgId, orgId)
+                        .isNull(SysUser::getTenantId)
+                        .exists());
     }
 
     private boolean wouldCreateCircularReference(Long orgId, Long newParentId) {
@@ -245,11 +241,14 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
     }
 
     private void collectChildrenIds(Long parentId, List<Long> result) {
-        String sql = "SELECT id FROM sys_organization WHERE parent_id = :parentId AND tenant_id IS NULL";
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("parentId", parentId);
         List<Long> children = TenantContext.withoutTenant(() ->
-                baseDao.queryListForSql(sql, params, Long.class));
+                lambdaQuery(SysOrganization.class)
+                        .eq(SysOrganization::getParentId, parentId)
+                        .isNull(SysOrganization::getTenantId)
+                        .list()
+                        .stream()
+                        .map(SysOrganization::getId)
+                        .collect(Collectors.toList()));
         result.addAll(children);
         for (Long childId : children) {
             collectChildrenIds(childId, result);
