@@ -83,19 +83,6 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
-
-        //        // 查询角色菜单
-//        String menusSql = "SELECT m.id, m.menu_name, m.path, m.parent_id, m.type, " +
-//                         "m.permission, m.icon, m.sort_order, m.status " +
-//                         "FROM sys_menu m " +
-//                         "INNER JOIN sys_role_menu rm ON m.id = rm.menu_id " +
-//                         "WHERE rm.role_id = :roleId ORDER BY m.sort_order";
-//        Map<String, Object> menuParams = Maps.newHashMap();
-//        menuParams.put("roleId", id);
-//
-//        List<MenuDTO> menus = baseDao.queryListForSql(menusSql, menuParams, MenuDTO.class);
-//        roleDTO.setMenus(menus);
-
         RoleDTO dto = new RoleDTO();
         BeanUtils.copyProperties(role, dto);
         return dto;

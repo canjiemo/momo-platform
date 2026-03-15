@@ -1,7 +1,6 @@
 package com.seer.fitness.system.utils;
 
 import com.seer.fitness.system.service.DictDataService;
-import com.seer.fitness.system.service.OrganizationService;
 import io.github.canjiemo.tools.dict.IMyDict;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,16 +16,10 @@ import org.springframework.util.StringUtils;
 public class DictUtil implements IMyDict {
 
     private static DictDataService dictDataService;
-    private static OrganizationService organizationService;
 
     @Autowired
     public void setDictDataService(DictDataService dictDataService) {
         DictUtil.dictDataService = dictDataService;
-    }
-
-    @Autowired
-    public void setOrganizationService(OrganizationService organizationService) {
-        DictUtil.organizationService = organizationService;
     }
 
     /**
@@ -47,28 +40,6 @@ public class DictUtil implements IMyDict {
         } catch (Exception e) {
             // 如果获取字典标签失败，返回原值
             return String.valueOf(dictValue);
-        }
-    }
-
-    /**
-     * 根据组织ID获取组织名称
-     *
-     * @param organizationId 组织ID
-     * @return 组织名称，如果未找到返回原值
-     */
-    public static String getOrganizationName(String organizationId) {
-        if (!StringUtils.hasText(organizationId)) {
-            return "";
-        }
-
-        try {
-            // 先尝试转换为Long类型
-            Long orgId = Long.valueOf(organizationId);
-            var org = organizationService.getById(orgId);
-            return org != null && StringUtils.hasText(org.getOrgName()) ? org.getOrgName() : organizationId;
-        } catch (Exception e) {
-            // 如果获取组织名称失败，返回原值
-            return organizationId;
         }
     }
 
