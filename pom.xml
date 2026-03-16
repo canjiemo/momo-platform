@@ -151,6 +151,13 @@
                 <version>${spring-ai.version}</version>
             </dependency>
 
+            <!-- Spring AI OpenAI（兼容阿里百炼 DashScope OpenAI 协议） -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+                <version>${spring-ai.version}</version>
+            </dependency>
+
             <!-- pgvector Java 客户端 -->
             <dependency>
                 <groupId>com.pgvector</groupId>

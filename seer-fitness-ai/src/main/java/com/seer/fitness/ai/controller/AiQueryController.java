@@ -2,17 +2,22 @@ package com.seer.fitness.ai.controller;
 
 import com.seer.fitness.ai.conversation.entity.AiConversation;
 import com.seer.fitness.ai.conversation.service.IAiConversationService;
-import com.seer.fitness.ai.engine.AiQueryEngine;
+import com.seer.fitness.ai.engine.AiQueryAsyncService;
 import com.seer.fitness.ai.engine.dto.AiQueryRequest;
-import com.seer.fitness.ai.engine.dto.AiQueryResponse;
+import com.seer.fitness.ai.engine.dto.AiTaskResult;
 import com.seer.fitness.framework.annotation.RequireAuth;
+import com.seer.fitness.framework.dto.UserCacheInfo;
+import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -20,27 +25,49 @@ import java.util.List;
 @RequireAuth(login = true)
 public class AiQueryController extends MyBaseController {
 
-    @Autowired private AiQueryEngine queryEngine;
+    @Autowired private AiQueryAsyncService asyncService;
     @Autowired private IAiConversationService conversationService;
 
+    /**
+     * 提交 AI 查询任务，立即返回 taskId，前端凭 taskId 轮询结果
+     */
     @PostMapping("/query")
-    public MyResponseResult<AiQueryResponse> query(@RequestBody AiQueryRequest request) {
+    public MyResponseResult<Map<String, String>> query(@RequestBody AiQueryRequest request) {
         if (request.getSessionId() == null || request.getSessionId().isBlank()) {
             throw new BusinessException("sessionId 不能为空");
         }
-        // TODO: AI 模块不依赖 seer-fitness-framework，userId 暂为 null，可通过扩展 AiCurrentUserProvider 接口实现
-        conversationService.saveUserMessage(request.getSessionId(), null, request.getQuestion());
+        if (request.getQuestion() == null || request.getQuestion().isBlank()) {
+            throw new BusinessException("请输入查询问题");
+        }
+        if (request.getQuestion().length() > 500) {
+            throw new BusinessException("问题描述不能超过 500 个字符");
+        }
 
-        AiQueryResponse response = queryEngine.query(request);
+        // 在 HTTP 线程取用户信息和历史（异步线程中 SecurityContextUtil 不可用）
+        UserCacheInfo user = SecurityContextUtil.getCurrentUser();
+        request.setUserId(user != null ? user.getUserId() : null);
+        request.setTenantId(user != null ? user.getTenantId() : null);
+        List<AiConversation> history = conversationService.getRecentHistory(request.getSessionId(), 5);
 
-        // 保存 AI 回答
-        int rowCount = response.getTable() != null && response.getTable().getRows() != null
-                ? response.getTable().getRows().size() : 0;
-        conversationService.saveAssistantMessage(
-                request.getSessionId(), response.getSummary(),
-                response.getGeneratedSql(), rowCount);
+        String taskId = UUID.randomUUID().toString().replace("-", "");
+        asyncService.initTask(taskId);
+        asyncService.executeAsync(taskId, request, history);
 
-        return doJsonOut(response);
+        log.info("[AI查询] 任务已提交 taskId={} sessionId={}", taskId, request.getSessionId());
+        return doJsonOut(Map.of("taskId", taskId));
+    }
+
+    /**
+     * 轮询任务结果
+     * 返回：{ status: "PENDING" } 或 { status: "DONE", result: {...} } 或 { status: "FAILED", errorMsg: "..." }
+     */
+    @GetMapping("/query/result/{taskId}")
+    public MyResponseResult<AiTaskResult> result(@PathVariable String taskId) {
+        AiTaskResult taskResult = asyncService.getTaskResult(taskId);
+        if (taskResult == null) {
+            throw new BusinessException("任务不存在或已过期（10分钟内有效）");
+        }
+        return doJsonOut(taskResult);
     }
 
     @GetMapping("/conversation/{sessionId}")

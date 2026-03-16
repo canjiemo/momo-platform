@@ -4,6 +4,7 @@ import com.seer.fitness.ai.catalog.dto.AiFieldCatalogDTO;
 import com.seer.fitness.ai.catalog.dto.AiTableCatalogDTO;
 import com.seer.fitness.ai.catalog.entity.AiFieldCatalog;
 import com.seer.fitness.ai.catalog.entity.AiTableCatalog;
+
 import java.util.List;
 
 public interface IAiCatalogService {
@@ -12,5 +13,6 @@ public interface IAiCatalogService {
     List<AiFieldCatalogDTO> listFields(Long tableId);
     void saveTable(AiTableCatalog request);
     void saveField(AiFieldCatalog request);
-    void syncAllVectors();
+    int[] syncAllVectors();
+    int refreshFields(Long tableId);
 }

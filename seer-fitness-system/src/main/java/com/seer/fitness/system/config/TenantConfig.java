@@ -1,6 +1,7 @@
 package com.seer.fitness.system.config;
 
 import com.seer.fitness.framework.dto.UserCacheInfo;
+import com.seer.fitness.framework.utils.AsyncTenantHolder;
 import com.seer.fitness.framework.utils.SecurityContextUtil;
 import io.github.canjiemo.base.myjdbc.audit.AuditFieldProvider;
 import io.github.canjiemo.base.myjdbc.tenant.TenantIdProvider;
@@ -26,7 +27,10 @@ public class TenantConfig {
     public TenantIdProvider tenantIdProvider() {
         return () -> {
             UserCacheInfo user = SecurityContextUtil.getCurrentUser();
-            if (user == null) return null;
+            if (user == null) {
+                // 异步线程中 SecurityContextUtil 不可用，从 AsyncTenantHolder ThreadLocal 兜底
+                return AsyncTenantHolder.get();
+            }
             // 只有平台超管（tenant_id=NULL 且 admin_flag=1）才绕过租户过滤
             if (user.getAdminFlag() != null && user.getAdminFlag() == 1 && user.getTenantId() == null) return null;
             return user.getTenantId();

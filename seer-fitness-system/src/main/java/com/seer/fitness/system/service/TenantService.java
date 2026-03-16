@@ -35,7 +35,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Value("${myjpa.tenant.enabled:false}")
+    @Value("${myjdbc.tenant.enabled:false}")
     private boolean tenantEnabled;
 
     @Override
@@ -138,8 +138,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
                 .eq(SysUser::getTenantId, tenant.getId())
                 .exists();
         if (exists) {
-            log.warn("租户管理员账号已存在，跳过创建: tenantId={}, username={}", tenant.getId(), username);
-            return;
+            throw new BusinessException("租户管理员账号已存在，请检查数据一致性: username=" + username);
         }
 
         String initialPassword = ConfigUtil.getString(ConfigKeys.PASSWORD_INITIAL, "Aa123456!");

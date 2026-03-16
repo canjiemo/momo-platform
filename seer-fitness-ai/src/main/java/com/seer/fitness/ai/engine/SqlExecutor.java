@@ -4,6 +4,7 @@ import io.github.canjiemo.base.myjdbc.dao.IBaseDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +28,14 @@ public class SqlExecutor {
         String limitedSql = cleanSql.toUpperCase().contains(" LIMIT ")
                 ? cleanSql
                 : cleanSql + " LIMIT " + MAX_ROWS;
+        log.info("[SqlExec] 执行SQL: {}", limitedSql);
+        long t = System.currentTimeMillis();
         List<Map<String, Object>> results = (List<Map<String, Object>>)
                 (List<?>) baseDao.queryListForSql(limitedSql, Map.of(), Map.class);
-        log.info("SQL 执行完成，返回 {} 行", results.size());
+        log.info("[SqlExec] 执行完成 | 耗时={}ms rows={}", System.currentTimeMillis() - t, results.size());
+        if (!results.isEmpty()) {
+            log.debug("[SqlExec] 结果预览(前3行): {}", results.subList(0, Math.min(3, results.size())));
+        }
         return results;
     }
 }

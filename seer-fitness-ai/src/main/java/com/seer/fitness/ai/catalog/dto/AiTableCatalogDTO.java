@@ -1,6 +1,7 @@
 package com.seer.fitness.ai.catalog.dto;
 
 import lombok.Data;
+
 import java.util.List;
 
 @Data

@@ -9,6 +9,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

@@ -68,7 +68,7 @@ public class AiProviderManager extends BaseServiceImpl {
         }
 
         chat.init(config);
-        embed.init(config);
+        if (chat != embed) embed.init(config);
         this.activeChat = chat;
         this.activeEmbed = embed;
         log.info("AI Provider 已加载: provider={}, chatModel={}", config.getProvider(), config.getChatModel());
