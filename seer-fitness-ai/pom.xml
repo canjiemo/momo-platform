@@ -25,18 +25,16 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring AI Ollama -->
+        <!-- Spring AI Ollama（版本由根 pom 统一管理，使用 M6 里程碑版） -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
-            <version>1.0.0-M6</version>
         </dependency>
 
-        <!-- pgvector -->
+        <!-- pgvector Java 客户端（版本由根 pom 统一管理） -->
         <dependency>
             <groupId>com.pgvector</groupId>
             <artifactId>pgvector</artifactId>
-            <version>0.1.6</version>
         </dependency>
 
         <!-- JSqlParser: SQL 安全校验 (myjdbc 已引入，不重复声明版本) -->

@@ -27,6 +27,9 @@
         <druid.version>1.2.23</druid.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <postgresql.version>42.7.7</postgresql.version>
+        <!-- Spring AI: 使用 M6 里程碑版，GA 版本发布时未上传至 Maven Central -->
+        <spring-ai.version>1.0.0-M6</spring-ai.version>
+        <pgvector.version>0.1.6</pgvector.version>
     </properties>
 
     <modules>
@@ -139,6 +142,20 @@
                 <groupId>com.github.jsqlparser</groupId>
                 <artifactId>jsqlparser</artifactId>
                 <version>5.3</version>
+            </dependency>
+
+            <!-- Spring AI Ollama（M6 里程碑版，GA 版未发布至 Maven Central） -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+                <version>${spring-ai.version}</version>
+            </dependency>
+
+            <!-- pgvector Java 客户端 -->
+            <dependency>
+                <groupId>com.pgvector</groupId>
+                <artifactId>pgvector</artifactId>
+                <version>${pgvector.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
