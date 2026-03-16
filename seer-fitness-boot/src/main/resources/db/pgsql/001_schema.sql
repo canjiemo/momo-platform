@@ -417,3 +417,78 @@ CREATE INDEX idx_sys_file_biz    ON public.sys_file(biz_type, biz_id);
 
 COMMENT ON TABLE  public.sys_file IS '文件记录表';
 COMMENT ON COLUMN public.sys_file.file_key IS '存储路径/对象Key，用于删除和访问';
+
+-- ========================================
+-- AI 智能查询模块
+-- ========================================
+
+-- ai_provider_config (AI 模型配置，可插拔)
+DROP TABLE IF EXISTS public.ai_provider_config;
+CREATE TABLE public.ai_provider_config (
+    id           BIGSERIAL    PRIMARY KEY,
+    config_name  VARCHAR(100) NOT NULL,
+    provider     VARCHAR(50)  NOT NULL,          -- ollama / claude / openai
+    chat_model   VARCHAR(100) NOT NULL,          -- 对话模型（如 qwen2.5:7b）
+    embed_model  VARCHAR(100) NOT NULL,          -- Embedding 模型（如 nomic-embed-text）
+    base_url     VARCHAR(500),                   -- 服务地址
+    api_key      VARCHAR(500),                   -- API Key（本地可为空）
+    is_active    SMALLINT     NOT NULL DEFAULT 0,
+    config       JSONB,                          -- 扩展配置（temperature 等）
+    remark       VARCHAR(500),
+    create_time  TIMESTAMP,
+    update_time  TIMESTAMP,
+    delete_flag  SMALLINT     NOT NULL DEFAULT 0
+);
+CREATE INDEX idx_ai_provider_active ON public.ai_provider_config(is_active) WHERE delete_flag = 0;
+COMMENT ON TABLE public.ai_provider_config IS 'AI 模型提供商配置，支持热切换';
+
+-- ai_table_catalog (数据目录 - 表级)
+DROP TABLE IF EXISTS public.ai_table_catalog;
+CREATE TABLE public.ai_table_catalog (
+    id           BIGSERIAL    PRIMARY KEY,
+    table_name   VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,          -- 中文名
+    description  TEXT,                           -- 语义描述（注入 Prompt）
+    is_enabled   SMALLINT     NOT NULL DEFAULT 0,
+    sort_order   INT          DEFAULT 0,
+    create_time  TIMESTAMP,
+    update_time  TIMESTAMP
+);
+COMMENT ON TABLE public.ai_table_catalog IS 'AI 可查询数据目录 - 表级';
+
+-- ai_field_catalog (数据目录 - 字段级)
+DROP TABLE IF EXISTS public.ai_field_catalog;
+CREATE TABLE public.ai_field_catalog (
+    id           BIGSERIAL    PRIMARY KEY,
+    table_id     BIGINT       NOT NULL,
+    table_name   VARCHAR(100) NOT NULL,
+    field_name   VARCHAR(100) NOT NULL,
+    field_type   VARCHAR(50),
+    display_name VARCHAR(100) NOT NULL,
+    description  TEXT,                           -- 语义描述（向量化）
+    is_enabled   SMALLINT     NOT NULL DEFAULT 1,
+    embed_vector vector(1024),                   -- pgvector 向量
+    sort_order   INT          DEFAULT 0,
+    create_time  TIMESTAMP,
+    update_time  TIMESTAMP
+);
+CREATE INDEX idx_field_catalog_table  ON public.ai_field_catalog(table_id);
+CREATE INDEX idx_field_catalog_vector ON public.ai_field_catalog
+    USING hnsw (embed_vector vector_cosine_ops);
+COMMENT ON TABLE public.ai_field_catalog IS 'AI 可查询数据目录 - 字段级，含向量';
+
+-- ai_conversation (对话历史)
+DROP TABLE IF EXISTS public.ai_conversation;
+CREATE TABLE public.ai_conversation (
+    id            BIGSERIAL   PRIMARY KEY,
+    session_id    VARCHAR(64) NOT NULL,
+    user_id       BIGINT,
+    role          VARCHAR(10) NOT NULL,           -- user / assistant
+    content       TEXT        NOT NULL,
+    generated_sql TEXT,
+    exec_rows     INT,
+    create_time   TIMESTAMP   DEFAULT NOW()
+);
+CREATE INDEX idx_ai_conv_session ON public.ai_conversation(session_id);
+CREATE INDEX idx_ai_conv_time    ON public.ai_conversation(create_time DESC);
+COMMENT ON TABLE public.ai_conversation IS 'AI 对话历史';

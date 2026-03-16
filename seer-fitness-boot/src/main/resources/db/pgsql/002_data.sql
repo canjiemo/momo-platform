@@ -269,3 +269,16 @@ INSERT INTO public.sys_file_config (config_name, storage_type, is_active, config
 VALUES ('MinIO 存储', 'minio', 0,
         '{"endpoint":"http://minio:9000","bucket":"seer-fitness","accessKey":"","secretKey":"","publicBucket":true,"presignedExpireSeconds":3600}',
         '生产环境使用 MinIO 对象存储', 'system', NOW(), 'system', NOW(), 0);
+
+-- ========================================
+-- AI 模块初始配置
+-- ========================================
+
+-- 默认 Ollama 配置（本地开发用）
+INSERT INTO public.ai_provider_config
+    (config_name, provider, chat_model, embed_model, base_url, is_active, remark, create_time, update_time, delete_flag)
+VALUES
+    ('本地 Ollama', 'ollama', 'qwen2.5:7b', 'nomic-embed-text',
+     'http://localhost:11434', 1,
+     '本地 Ollama 服务，需先安装 Ollama 并拉取模型',
+     NOW(), NOW(), 0);
