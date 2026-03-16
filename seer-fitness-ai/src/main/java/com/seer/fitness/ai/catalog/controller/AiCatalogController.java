@@ -5,6 +5,7 @@ import com.seer.fitness.ai.catalog.dto.AiTableCatalogDTO;
 import com.seer.fitness.ai.catalog.entity.AiFieldCatalog;
 import com.seer.fitness.ai.catalog.entity.AiTableCatalog;
 import com.seer.fitness.ai.catalog.service.IAiCatalogService;
+import com.seer.fitness.framework.annotation.RequireAuth;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/platform/ai/catalog")
+@RequireAuth(login = true)
 public class AiCatalogController extends MyBaseController {
 
     @Autowired

@@ -69,7 +69,7 @@ public class ResultFormatter {
             List<String> cols = response.getTable().getColumns();
             AiQueryResponse.ChartConfig chart = new AiQueryResponse.ChartConfig();
             chart.setType(chartType);
-            chart.setXField(cols.size() > 0 ? cols.get(0) : "");
+            chart.setXField(!cols.isEmpty() ? cols.get(0) : "");
             chart.setYField(cols.size() > 1 ? cols.get(1) : "");
             response.setChart(chart);
         }

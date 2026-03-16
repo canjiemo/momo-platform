@@ -23,6 +23,9 @@ public class AiQueryEngine {
         if (request.getQuestion() == null || request.getQuestion().isBlank()) {
             throw new BusinessException("请输入查询问题");
         }
+        if (request.getQuestion().length() > 500) {
+            throw new BusinessException("问题描述不能超过 500 个字符");
+        }
         String question = request.getQuestion();
         log.info("AI 查询开始: sessionId={}, question={}", request.getSessionId(), question);
 

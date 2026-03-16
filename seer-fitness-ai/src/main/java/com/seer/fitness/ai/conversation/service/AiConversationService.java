@@ -29,7 +29,7 @@ public class AiConversationService extends BaseServiceImpl implements IAiConvers
         AiConversation conv = new AiConversation();
         conv.setSessionId(sessionId);
         conv.setRole("assistant");
-        conv.setContent(summary);
+        conv.setContent(summary != null ? summary : "");
         conv.setGeneratedSql(sql);
         conv.setExecRows(rows);
         conv.setCreateTime(LocalDateTime.now());

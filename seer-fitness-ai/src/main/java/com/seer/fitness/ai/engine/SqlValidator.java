@@ -24,6 +24,14 @@ public class SqlValidator extends BaseServiceImpl {
      * 预留扩展点：后续可注入 SqlValidatorPlugin 列表
      */
     public void validate(String sql) {
+        // 拒绝多语句 SQL（防止注入：SELECT 1; DROP TABLE ... 模式）
+        if (sql.contains(";")) {
+            String stripped = sql.stripTrailing().replaceAll(";$", "");
+            if (stripped.contains(";")) {
+                throw new BusinessException("不支持多语句 SQL");
+            }
+        }
+
         Statement stmt;
         try {
             stmt = CCJSqlParserUtil.parse(sql);

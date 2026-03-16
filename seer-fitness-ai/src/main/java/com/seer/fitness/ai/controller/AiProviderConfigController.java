@@ -11,35 +11,39 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/platform/ai/provider")
-@RequireAuth(login = true)
 public class AiProviderConfigController extends MyBaseController {
 
     @Autowired
     private IAiProviderConfigService configService;
 
+    @RequireAuth(permissions = {"ai:provider:view"})
     @GetMapping("/list")
     public MyResponseResult<List<AiProviderConfig>> list() {
         return doJsonOut(configService.list());
     }
 
+    @RequireAuth(permissions = {"ai:provider:create"})
     @PostMapping("/create")
     public MyResponseResult create(@RequestBody AiProviderConfig config) {
         configService.create(config);
         return doJsonDefaultMsg();
     }
 
+    @RequireAuth(permissions = {"ai:provider:update"})
     @PostMapping("/update")
     public MyResponseResult update(@RequestBody AiProviderConfig config) {
         configService.update(config);
         return doJsonDefaultMsg();
     }
 
+    @RequireAuth(permissions = {"ai:provider:update"})
     @PostMapping("/activate/{id}")
     public MyResponseResult activate(@PathVariable Long id) {
         configService.activate(id);
         return doJsonDefaultMsg();
     }
 
+    @RequireAuth(permissions = {"ai:provider:delete"})
     @PostMapping("/delete/{id}")
     public MyResponseResult delete(@PathVariable Long id) {
         configService.delete(id);

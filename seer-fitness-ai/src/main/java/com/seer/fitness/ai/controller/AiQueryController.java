@@ -28,9 +28,7 @@ public class AiQueryController extends MyBaseController {
         if (request.getSessionId() == null || request.getSessionId().isBlank()) {
             throw new BusinessException("sessionId 不能为空");
         }
-        // seer-fitness-ai 模块不依赖 seer-fitness-framework，无法直接获取当前用户 ID。
-        // 若需记录 userId，可在 seer-fitness-boot 中实现 AiCurrentUserProvider 接口并注入。
-        // MVP 阶段暂用 null，对话历史仍按 sessionId 正确关联。
+        // TODO: AI 模块不依赖 seer-fitness-framework，userId 暂为 null，可通过扩展 AiCurrentUserProvider 接口实现
         conversationService.saveUserMessage(request.getSessionId(), null, request.getQuestion());
 
         AiQueryResponse response = queryEngine.query(request);
