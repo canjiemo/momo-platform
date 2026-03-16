@@ -27,6 +27,13 @@
             <version>${mymvc.version}</version>
         </dependency>
 
+        <!-- framework: @RequireAuth 注解、BusinessException 等基础设施 -->
+        <dependency>
+            <groupId>com.seer</groupId>
+            <artifactId>seer-fitness-framework</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

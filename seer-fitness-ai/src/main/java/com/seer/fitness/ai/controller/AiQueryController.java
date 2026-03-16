@@ -5,8 +5,10 @@ import com.seer.fitness.ai.conversation.service.IAiConversationService;
 import com.seer.fitness.ai.engine.AiQueryEngine;
 import com.seer.fitness.ai.engine.dto.AiQueryRequest;
 import com.seer.fitness.ai.engine.dto.AiQueryResponse;
+import com.seer.fitness.framework.annotation.RequireAuth;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/system/ai")
+@RequireAuth(login = true)
 public class AiQueryController extends MyBaseController {
 
     @Autowired private AiQueryEngine queryEngine;
@@ -22,7 +25,12 @@ public class AiQueryController extends MyBaseController {
 
     @PostMapping("/query")
     public MyResponseResult<AiQueryResponse> query(@RequestBody AiQueryRequest request) {
-        // 保存用户问题（MVP 阶段 userId 传 null）
+        if (request.getSessionId() == null || request.getSessionId().isBlank()) {
+            throw new BusinessException("sessionId 不能为空");
+        }
+        // seer-fitness-ai 模块不依赖 seer-fitness-framework，无法直接获取当前用户 ID。
+        // 若需记录 userId，可在 seer-fitness-boot 中实现 AiCurrentUserProvider 接口并注入。
+        // MVP 阶段暂用 null，对话历史仍按 sessionId 正确关联。
         conversationService.saveUserMessage(request.getSessionId(), null, request.getQuestion());
 
         AiQueryResponse response = queryEngine.query(request);

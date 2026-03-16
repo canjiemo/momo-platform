@@ -2,6 +2,7 @@ package com.seer.fitness.ai.controller;
 
 import com.seer.fitness.ai.provider.entity.AiProviderConfig;
 import com.seer.fitness.ai.provider.service.IAiProviderConfigService;
+import com.seer.fitness.framework.annotation.RequireAuth;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/platform/ai/provider")
+@RequireAuth(login = true)
 public class AiProviderConfigController extends MyBaseController {
 
     @Autowired
