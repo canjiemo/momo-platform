@@ -19,8 +19,8 @@ import java.util.List;
 @Component("ollama")
 public class OllamaAiProvider implements IAiChatProvider, IAiEmbeddingProvider {
 
-    private OllamaChatModel chatModel;
-    private OllamaEmbeddingModel embeddingModel;
+    private volatile OllamaChatModel chatModel;
+    private volatile OllamaEmbeddingModel embeddingModel;
 
     @Override
     public String getProvider() {

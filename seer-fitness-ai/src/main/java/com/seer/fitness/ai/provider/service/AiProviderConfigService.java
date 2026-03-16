@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class AiProviderConfigService extends BaseServiceImpl {
+public class AiProviderConfigService extends BaseServiceImpl implements IAiProviderConfigService {
 
     @Lazy
     @Autowired
@@ -44,6 +44,7 @@ public class AiProviderConfigService extends BaseServiceImpl {
         if (request.getApiKey()      != null) config.setApiKey(request.getApiKey());
         if (request.getConfig()      != null) config.setConfig(request.getConfig());
         if (request.getRemark()      != null) config.setRemark(request.getRemark());
+        // isActive 不允许通过 update 接口修改，必须通过 activate 接口切换，以确保同时只有一个激活配置
         config.setUpdateTime(null);
         baseDao.updatePO(config);
         if (config.getIsActive() != null && config.getIsActive() == 1) {

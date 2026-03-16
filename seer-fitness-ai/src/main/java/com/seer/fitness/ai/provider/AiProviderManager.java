@@ -1,10 +1,9 @@
 package com.seer.fitness.ai.provider;
 
 import com.seer.fitness.ai.provider.entity.AiProviderConfig;
-import io.github.canjiemo.base.myjdbc.dao.IBaseDao;
+import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,13 +13,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AiProviderManager {
+public class AiProviderManager extends BaseServiceImpl {
 
     private final Map<String, IAiChatProvider> chatProviders;
     private final Map<String, IAiEmbeddingProvider> embedProviders;
-
-    @Autowired
-    private IBaseDao baseDao;
 
     private volatile IAiChatProvider activeChat;
     private volatile IAiEmbeddingProvider activeEmbed;
@@ -51,16 +47,16 @@ public class AiProviderManager {
         return activeEmbed;
     }
 
-    public void invalidate() {
+    public synchronized void invalidate() {
         this.activeChat = null;
         this.activeEmbed = null;
         log.info("AI Provider 缓存已失效，下次调用重新加载");
     }
 
     private void refresh() {
-        AiProviderConfig config = baseDao.querySingleForSql(
-                "SELECT * FROM ai_provider_config WHERE is_active = 1 AND delete_flag = 0 LIMIT 1",
-                java.util.Collections.emptyMap(), AiProviderConfig.class);
+        AiProviderConfig config = lambdaQuery(AiProviderConfig.class)
+                .eq(AiProviderConfig::getIsActive, 1)
+                .one();
         if (config == null) {
             throw new BusinessException("未配置 AI 模型，请先在平台配置中激活一个 AI Provider");
         }
