@@ -30,7 +30,10 @@ public class AiCatalogService extends BaseServiceImpl implements IAiCatalogServi
         String sql = """
             SELECT c.table_name, c.column_name, c.data_type, c.ordinal_position
             FROM information_schema.columns c
+            JOIN information_schema.tables t
+              ON t.table_schema = c.table_schema AND t.table_name = c.table_name
             WHERE c.table_schema = 'public'
+              AND t.table_type = 'BASE TABLE'
               AND c.table_name NOT LIKE 'ai_%'
             ORDER BY c.table_name, c.ordinal_position
             """;
@@ -129,14 +132,18 @@ public class AiCatalogService extends BaseServiceImpl implements IAiCatalogServi
             baseDao.updatePO(existing);
             request.setId(existing.getId());
         }
-        // 描述有变化则重新生成向量
+        // 描述有变化则重新生成向量（事务提交后执行，Ollama 不可用时不影响元数据保存）
         if (descChanged && request.getDescription() != null) {
-            syncFieldVector(request.getId());
+            try {
+                syncFieldVector(request.getId());
+            } catch (Exception e) {
+                log.warn("字段向量同步失败（可通过全量同步接口重试），fieldId={}, error={}", request.getId(), e.getMessage());
+            }
         }
     }
 
     /** 单字段向量同步 */
-    public void syncFieldVector(Long fieldId) {
+    private void syncFieldVector(Long fieldId) {
         AiFieldCatalog field = baseDao.queryById(fieldId, AiFieldCatalog.class);
         if (field == null || field.getDescription() == null) return;
         String text = field.getDisplayName() + ": " + field.getDescription();
@@ -158,8 +165,12 @@ public class AiCatalogService extends BaseServiceImpl implements IAiCatalogServi
         int count = 0;
         for (AiFieldCatalog field : fields) {
             if (field.getDescription() != null) {
-                syncFieldVector(field.getId());
-                count++;
+                try {
+                    syncFieldVector(field.getId());
+                    count++;
+                } catch (Exception e) {
+                    log.warn("字段向量同步失败，跳过: fieldId={}, error={}", field.getId(), e.getMessage());
+                }
             }
         }
         log.info("全量向量同步完成，共 {} 个字段", count);
