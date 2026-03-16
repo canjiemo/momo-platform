@@ -1,5 +1,5 @@
 -- ====================================================================================================
--- Seer Fitness Edu - 统一建表脚本 (tenant_id 模式)
+-- Seer Fitness Edu - 统一建表脚本
 -- 所有表在 public schema，通过 tenant_id 区分租户数据
 -- tenant_id = NULL 表示平台级数据（平台菜单/角色）
 -- tenant_id = 具体值 表示租户数据
@@ -33,7 +33,6 @@ CREATE INDEX idx_sys_tenant_code ON public.sys_tenant(tenant_code);
 CREATE INDEX idx_sys_tenant_status ON public.sys_tenant(status, delete_flag);
 
 COMMENT ON TABLE public.sys_tenant IS '租户表（学校表），平台级';
-COMMENT ON COLUMN public.sys_tenant.id IS '主键ID';
 COMMENT ON COLUMN public.sys_tenant.tenant_code IS '租户编码，全局唯一';
 COMMENT ON COLUMN public.sys_tenant.tenant_name IS '管理员登录账号，字母开头，只能包含字母/数字/下划线，创建后不可修改';
 COMMENT ON COLUMN public.sys_tenant.real_name IS '学校中文名称，作为管理员账号的显示名称';
@@ -88,12 +87,11 @@ CREATE TABLE public.sys_role (
 
 CREATE INDEX idx_sys_role_tenant ON public.sys_role(tenant_id);
 CREATE INDEX idx_sys_role_status ON public.sys_role(status, delete_flag);
--- role_code 在同一租户内唯一（NULL tenant_id 用 -1 代替参与唯一约束，软删除安全）
 CREATE UNIQUE INDEX idx_sys_role_code ON public.sys_role(COALESCE(tenant_id, -1), role_code) WHERE delete_flag = 0;
 
 COMMENT ON TABLE public.sys_role IS '角色表';
 COMMENT ON COLUMN public.sys_role.tenant_id IS '租户ID，NULL表示平台角色模板';
-COMMENT ON COLUMN public.sys_role.role_code IS '角色编码，同租户内唯一，用于数据权限识别，如 ADMIN、TENANT_ADMIN';
+COMMENT ON COLUMN public.sys_role.role_code IS '角色编码，同租户内唯一';
 
 -- ----------------------------
 -- sys_menu (菜单表)
@@ -123,7 +121,6 @@ CREATE INDEX idx_sys_menu_status_delete ON public.sys_menu(status, delete_flag);
 COMMENT ON TABLE public.sys_menu IS '菜单表';
 COMMENT ON COLUMN public.sys_menu.tenant_id IS '租户ID，NULL表示平台菜单模板';
 COMMENT ON COLUMN public.sys_menu.type IS '类型：0目录 1菜单 2按钮';
-COMMENT ON COLUMN public.sys_menu.icon IS 'Ant Design 图标名，如 DashboardOutlined、UserOutlined';
 
 -- ----------------------------
 -- sys_role_menu (角色菜单关联表)
@@ -142,7 +139,6 @@ CREATE INDEX idx_sys_role_menu_role ON public.sys_role_menu(role_id);
 CREATE INDEX idx_sys_role_menu_menu ON public.sys_role_menu(menu_id);
 
 COMMENT ON TABLE public.sys_role_menu IS '角色-菜单关联表';
-COMMENT ON COLUMN public.sys_role_menu.tenant_id IS '租户ID，NULL表示平台角色菜单';
 
 -- ----------------------------
 -- sys_user_role (用户角色关联表)
@@ -161,12 +157,9 @@ CREATE INDEX idx_sys_user_role_user ON public.sys_user_role(user_id);
 CREATE INDEX idx_sys_user_role_role ON public.sys_user_role(role_id);
 
 COMMENT ON TABLE public.sys_user_role IS '用户-角色关联表';
-COMMENT ON COLUMN public.sys_user_role.tenant_id IS '租户ID';
 
 -- ----------------------------
 -- sys_tenant_role (租户-平台角色映射表)
--- 记录平台分配给每个租户的平台角色（tenant_id=NULL 的角色）
--- 租户管理员的菜单权限由此表动态决定
 -- ----------------------------
 DROP TABLE IF EXISTS public.sys_tenant_role;
 CREATE TABLE public.sys_tenant_role (
@@ -181,8 +174,6 @@ CREATE INDEX idx_sys_tenant_role_tenant ON public.sys_tenant_role(tenant_id);
 CREATE INDEX idx_sys_tenant_role_role ON public.sys_tenant_role(role_id);
 
 COMMENT ON TABLE public.sys_tenant_role IS '租户-平台角色映射表';
-COMMENT ON COLUMN public.sys_tenant_role.tenant_id IS '租户ID';
-COMMENT ON COLUMN public.sys_tenant_role.role_id IS '平台角色ID（tenant_id=NULL 的角色）';
 
 -- ----------------------------
 -- sys_organization (组织架构表)
@@ -213,7 +204,6 @@ CREATE INDEX idx_sys_org_parent ON public.sys_organization(parent_id);
 CREATE INDEX idx_sys_org_status ON public.sys_organization(status, delete_flag);
 
 COMMENT ON TABLE public.sys_organization IS '组织架构表';
-COMMENT ON COLUMN public.sys_organization.tenant_id IS '租户ID，NULL=平台组织，非NULL=租户组织';
 
 -- ----------------------------
 -- sys_operation_log (操作日志表)
@@ -249,7 +239,6 @@ CREATE INDEX idx_op_log_module ON public.sys_operation_log(module_name);
 CREATE INDEX idx_op_log_time ON public.sys_operation_log(create_time);
 
 COMMENT ON TABLE public.sys_operation_log IS '操作日志表';
-COMMENT ON COLUMN public.sys_operation_log.tenant_id IS '租户ID，NULL表示平台操作日志';
 
 -- ----------------------------
 -- sys_dict_type (数据字典类型表)
@@ -276,7 +265,6 @@ CREATE INDEX idx_dict_type_type ON public.sys_dict_type(dict_type);
 CREATE INDEX idx_dict_type_status ON public.sys_dict_type(status, delete_flag);
 
 COMMENT ON TABLE public.sys_dict_type IS '数据字典类型表';
-COMMENT ON COLUMN public.sys_dict_type.tenant_id IS '租户ID，NULL表示平台字典';
 
 -- ----------------------------
 -- sys_dict_data (数据字典数据表)
@@ -307,4 +295,125 @@ CREATE INDEX idx_dict_data_type ON public.sys_dict_data(dict_type);
 CREATE INDEX idx_dict_data_status ON public.sys_dict_data(status, delete_flag);
 
 COMMENT ON TABLE public.sys_dict_data IS '数据字典数据表';
-COMMENT ON COLUMN public.sys_dict_data.tenant_id IS '租户ID，NULL表示平台字典数据';
+
+-- ----------------------------
+-- sys_job (定时任务定义表)
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_job;
+CREATE TABLE public.sys_job (
+  id              BIGSERIAL     PRIMARY KEY,
+  job_name        VARCHAR(100)  NOT NULL,
+  job_group       VARCHAR(50)   NOT NULL DEFAULT 'DEFAULT',
+  handler_name    VARCHAR(100)  NOT NULL,
+  cron_expression VARCHAR(50)   NOT NULL,
+  job_params      TEXT,
+  status          SMALLINT      NOT NULL DEFAULT 0,
+  remark          VARCHAR(255),
+  delete_flag     SMALLINT      NOT NULL DEFAULT 0,
+  created_by      BIGINT,
+  create_time     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_by      BIGINT,
+  update_time     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE  public.sys_job IS '定时任务定义表';
+COMMENT ON COLUMN public.sys_job.handler_name IS 'Spring Bean 名称';
+COMMENT ON COLUMN public.sys_job.status IS '0=停用 1=启用';
+
+-- ----------------------------
+-- sys_job_log (定时任务执行历史表)
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_job_log;
+CREATE TABLE public.sys_job_log (
+  id            BIGSERIAL    PRIMARY KEY,
+  job_id        BIGINT       NOT NULL,
+  job_name      VARCHAR(100) NOT NULL,
+  handler_name  VARCHAR(100) NOT NULL,
+  trigger_type  SMALLINT     NOT NULL DEFAULT 0,
+  start_time    TIMESTAMP    NOT NULL,
+  end_time      TIMESTAMP,
+  duration_ms   BIGINT,
+  status        SMALLINT     NOT NULL DEFAULT 0,
+  error_msg     TEXT,
+  operator_id   BIGINT
+);
+
+CREATE INDEX idx_sys_job_log_job_id     ON public.sys_job_log(job_id);
+CREATE INDEX idx_sys_job_log_start_time ON public.sys_job_log(start_time DESC);
+
+COMMENT ON TABLE  public.sys_job_log IS '定时任务执行历史表';
+COMMENT ON COLUMN public.sys_job_log.trigger_type IS '0=定时触发 1=手动触发';
+COMMENT ON COLUMN public.sys_job_log.status IS '0=失败 1=成功';
+
+-- ----------------------------
+-- sys_config (系统配置表)
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_config;
+CREATE TABLE public.sys_config (
+    id          BIGSERIAL PRIMARY KEY,
+    config_key  VARCHAR(100) NOT NULL,
+    config_value TEXT,
+    config_name VARCHAR(200) NOT NULL,
+    config_type SMALLINT NOT NULL DEFAULT 1,
+    remark      VARCHAR(500),
+    tenant_id   BIGINT,
+    create_by   VARCHAR(50),
+    create_time TIMESTAMP,
+    update_by   VARCHAR(50),
+    update_time TIMESTAMP,
+    delete_flag SMALLINT NOT NULL DEFAULT 0,
+    CONSTRAINT uk_sys_config_key UNIQUE (config_key)
+);
+
+COMMENT ON TABLE  public.sys_config IS '系统配置表';
+COMMENT ON COLUMN public.sys_config.config_type IS '1=系统内置（不可删）2=用户自定义';
+
+-- ----------------------------
+-- sys_file_config (文件存储配置表，平台级)
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_file_config;
+CREATE TABLE public.sys_file_config (
+    id           BIGSERIAL PRIMARY KEY,
+    config_name  VARCHAR(100)  NOT NULL,
+    storage_type VARCHAR(20)   NOT NULL,
+    is_active    SMALLINT      NOT NULL DEFAULT 0,
+    config       JSONB         NOT NULL,
+    remark       VARCHAR(500),
+    create_by    VARCHAR(50),
+    create_time  TIMESTAMP,
+    update_by    VARCHAR(50),
+    update_time  TIMESTAMP,
+    delete_flag  SMALLINT      NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_file_config_type   ON public.sys_file_config(storage_type);
+CREATE INDEX idx_file_config_active ON public.sys_file_config(is_active) WHERE delete_flag = 0;
+
+COMMENT ON TABLE  public.sys_file_config IS '文件存储配置表，平台级';
+COMMENT ON COLUMN public.sys_file_config.config IS '存储配置JSON，结构因 storage_type 而异';
+
+-- ----------------------------
+-- sys_file (文件记录表)
+-- ----------------------------
+DROP TABLE IF EXISTS public.sys_file;
+CREATE TABLE public.sys_file (
+    id           BIGSERIAL PRIMARY KEY,
+    file_name    VARCHAR(255)  NOT NULL,
+    file_key     VARCHAR(500)  NOT NULL,
+    file_url     VARCHAR(1000),
+    file_size    BIGINT,
+    content_type VARCHAR(100),
+    storage_type VARCHAR(20),
+    biz_type     VARCHAR(50),
+    biz_id       VARCHAR(50),
+    tenant_id    BIGINT,
+    create_by    VARCHAR(50),
+    create_time  TIMESTAMP,
+    delete_flag  SMALLINT      NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_sys_file_tenant ON public.sys_file(tenant_id);
+CREATE INDEX idx_sys_file_biz    ON public.sys_file(biz_type, biz_id);
+
+COMMENT ON TABLE  public.sys_file IS '文件记录表';
+COMMENT ON COLUMN public.sys_file.file_key IS '存储路径/对象Key，用于删除和访问';

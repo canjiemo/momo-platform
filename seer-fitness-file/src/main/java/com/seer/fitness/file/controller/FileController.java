@@ -1,6 +1,8 @@
 package com.seer.fitness.file.controller;
 
 import com.seer.fitness.file.dto.SysFileDTO;
+import com.seer.fitness.file.dto.SysFileQueryParam;
+import io.github.canjiemo.mycommon.pager.PagerHandler;
 import com.seer.fitness.file.service.ISysFileService;
 import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.file.storage.adapter.LocalStorageAdapter;
@@ -57,11 +59,9 @@ public class FileController extends MyBaseController {
 
     @PostMapping("/search")
     @RequireAuth(login = true)
-    public MyResponseResult<Pager<SysFileDTO>> search(
-            @RequestParam(required = false) String bizType,
-            @RequestParam(required = false) String bizId,
-            Pager<SysFileDTO> pager) {
-        return doJsonOut(fileService.search(bizType, bizId, pager));
+    public MyResponseResult<Pager<SysFileDTO>> search(@RequestBody SysFileQueryParam param) {
+        return doJsonOut(fileService.search(param.getBizType(), param.getBizId(),
+                PagerHandler.createPager(param)));
     }
 
     /**

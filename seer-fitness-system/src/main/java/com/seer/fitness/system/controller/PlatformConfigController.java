@@ -9,6 +9,7 @@ import com.seer.fitness.system.dto.SysConfigQueryParam;
 import com.seer.fitness.system.dto.SysConfigUpdateRequest;
 import com.seer.fitness.system.service.ISysConfigService;
 import io.github.canjiemo.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.PagerHandler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +23,8 @@ public class PlatformConfigController {
 
     @PostMapping("/search")
     @RequireAuth(permissions = {"config:view"})
-    public Pager<SysConfigDTO> search(@RequestBody SysConfigQueryParam param, Pager<SysConfigDTO> pager) {
-        return sysConfigService.search(param, pager);
+    public Pager<SysConfigDTO> search(@RequestBody SysConfigQueryParam param) {
+        return sysConfigService.search(param, PagerHandler.createPager(param));
     }
 
     @GetMapping("/{key}")
