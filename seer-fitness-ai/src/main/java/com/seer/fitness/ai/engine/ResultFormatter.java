@@ -57,6 +57,11 @@ public class ResultFormatter {
             summary = aiResponse.substring(0, idx).trim();
             chartType = aiResponse.substring(idx + "CHART_TYPE:".length()).trim().toLowerCase();
         }
+        // 校验 LLM 返回的图表类型
+        Set<String> validChartTypes = Set.of("bar", "line", "pie", "none");
+        if (!validChartTypes.contains(chartType)) {
+            chartType = "none";
+        }
         response.setSummary(summary);
 
         // 图表配置（简单推断 X/Y 轴）
@@ -69,6 +74,7 @@ public class ResultFormatter {
             response.setChart(chart);
         }
 
+        log.debug("格式化完成: chartType={}, rows={}", chartType, rows.size());
         return response;
     }
 }

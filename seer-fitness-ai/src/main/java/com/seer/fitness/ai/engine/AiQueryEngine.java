@@ -2,6 +2,7 @@ package com.seer.fitness.ai.engine;
 
 import com.seer.fitness.ai.engine.dto.AiQueryRequest;
 import com.seer.fitness.ai.engine.dto.AiQueryResponse;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,9 @@ public class AiQueryEngine {
     @Autowired private ResultFormatter resultFormatter;
 
     public AiQueryResponse query(AiQueryRequest request) {
+        if (request.getQuestion() == null || request.getQuestion().isBlank()) {
+            throw new BusinessException("请输入查询问题");
+        }
         String question = request.getQuestion();
         log.info("AI 查询开始: sessionId={}, question={}", request.getSessionId(), question);
 

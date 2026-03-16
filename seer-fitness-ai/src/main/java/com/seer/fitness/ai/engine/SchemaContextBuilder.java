@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -82,13 +83,19 @@ public class SchemaContextBuilder extends BaseServiceImpl {
     private String buildFullSchema() {
         List<AiTableCatalog> tables = lambdaQuery(AiTableCatalog.class)
                 .eq(AiTableCatalog::getIsEnabled, 1).list();
+        if (tables.isEmpty()) return "";
+
+        // 一次性查询所有启用字段，避免 N+1
+        List<AiFieldCatalog> allFields = lambdaQuery(AiFieldCatalog.class)
+                .eq(AiFieldCatalog::getIsEnabled, 1).list();
+        Map<Long, List<AiFieldCatalog>> fieldsByTable = allFields.stream()
+                .collect(Collectors.groupingBy(AiFieldCatalog::getTableId));
+
         StringBuilder sb = new StringBuilder();
         for (AiTableCatalog t : tables) {
             sb.append("表名: ").append(t.getTableName())
               .append("（").append(t.getDisplayName()).append("）\n");
-            List<AiFieldCatalog> fields = lambdaQuery(AiFieldCatalog.class)
-                    .eq(AiFieldCatalog::getTableId, t.getId())
-                    .eq(AiFieldCatalog::getIsEnabled, 1).list();
+            List<AiFieldCatalog> fields = fieldsByTable.getOrDefault(t.getId(), List.of());
             for (AiFieldCatalog f : fields) {
                 sb.append("  - ").append(f.getFieldName())
                   .append("（").append(f.getDisplayName()).append("）");

@@ -22,9 +22,11 @@ public class SqlExecutor {
      */
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> execute(String sql) {
-        // 追加行数限制，防止超大结果集
-        String limitedSql = sql.stripTrailing().replaceAll(";$", "")
-                + " LIMIT " + MAX_ROWS;
+        String cleanSql = sql.stripTrailing().replaceAll(";$", "");
+        // 仅在 SQL 未包含 LIMIT 时追加行数限制
+        String limitedSql = cleanSql.toUpperCase().contains(" LIMIT ")
+                ? cleanSql
+                : cleanSql + " LIMIT " + MAX_ROWS;
         List<Map<String, Object>> results = (List<Map<String, Object>>)
                 (List<?>) baseDao.queryListForSql(limitedSql, Map.of(), Map.class);
         log.info("SQL 执行完成，返回 {} 行", results.size());
