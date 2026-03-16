@@ -8,5 +8,4 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class SysFileQueryParam extends PagerParam {
     private String bizType;
-    private String bizId;
 }

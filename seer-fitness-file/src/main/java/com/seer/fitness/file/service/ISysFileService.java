@@ -6,8 +6,8 @@ import io.github.canjiemo.mycommon.pager.Pager;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ISysFileService extends IBaseService {
-    SysFileDTO upload(MultipartFile file, String bizType, String bizId) throws Exception;
+    SysFileDTO upload(MultipartFile file, String bizType) throws Exception;
     SysFileDTO getById(Long id);
     void delete(Long id) throws Exception;
-    Pager<SysFileDTO> search(String bizType, String bizId, Pager<SysFileDTO> pager);
+    Pager<SysFileDTO> search(String bizType, Pager<SysFileDTO> pager);
 }

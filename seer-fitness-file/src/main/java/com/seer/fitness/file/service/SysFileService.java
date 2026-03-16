@@ -4,6 +4,7 @@ import com.seer.fitness.file.dto.SysFileDTO;
 import com.seer.fitness.file.entity.SysFile;
 import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.file.storage.IFileStorageAdapter;
+import com.seer.fitness.file.storage.model.FileBizType;
 import com.seer.fitness.file.storage.model.FileUploadResult;
 import com.seer.fitness.framework.dto.UserCacheInfo;
 import com.seer.fitness.framework.utils.SecurityContextUtil;
@@ -17,7 +18,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -47,15 +47,18 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
 
     @Override
     @Transactional
-    public SysFileDTO upload(MultipartFile file, String bizType, String bizId) throws Exception {
+    public SysFileDTO upload(MultipartFile file, String bizType) throws Exception {
         validateFile(file);
+        String resolvedBizType = (bizType == null || bizType.isBlank()) ? FileBizType.COMMON : bizType;
+        if (!FileBizType.ALL.contains(resolvedBizType)) {
+            throw new BusinessException("不支持的业务类型: " + resolvedBizType + "，允许值: " + FileBizType.ALL);
+        }
         IFileStorageAdapter adapter = fileStorageManager.getActive();
         UserCacheInfo user = SecurityContextUtil.getCurrentUser();
         String tenantSegment = (user != null && user.getTenantId() != null)
                 ? String.valueOf(user.getTenantId()) : "platform";
-        String typeSegment = StringUtils.hasText(bizType) ? bizType : "common";
         String dateSegment = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        String directory = tenantSegment + "/" + typeSegment + "/" + dateSegment;
+        String directory = tenantSegment + "/" + resolvedBizType + "/" + dateSegment;
         FileUploadResult result = adapter.upload(file, directory);
 
         SysFile sysFile = new SysFile();
@@ -65,8 +68,7 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
         sysFile.setFileSize(result.getFileSize());
         sysFile.setContentType(result.getContentType());
         sysFile.setStorageType(adapter.getType());
-        sysFile.setBizType(bizType);
-        sysFile.setBizId(bizId);
+        sysFile.setBizType(resolvedBizType);
         sysFile.setDeleteFlag(0);
         baseDao.insertPO(sysFile, true);
 
@@ -96,10 +98,9 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
     }
 
     @Override
-    public Pager<SysFileDTO> search(String bizType, String bizId, Pager<SysFileDTO> pager) {
+    public Pager<SysFileDTO> search(String bizType, Pager<SysFileDTO> pager) {
         return lambdaQuery(SysFile.class, SysFileDTO.class)
                 .eq(SysFile::getBizType, bizType)
-                .eq(SysFile::getBizId, bizId)
                 .orderByDesc(SysFile::getCreateTime)
                 .page(pager);
     }

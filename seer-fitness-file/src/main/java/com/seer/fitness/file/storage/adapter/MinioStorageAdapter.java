@@ -30,7 +30,22 @@ public class MinioStorageAdapter implements IFileStorageAdapter {
                 .endpoint(config.getEndpoint())
                 .credentials(config.getAccessKey(), config.getSecretKey())
                 .build();
+        ensureBucketExists();
         log.info("MinIO 存储初始化: endpoint={}, bucket={}", config.getEndpoint(), config.getBucket());
+    }
+
+    private void ensureBucketExists() {
+        String bucket = config.getBucket();
+        try {
+            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+            if (!exists) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+                log.info("MinIO bucket 已自动创建: {}", bucket);
+            }
+        } catch (Exception e) {
+            log.error("MinIO bucket 检查/创建失败: bucket={}", bucket, e);
+            throw new RuntimeException("MinIO bucket 初始化失败: " + bucket, e);
+        }
     }
 
     @Override

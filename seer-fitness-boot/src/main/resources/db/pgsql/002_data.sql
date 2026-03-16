@@ -270,47 +270,4 @@ VALUES ('MinIO 存储', 'minio', 0,
         '{"endpoint":"http://minio:9000","bucket":"seer-fitness","accessKey":"","secretKey":"","publicBucket":true,"presignedExpireSeconds":3600}',
         '生产环境使用 MinIO 对象存储', 'system', NOW(), 'system', NOW(), 0);
 
--- ========================================
--- AI 模块初始配置
--- ========================================
-
--- 默认 Ollama 配置（本地开发用）
-INSERT INTO public.ai_provider_config
-    (config_name, provider, chat_model, embed_model, base_url, is_active, remark, create_time, update_time, delete_flag)
-VALUES
-    ('本地 Ollama', 'ollama', 'qwen2.5:7b', 'nomic-embed-text',
-     'http://localhost:11434', 1,
-     '本地 Ollama 服务，需先安装 Ollama 并拉取模型',
-     NOW(), NOW(), 0);
-
--- ========================================
--- AI 智能查询模块菜单
--- ========================================
-
--- 平台管理 -> AI 模型配置
-INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, create_time, update_time)
-VALUES
-    (10600, NULL, 'AI 模型',       10000, 1, '/platform/ai/provider', NULL, 'RobotOutlined',   7, 1, 0, NOW(), NOW()),
-    (10601, NULL, '查看模型配置',  10600, 2, NULL, 'ai:provider:view',   NULL, 1, 1, 0, NOW(), NOW()),
-    (10602, NULL, '新增模型配置',  10600, 2, NULL, 'ai:provider:create', NULL, 2, 1, 0, NOW(), NOW()),
-    (10603, NULL, '修改模型配置',  10600, 2, NULL, 'ai:provider:update', NULL, 3, 1, 0, NOW(), NOW()),
-    (10604, NULL, '删除模型配置',  10600, 2, NULL, 'ai:provider:delete', NULL, 4, 1, 0, NOW(), NOW());
-
--- 平台管理 -> 数据目录
-INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, create_time, update_time)
-VALUES
-    (10700, NULL, '数据目录',      10000, 1, '/platform/ai/catalog', NULL, 'TableOutlined',   8, 1, 0, NOW(), NOW()),
-    (10701, NULL, '扫描表结构',    10700, 2, NULL, 'ai:catalog:scan',   NULL, 1, 1, 0, NOW(), NOW()),
-    (10702, NULL, '配置表/字段',   10700, 2, NULL, 'ai:catalog:edit',   NULL, 2, 1, 0, NOW(), NOW()),
-    (10703, NULL, '同步向量',      10700, 2, NULL, 'ai:catalog:sync',   NULL, 3, 1, 0, NOW(), NOW());
-
--- 系统管理 -> AI 智能查询（租户可见）
-INSERT INTO public.sys_menu (id, tenant_id, menu_name, parent_id, type, path, permission, icon, sort_order, status, delete_flag, create_time, update_time)
-VALUES
-    (1600, NULL, 'AI 智能查询', 1000, 1, '/system/ai', NULL, 'ThunderboltOutlined', 5, 1, 0, NOW(), NOW()),
-    (1601, NULL, '发起查询',    1600, 2, NULL, 'ai:query', NULL, 1, 1, 0, NOW(), NOW());
-
--- 将 AI 查询菜单加入租户管理员模板角色
-INSERT INTO public.sys_role_menu (tenant_id, role_id, menu_id) VALUES
-    (NULL, 100, 1600),
-    (NULL, 100, 1601);
+-- AI 智能查询模块初始数据见 004_ai_data.sql

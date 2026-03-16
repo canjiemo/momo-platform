@@ -1,6 +1,7 @@
 package com.seer.fitness.file.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -13,6 +14,5 @@ public class SysFileDTO {
     private String contentType;
     private String storageType;
     private String bizType;
-    private String bizId;
     private LocalDateTime createTime;
 }

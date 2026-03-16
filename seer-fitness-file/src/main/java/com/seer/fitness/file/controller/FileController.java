@@ -2,7 +2,6 @@ package com.seer.fitness.file.controller;
 
 import com.seer.fitness.file.dto.SysFileDTO;
 import com.seer.fitness.file.dto.SysFileQueryParam;
-import io.github.canjiemo.mycommon.pager.PagerHandler;
 import com.seer.fitness.file.service.ISysFileService;
 import com.seer.fitness.file.storage.FileStorageManager;
 import com.seer.fitness.file.storage.adapter.LocalStorageAdapter;
@@ -10,6 +9,7 @@ import com.seer.fitness.framework.annotation.RequireAuth;
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
 import io.github.canjiemo.mycommon.pager.Pager;
+import io.github.canjiemo.mycommon.pager.PagerHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +39,8 @@ public class FileController extends MyBaseController {
     @RequireAuth(login = true)
     public MyResponseResult<SysFileDTO> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "bizType", defaultValue = "common") String bizType,
-            @RequestParam(value = "bizId", required = false) String bizId) throws Exception {
-        return doJsonOut(fileService.upload(file, bizType, bizId));
+            @RequestParam(value = "bizType", defaultValue = "common") String bizType) throws Exception {
+        return doJsonOut(fileService.upload(file, bizType));
     }
 
     @GetMapping("/{id}")
@@ -60,8 +59,7 @@ public class FileController extends MyBaseController {
     @PostMapping("/search")
     @RequireAuth(login = true)
     public MyResponseResult<Pager<SysFileDTO>> search(@RequestBody SysFileQueryParam param) {
-        return doJsonOut(fileService.search(param.getBizType(), param.getBizId(),
-                PagerHandler.createPager(param)));
+        return doJsonOut(fileService.search(param.getBizType(), PagerHandler.createPager(param)));
     }
 
     /**

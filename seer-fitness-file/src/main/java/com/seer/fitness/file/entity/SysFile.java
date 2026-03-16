@@ -5,6 +5,7 @@ import io.github.canjiemo.base.myjdbc.annotation.AuditFill;
 import io.github.canjiemo.base.myjdbc.annotation.MyField;
 import io.github.canjiemo.base.myjdbc.annotation.MyTable;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +19,6 @@ public class SysFile implements MyTableEntity {
     private String contentType;
     private String storageType;
     private String bizType;
-    private String bizId;
     private Long tenantId;
     @MyField(fill = AuditFill.CREATE_BY)
     private String createBy;
