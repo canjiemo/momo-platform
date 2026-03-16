@@ -34,6 +34,7 @@
         <module>seer-fitness-system</module>
         <module>seer-fitness-file</module>
         <module>seer-fitness-business</module>
+        <module>seer-fitness-ai</module>
         <module>seer-fitness-boot</module>
     </modules>
 
@@ -98,6 +99,13 @@
                 <version>${druid.version}</version>
             </dependency>
 
+            <!-- FastJSON2 核心库 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+
             <!-- FastJSON2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
@@ -124,6 +132,13 @@
                 <groupId>io.minio</groupId>
                 <artifactId>minio</artifactId>
                 <version>8.5.11</version>
+            </dependency>
+
+            <!-- JSqlParser: SQL 解析（myjdbc 传递依赖，统一版本管理） -->
+            <dependency>
+                <groupId>com.github.jsqlparser</groupId>
+                <artifactId>jsqlparser</artifactId>
+                <version>5.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -184,6 +199,28 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </repository>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-release</id>
+            <name>Spring Release</name>
+            <url>https://repo.spring.io/release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
 <!--        <repository>-->
 <!--            <id>company</id>-->

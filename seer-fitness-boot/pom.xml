@@ -30,6 +30,13 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- AI 智能查询模块 -->
+        <dependency>
+            <groupId>com.seer</groupId>
+            <artifactId>seer-fitness-ai</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Web Starter with Undertow -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
