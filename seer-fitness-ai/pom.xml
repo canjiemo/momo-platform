@@ -20,6 +20,13 @@
             <version>${myjdbc.version}</version>
         </dependency>
 
+        <!-- mymvc: Controller 基类 + 统一响应封装 -->
+        <dependency>
+            <groupId>io.github.canjiemo</groupId>
+            <artifactId>mymvc-spring-boot-starter</artifactId>
+            <version>${mymvc.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
