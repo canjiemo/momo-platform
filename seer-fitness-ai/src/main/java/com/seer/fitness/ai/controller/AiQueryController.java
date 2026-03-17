@@ -1,5 +1,6 @@
 package com.seer.fitness.ai.controller;
 
+import com.seer.fitness.ai.conversation.dto.ConversationCursorResult;
 import com.seer.fitness.ai.conversation.entity.AiConversation;
 import com.seer.fitness.ai.conversation.service.IAiConversationService;
 import com.seer.fitness.ai.engine.AiQueryAsyncService;
@@ -78,8 +79,18 @@ public class AiQueryController extends MyBaseController {
         return doJsonOut(taskResult);
     }
 
+    /**
+     * 游标分页查询对话历史
+     *
+     * @param sessionId 会话 ID
+     * @param cursor    上一页最老消息的 id，首次加载不传
+     * @param size      每页条数，默认 20，最大 100
+     */
     @GetMapping("/conversation/{sessionId}")
-    public MyResponseResult<List<AiConversation>> history(@PathVariable String sessionId) {
-        return doJsonOut(conversationService.getHistory(sessionId));
+    public MyResponseResult<ConversationCursorResult> history(
+            @PathVariable String sessionId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "20") int size) {
+        return doJsonOut(conversationService.getHistory(sessionId, cursor, size));
     }
 }
