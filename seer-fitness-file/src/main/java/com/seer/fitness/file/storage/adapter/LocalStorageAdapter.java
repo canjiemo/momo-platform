@@ -62,8 +62,13 @@ public class LocalStorageAdapter implements IFileStorageAdapter {
         return config.getUrlPrefix() + "/" + fileKey;
     }
 
-    /** 供 FileController 本地文件服务时使用 */
+    /** 供 FileController 本地文件服务时使用，内置路径穿越防护 */
     public Path resolvePath(String fileKey) {
-        return Paths.get(config.getBasePath(), fileKey);
+        Path base = Paths.get(config.getBasePath()).toAbsolutePath().normalize();
+        Path resolved = base.resolve(fileKey).normalize();
+        if (!resolved.startsWith(base)) {
+            throw new IllegalArgumentException("非法文件路径");
+        }
+        return resolved;
     }
 }

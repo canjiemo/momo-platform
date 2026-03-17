@@ -28,10 +28,14 @@ public class AiQueryAsyncService {
 
     /**
      * 初始化任务状态为 PENDING，供 Controller 在提交前调用（同步，确保轮询时 key 已存在）
+     *
+     * @param taskId 任务ID
+     * @param ownerUserId 提交任务的用户ID，用于防止跨用户查询任务结果
      */
-    public void initTask(String taskId) {
+    public void initTask(String taskId, Long ownerUserId) {
         AiTaskResult pending = new AiTaskResult();
         pending.setStatus(AiTaskResult.Status.PENDING);
+        pending.setOwnerUserId(ownerUserId);
         redisUtil.set(TASK_KEY_PREFIX + taskId, pending, TASK_TTL_MINUTES, TimeUnit.MINUTES);
     }
 

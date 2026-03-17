@@ -14,4 +14,6 @@ public class AiTaskResult {
     private AiQueryResponse result;
     /** 失败时的错误提示（展示给用户） */
     private String errorMsg;
+    /** 任务提交人用户ID，用于防止跨用户查询任务结果 */
+    private Long ownerUserId;
 }

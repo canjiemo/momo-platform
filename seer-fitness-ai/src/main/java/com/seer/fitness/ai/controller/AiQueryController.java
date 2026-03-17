@@ -44,13 +44,15 @@ public class AiQueryController extends MyBaseController {
         }
 
         // 在 HTTP 线程取用户信息和历史（异步线程中 SecurityContextUtil 不可用）
+        // userId/tenantId 由 SecurityContextUtil 强制覆盖，不信任客户端传值
         UserCacheInfo user = SecurityContextUtil.getCurrentUser();
-        request.setUserId(user != null ? user.getUserId() : null);
+        Long userId = user != null ? user.getUserId() : null;
+        request.setUserId(userId);
         request.setTenantId(user != null ? user.getTenantId() : null);
         List<AiConversation> history = conversationService.getRecentHistory(request.getSessionId(), 5);
 
         String taskId = UUID.randomUUID().toString().replace("-", "");
-        asyncService.initTask(taskId);
+        asyncService.initTask(taskId, userId);
         asyncService.executeAsync(taskId, request, history);
 
         log.info("[AI查询] 任务已提交 taskId={} sessionId={}", taskId, request.getSessionId());
@@ -66,6 +68,12 @@ public class AiQueryController extends MyBaseController {
         AiTaskResult taskResult = asyncService.getTaskResult(taskId);
         if (taskResult == null) {
             throw new BusinessException("任务不存在或已过期（10分钟内有效）");
+        }
+        // 验证任务归属，防止跨用户查询他人任务结果
+        UserCacheInfo user = SecurityContextUtil.getCurrentUser();
+        Long currentUserId = user != null ? user.getUserId() : null;
+        if (taskResult.getOwnerUserId() != null && !taskResult.getOwnerUserId().equals(currentUserId)) {
+            throw new BusinessException("无权访问该任务");
         }
         return doJsonOut(taskResult);
     }

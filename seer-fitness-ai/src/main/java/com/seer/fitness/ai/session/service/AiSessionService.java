@@ -55,7 +55,8 @@ public class AiSessionService extends BaseServiceImpl implements IAiSessionServi
     @Transactional
     public void delete(String sessionId, Long userId) {
         AiSession session = getOwnedSession(sessionId, userId);
-        // 物理删除该会话的所有消息（ai_conversation 无 delete_flag）
+        // 物理删除该会话所有消息（ai_conversation 无 delete_flag）
+        // @Transactional 保证原子性：任一步骤失败时整个事务回滚，不会出现消息半删状态
         List<AiConversation> messages = lambdaQuery(AiConversation.class)
                 .eq(AiConversation::getSessionId, sessionId)
                 .list();
