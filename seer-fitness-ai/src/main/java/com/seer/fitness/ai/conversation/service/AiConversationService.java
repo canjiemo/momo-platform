@@ -98,17 +98,31 @@ public class AiConversationService extends BaseServiceImpl implements IAiConvers
     @Override
     public List<AiConversation> getRecentHistory(String sessionId, int rounds) {
         UserCacheInfo user = SecurityContextUtil.getCurrentUser();
-        Long userId = user != null ? user.getUserId() : null;
-        // lambdaQuery 自动注入 tenant_id 条件
-        // 只取有 SQL 的轮次注入 LLM 上下文，NOT_A_QUERY 的拒绝回复不传给模型
-        List<AiConversation> all = lambdaQuery(AiConversation.class)
-                .eq(AiConversation::getSessionId, sessionId)
-                .eq(AiConversation::getUserId, userId)
-                .isNotNull(AiConversation::getGeneratedSql)
-                .orderByAsc(AiConversation::getCreateTime)
-                .list();
+        Long userId   = user != null ? user.getUserId()   : null;
+        Long tenantId = user != null ? user.getTenantId() : null;
+
+        // 只取有 SQL 的轮次（每轮 user + assistant 各 1 条），直接 LIMIT，不再全量加载
         int limit = rounds * 2;
-        if (all.size() <= limit) return all;
-        return all.subList(all.size() - limit, all.size());
+        Map<String, Object> params = new HashMap<>();
+        params.put("sessionId", sessionId);
+        params.put("userId", userId);
+        params.put("limit", limit);
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM ai_conversation"
+                + " WHERE session_id = :sessionId AND user_id = :userId AND generated_sql IS NOT NULL"
+        );
+        if (tenantId != null) {
+            sql.append(" AND tenant_id = :tenantId");
+            params.put("tenantId", tenantId);
+        } else {
+            sql.append(" AND tenant_id IS NULL");
+        }
+        sql.append(" ORDER BY id DESC LIMIT :limit");
+
+        List<AiConversation> rows = baseDao.queryListForSql(sql.toString(), params, AiConversation.class);
+        // DESC → ASC，LLM 需要按时间顺序理解上下文
+        Collections.reverse(rows);
+        return rows;
     }
 }
