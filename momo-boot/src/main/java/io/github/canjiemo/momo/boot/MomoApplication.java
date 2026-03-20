@@ -1,0 +1,11 @@
+package io.github.canjiemo.momo.boot;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication(scanBasePackages = {"io.github.canjiemo.momo"})
+public class MomoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MomoApplication.class, args);
+    }
+}

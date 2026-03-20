@@ -8,6 +8,7 @@ logs
 .mcp.json
 .claude/
 docs/
+uploads/
 
 ### STS ###
 .apt_generated

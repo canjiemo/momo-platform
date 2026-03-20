@@ -1,0 +1,89 @@
+spring:
+  application:
+    name: momo-platform
+  profiles:
+    active: local
+
+  # PostgreSQL Database Configuration
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/momo-platform?stringtype=unspecified
+    username: admin
+    password: 123456
+
+    # Druid Connection Pool Configuration
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall
+      validation-query-timeout: 3
+
+      # Druid Web Monitor
+      web-stat-filter:
+        enabled: true
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: admin123
+
+  servlet:
+    multipart:
+      max-file-size: 10GB
+      max-request-size: 10GB
+
+  data:
+    redis:
+      host: localhost
+      database: 0
+      timeout: 3000ms
+      port: 30069
+      password: 123456
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    clean-disabled: true        # 禁止 clean，防止误删生产数据
+
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.autoconfigure.ollama.OllamaChatAutoConfiguration
+      - org.springframework.ai.autoconfigure.ollama.OllamaEmbeddingAutoConfiguration
+      - org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration
+
+# Server Configuration
+server:
+  port: 8070
+  undertow:
+    threads:
+      io: 4
+      worker: 20
+    buffer-size: 1024
+    direct-buffers: true
+
+# JWT Configuration (JWT配置)
+jwt:
+  secret: "9F922B9833DEDAC0176412709F157797"  # JWT密钥(256位)
+  expiration: 86400000                   # Token过期时间(毫秒,24小时)
+
+# MyJdbc Configuration (多租户配置)
+myjdbc:
+  show-sql:
+    enabled: true        # 开启 MyJDBC SQL 调试日志（Preparing / Parameters / 耗时）
+  tenant:
+    enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
+    column: tenant_id                    # 租户字段名
+
+

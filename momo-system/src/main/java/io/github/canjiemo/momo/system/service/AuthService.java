@@ -1,0 +1,216 @@
+package io.github.canjiemo.momo.system.service;
+
+import io.github.canjiemo.momo.framework.dto.UserCacheInfo;
+import io.github.canjiemo.momo.framework.utils.JwtUtil;
+import io.github.canjiemo.momo.framework.utils.PasswordUtil;
+import io.github.canjiemo.momo.framework.utils.RedisUtil;
+import io.github.canjiemo.momo.system.dto.LoginRequest;
+import io.github.canjiemo.momo.system.dto.LoginResponse;
+import io.github.canjiemo.momo.system.dto.RoleDTO;
+import io.github.canjiemo.momo.system.entity.SysUser;
+import io.github.canjiemo.mycommon.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+/**
+ * 认证服务
+ *
+ * @author canjiemo@gmail.com
+ */
+@Service
+@Slf4j
+public class AuthService implements IAuthService {
+
+    @Autowired
+    private IUserService userService;
+
+    @Autowired
+    private IRoleService roleService;
+
+    @Autowired
+    private IMenuService menuService;
+
+    @Autowired
+    private IAccountLockService accountLockService;
+
+    @Autowired
+    private PasswordUtil passwordUtil;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Autowired
+    private ICaptchaService captchaService;
+
+    @Autowired(required = false)
+    private ITenantService tenantService;
+
+    /**
+     * 用户登录
+     * - tenantCode 为空：平台管理员登录（tenant_id=NULL）
+     * - tenantCode 有值：租户用户登录（tenant_id=具体值）
+     */
+    public LoginResponse login(LoginRequest request, String ip) {
+        String username = request.getUsername();
+        String password = request.getPassword();
+        String tenantCode = request.getTenantCode();
+
+        // 1. 验证验证码
+        if (!captchaService.verifyCaptcha(request.getCaptchaId(), request.getCaptcha())) {
+            throw new BusinessException("验证码错误或已过期");
+        }
+
+        // 2. 判断登录类型
+        boolean isPlatformAdmin = (tenantCode == null || tenantCode.trim().isEmpty());
+
+        io.github.canjiemo.momo.system.dto.TenantDTO tenant = null;
+        if (!isPlatformAdmin && tenantService != null) {
+            tenant = tenantService.getByCode(tenantCode);
+            if (tenant == null) {
+                throw new BusinessException("租户不存在或已被禁用");
+            }
+            if (tenant.getStatus() != 1) {
+                throw new BusinessException("租户已被禁用，请联系平台管理员");
+            }
+            if (tenant.getExpiredAt() != null && tenant.getExpiredAt().isBefore(java.time.LocalDateTime.now())) {
+                throw new BusinessException("租户已过期，请联系平台管理员");
+            }
+        }
+
+        // 3. 查询用户（tenant_id 模式：同一张表，通过 tenantId 区分）
+        Long tenantId = (tenant != null) ? tenant.getId() : null;
+        SysUser user = userService.findByUsernameAndTenantId(username, tenantId);
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 4. 检查用户状态
+        if (user.getStatus() != 1) {
+            throw new BusinessException("账户已被禁用");
+        }
+
+        // 5. 验证密码
+        if (!passwordUtil.verifyPassword(password, user.getPassword())) {
+            accountLockService.recordFailedAttempt(username, ip);
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        // 6. 登录成功，重置失败记录
+        accountLockService.onLoginSuccess(username, ip);
+
+        // 7. 生成JWT Token
+        String token;
+        if (tenant != null) {
+            token = jwtUtil.generateTokenWithTenant(username, user.getId(), tenant.getId(), tenant.getTenantCode());
+        } else {
+            token = jwtUtil.generateToken(username, user.getId());
+        }
+        String tokenId = jwtUtil.getTokenIdFromToken(token);
+
+        // 8. 获取用户角色和权限
+        List<String> roleCodes = roleService.getUserRoles(user.getId())
+                .stream()
+                .map(RoleDTO::getRoleCode)
+                .collect(Collectors.toList());
+        List<String> permissions = menuService.getUserPermissions(user.getId());
+
+        // 9. 缓存用户信息到Redis
+        UserCacheInfo userCacheInfo;
+        if (tenant != null) {
+            userCacheInfo = new UserCacheInfo(
+                    user.getId(), user.getUsername(), user.getRealName(),
+                    roleCodes, permissions, user.getAdminFlag(), user.getUserType(), tokenId,
+                    tenant.getId(), tenant.getTenantCode()
+            );
+        } else {
+            userCacheInfo = new UserCacheInfo(
+                    user.getId(), user.getUsername(), user.getRealName(),
+                    roleCodes, permissions, user.getAdminFlag(), user.getUserType(), tokenId
+            );
+        }
+        redisUtil.set("user:token:" + tokenId, userCacheInfo, 24, TimeUnit.HOURS);
+
+        log.info("用户登录成功: username={}, tenantCode={}, ip={}", username, tenantCode, ip);
+        return new LoginResponse(token);
+    }
+
+    /**
+     * 获取密码策略配置
+     */
+    public Map<String, Object> getPasswordPolicyConfig() {
+        return passwordUtil.getPasswordPolicyConfig();
+    }
+
+    /**
+     * 获取当前用户信息
+     */
+    public UserCacheInfo getCurrentUser(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        try {
+            String tokenId = jwtUtil.getTokenIdFromToken(token);
+            UserCacheInfo userInfo = redisUtil.get("user:token:" + tokenId, UserCacheInfo.class);
+
+            if (userInfo != null) {
+                // 更新最后访问时间，重新缓存24小时
+                userInfo.setLastAccessTime(System.currentTimeMillis());
+                redisUtil.set("user:token:" + tokenId, userInfo, 24, TimeUnit.HOURS);
+            }
+
+            return userInfo;
+        } catch (Exception e) {
+            log.warn("获取当前用户失败: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 清除用户缓存（登出）
+     */
+    public void clearUserCache(String token) {
+        if (token == null) {
+            return;
+        }
+
+        try {
+            String tokenId = jwtUtil.getTokenIdFromToken(token);
+            redisUtil.delete("user:token:" + tokenId);
+            log.info("清除用户缓存成功: tokenId={}", tokenId);
+        } catch (Exception e) {
+            log.warn("清除用户缓存失败: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 检查用户是否有权限
+     */
+    public boolean hasPermission(UserCacheInfo user, String permission) {
+        if (user == null || permission == null) {
+            return false;
+        }
+
+        return user.getPermissions() != null && user.getPermissions().contains(permission);
+    }
+
+    /**
+     * 检查用户是否有角色
+     */
+    public boolean hasRole(UserCacheInfo user, String role) {
+        if (user == null || role == null) {
+            return false;
+        }
+
+        return user.getRoleCodes() != null && user.getRoleCodes().contains(role);
+    }
+}

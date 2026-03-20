@@ -1,0 +1,83 @@
+package io.github.canjiemo.momo.system.entity;
+
+import io.github.canjiemo.base.myjdbc.MyTableEntity;
+import io.github.canjiemo.base.myjdbc.annotation.AuditFill;
+import io.github.canjiemo.base.myjdbc.annotation.MyField;
+import io.github.canjiemo.base.myjdbc.annotation.MyTable;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+/**
+ * 系统用户实体类
+ * 对应数据库表 sys_user
+ *
+ * @author canjiemo@gmail.com
+ */
+@Data
+@MyTable("sys_user")
+public class SysUser implements MyTableEntity {
+
+    /**
+     * 主键ID
+     */
+    private Long id;
+
+    /**
+     * 租户ID，NULL表示平台管理员
+     */
+    private Long tenantId;
+
+    /**
+     * 登录用户名
+     */
+    private String username;
+
+    /**
+     * 加密密码
+     */
+    private String password;
+
+    /**
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
+     * 所属组织ID
+     */
+    private Long orgId;
+
+    /**
+     * 状态：1启用 0禁用
+     */
+    private Integer status;
+
+    /**
+     * 管理员标识：1管理员 0普通用户
+     */
+    private Integer adminFlag;
+
+    /**
+     * 用户类型：0-运维人员 1-教师 2-学生
+     * @see io.github.canjiemo.momo.framework.enums.UserType
+     */
+    private Integer userType;
+
+    /**
+     * 逻辑删除：0正常 1删除
+     */
+    private Integer deleteFlag;
+
+    @MyField(fill = AuditFill.CREATE_BY)
+    private Long createdBy;
+
+    @MyField(fill = AuditFill.CREATE_TIME)
+    private LocalDateTime createTime;
+
+    @MyField(fill = AuditFill.UPDATE_BY)
+    private Long updatedBy;
+
+    @MyField(fill = AuditFill.UPDATE_TIME)
+    private LocalDateTime updateTime;
+}

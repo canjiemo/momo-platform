@@ -8,11 +8,11 @@
         <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.seer</groupId>
-    <artifactId>seer-fitness-edu</artifactId>
+    <groupId>io.github.canjiemo</groupId>
+    <artifactId>momo-platform</artifactId>
     <version>1.0.0</version>
-    <name>seer-fitness-edu</name>
-    <description>seer-fitness-edu,先知智慧体育-校园</description>
+    <name>momo-platform</name>
+    <description>momo-platform - 通用 Spring Boot 开发脚手架</description>
     <packaging>pom</packaging>
 
     <properties>
@@ -20,7 +20,7 @@
         <!-- 第三方依赖版本管理 -->
         <myjdbc.version>1.0.8-jdk21</myjdbc.version>
         <mymvc.version>1.0.2-jdk21</mymvc.version>
-        <mydict.version>1.0.6-jdk21</mydict.version>
+        <mydict.version>1.0.7-jdk21</mydict.version>
         <jwt.version>0.11.5</jwt.version>
         <guava.version>32.1.3-jre</guava.version>
         <caffeine.version>3.1.8</caffeine.version>
@@ -33,12 +33,12 @@
     </properties>
 
     <modules>
-        <module>seer-fitness-framework</module>
-        <module>seer-fitness-system</module>
-        <module>seer-fitness-file</module>
-        <module>seer-fitness-business</module>
-        <module>seer-fitness-ai</module>
-        <module>seer-fitness-boot</module>
+        <module>momo-framework</module>
+        <module>momo-system</module>
+        <module>momo-file</module>
+        <module>momo-business</module>
+        <module>momo-ai</module>
+        <module>momo-boot</module>
     </modules>
 
     <!-- 依赖版本统一管理 -->
@@ -246,14 +246,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-<!--        <repository>-->
-<!--            <id>company</id>-->
-<!--            <name>maven-releases</name>-->
-<!--            <url>http://172.20.186.161:9990/repository/maven-releases</url>-->
-<!--            <releases>-->
-<!--                <enabled>true</enabled>-->
-<!--            </releases>-->
-<!--        </repository>-->
     </repositories>
 
     <pluginRepositories>
