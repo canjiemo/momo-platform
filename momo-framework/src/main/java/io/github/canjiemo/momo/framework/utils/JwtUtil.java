@@ -1,5 +1,6 @@
 package io.github.canjiemo.momo.framework.utils;
 
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.momo.framework.config.JwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -74,10 +75,10 @@ public class JwtUtil {
                     .getBody();
         } catch (ExpiredJwtException e) {
             log.warn("JWT Token已过期: {}", e.getMessage());
-            throw new RuntimeException("Token已过期");
+            throw new BusinessException("Token已过期");
         } catch (JwtException e) {
             log.warn("JWT Token解析失败: {}", e.getMessage());
-            throw new RuntimeException("Token无效");
+            throw new BusinessException("Token无效");
         }
     }
 

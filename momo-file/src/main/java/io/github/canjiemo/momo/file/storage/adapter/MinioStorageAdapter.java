@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import io.github.canjiemo.momo.file.storage.IFileStorageAdapter;
 import io.github.canjiemo.momo.file.storage.model.FileUploadResult;
 import io.github.canjiemo.momo.file.storage.model.MinioStorageConfig;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.minio.*;
 import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class MinioStorageAdapter implements IFileStorageAdapter {
             }
         } catch (Exception e) {
             log.error("MinIO bucket 检查/创建失败: bucket={}", bucket, e);
-            throw new RuntimeException("MinIO bucket 初始化失败: " + bucket, e);
+            throw new BusinessException("MinIO bucket 初始化失败: " + bucket);
         }
     }
 

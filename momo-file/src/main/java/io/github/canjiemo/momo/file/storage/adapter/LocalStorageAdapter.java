@@ -1,6 +1,7 @@
 package io.github.canjiemo.momo.file.storage.adapter;
 
 import com.alibaba.fastjson2.JSON;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.momo.file.storage.IFileStorageAdapter;
 import io.github.canjiemo.momo.file.storage.model.FileUploadResult;
 import io.github.canjiemo.momo.file.storage.model.LocalStorageConfig;
@@ -67,7 +68,7 @@ public class LocalStorageAdapter implements IFileStorageAdapter {
         Path base = Paths.get(config.getBasePath()).toAbsolutePath().normalize();
         Path resolved = base.resolve(fileKey).normalize();
         if (!resolved.startsWith(base)) {
-            throw new IllegalArgumentException("非法文件路径");
+            throw new BusinessException("非法文件路径");
         }
         return resolved;
     }

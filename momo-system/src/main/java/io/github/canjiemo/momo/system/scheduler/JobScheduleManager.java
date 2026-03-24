@@ -1,6 +1,7 @@
 package io.github.canjiemo.momo.system.scheduler;
 
 import io.github.canjiemo.base.myjdbc.dao.IBaseDao;
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.momo.system.entity.SysJob;
 import io.github.canjiemo.momo.system.entity.SysJobLog;
 import jakarta.annotation.PostConstruct;
@@ -55,7 +56,7 @@ public class JobScheduleManager {
      */
     public void register(SysJob job) {
         if (!CronExpression.isValidExpression(job.getCronExpression())) {
-            throw new IllegalArgumentException("无效的Cron表达式: " + job.getCronExpression());
+            throw new BusinessException("无效的Cron表达式: " + job.getCronExpression());
         }
         getHandler(job.getHandlerName()); // 提前校验 handler 存在
 
@@ -134,7 +135,7 @@ public class JobScheduleManager {
         try {
             return applicationContext.getBean(handlerName, JobHandler.class);
         } catch (Exception e) {
-            throw new IllegalArgumentException("找不到处理器Bean: " + handlerName);
+            throw new BusinessException("找不到处理器Bean: " + handlerName);
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.canjiemo.momo.system.service;
 
+import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.momo.framework.utils.RedisUtil;
 import io.github.canjiemo.momo.system.constants.ConfigKeys;
 import io.github.canjiemo.momo.system.dto.CaptchaConfigResponse;
@@ -259,7 +260,7 @@ public class CaptchaService implements ICaptchaService {
             return Base64.getEncoder().encodeToString(imageBytes);
         } catch (IOException e) {
             log.error("验证码图片转Base64失败", e);
-            throw new RuntimeException("生成验证码失败", e);
+            throw new BusinessException("生成验证码失败");
         }
     }
 
