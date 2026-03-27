@@ -1,6 +1,7 @@
 package io.github.canjiemo.momo.system.service;
 
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.momo.framework.utils.PasswordUtil;
 import io.github.canjiemo.momo.system.constants.ConfigKeys;
 import io.github.canjiemo.momo.system.dto.TenantCreateRequest;
 import io.github.canjiemo.momo.system.dto.TenantDTO;
@@ -15,8 +16,8 @@ import io.github.canjiemo.mycommon.exception.BusinessException;
 import io.github.canjiemo.mycommon.pager.Pager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,9 @@ import java.util.List;
 public class TenantService extends BaseServiceImpl implements ITenantService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @Autowired
+    private PasswordUtil passwordUtil;
 
     @Value("${myjdbc.tenant.enabled:false}")
     private boolean tenantEnabled;
@@ -142,8 +146,7 @@ public class TenantService extends BaseServiceImpl implements ITenantService {
         }
 
         String initialPassword = ConfigUtil.getString(ConfigKeys.PASSWORD_INITIAL, "Aa123456!");
-        int bcryptStrength = 12;
-        String encodedPassword = BCrypt.hashpw(initialPassword, BCrypt.gensalt(bcryptStrength));
+        String encodedPassword = passwordUtil.encryptPassword(initialPassword);
 
         SysUser admin = new SysUser();
         admin.setTenantId(tenant.getId());
