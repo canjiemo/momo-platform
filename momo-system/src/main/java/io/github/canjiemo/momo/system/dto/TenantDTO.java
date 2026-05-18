@@ -88,10 +88,10 @@ public class TenantDTO {
     /**
      * 创建人ID
      */
-    private Long createdBy;
+    private Long createBy;
 
     /**
      * 更新人ID
      */
-    private Long updatedBy;
+    private Long updateBy;
 }

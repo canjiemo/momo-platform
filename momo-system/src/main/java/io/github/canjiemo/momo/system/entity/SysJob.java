@@ -19,8 +19,8 @@ public class SysJob implements MyTableEntity {
     private Integer status;
     private String remark;
     private Integer deleteFlag;
-    private Long createdBy;
+    private Long createBy;
     private LocalDateTime createTime;
-    private Long updatedBy;
+    private Long updateBy;
     private LocalDateTime updateTime;
 }

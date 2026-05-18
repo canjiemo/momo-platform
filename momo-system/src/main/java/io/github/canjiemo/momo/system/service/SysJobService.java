@@ -84,7 +84,8 @@ public class SysJobService extends BaseServiceImpl implements ISysJobService {
         job.setStatus(request.getStatus());
         job.setRemark(request.getRemark());
 
-        baseDao.updatePO(job);
+        // 全量更新：jobParams / remark 等可空字段通过 ignoreNull=false 才能清空
+        baseDao.updatePO(job, false);
         scheduleManager.refresh(job);
     }
 

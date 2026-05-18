@@ -2,7 +2,7 @@ spring:
   application:
     name: momo-platform
   profiles:
-    active: local
+    active: dev
 
   # PostgreSQL Database Configuration
   datasource:
@@ -59,12 +59,6 @@ spring:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
-
-  autoconfigure:
-    exclude:
-      - org.springframework.ai.autoconfigure.ollama.OllamaChatAutoConfiguration
-      - org.springframework.ai.autoconfigure.ollama.OllamaEmbeddingAutoConfiguration
-      - org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration
 
 # Server Configuration
 server:

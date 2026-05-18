@@ -330,7 +330,8 @@ public class MenuService extends BaseServiceImpl implements IMenuService {
         menu.setSortOrder(request.getSortOrder());
         menu.setStatus(request.getStatus());
 
-        baseDao.updatePO(menu);
+        // 全量更新：path / permission / icon 等可空字段通过 ignoreNull=false 才能清空
+        baseDao.updatePO(menu, false);
 
         log.info("更新菜单成功: id={}, menuName={}", request.getId(), request.getMenuName());
     }

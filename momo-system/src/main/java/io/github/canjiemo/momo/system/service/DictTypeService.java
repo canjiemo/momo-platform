@@ -156,7 +156,8 @@ public class DictTypeService extends BaseServiceImpl implements IDictTypeService
         existingDict.setSortOrder(request.getSortOrder());
         existingDict.setRemark(request.getRemark());
 
-        baseDao.updatePO(existingDict);
+        // 全量更新：updatePO 默认跳过 null 字段，会导致可选字段（dictDescription/remark）传 null 时清不掉
+        baseDao.updatePO(existingDict, false);
 
         String oldDictType = existingDict.getDictType();
         if (!oldDictType.equals(request.getDictType())) {

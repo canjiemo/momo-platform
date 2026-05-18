@@ -74,13 +74,13 @@ public class SysMenu implements MyTableEntity {
     private Integer deleteFlag;
 
     @MyField(fill = AuditFill.CREATE_BY)
-    private Long createdBy;
+    private Long createBy;
 
     @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;
 
     @MyField(fill = AuditFill.UPDATE_BY)
-    private Long updatedBy;
+    private Long updateBy;
 
     @MyField(fill = AuditFill.UPDATE_TIME)
     private LocalDateTime updateTime;

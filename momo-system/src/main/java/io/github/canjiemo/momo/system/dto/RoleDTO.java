@@ -42,7 +42,7 @@ public class RoleDTO {
     /**
      * 创建人ID
      */
-    private Long createdBy;
+    private Long createBy;
 
     /**
      * 创建时间
@@ -52,7 +52,7 @@ public class RoleDTO {
     /**
      * 更新人ID
      */
-    private Long updatedBy;
+    private Long updateBy;
 
     /**
      * 更新时间

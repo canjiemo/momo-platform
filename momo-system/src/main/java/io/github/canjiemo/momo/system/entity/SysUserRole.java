@@ -39,7 +39,7 @@ public class SysUserRole implements MyTableEntity {
     private Long roleId;
 
     @MyField(fill = AuditFill.CREATE_BY)
-    private Long createdBy;
+    private Long createBy;
 
     @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;

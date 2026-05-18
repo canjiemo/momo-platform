@@ -241,7 +241,8 @@ public class UserService extends BaseServiceImpl implements IUserService {
             user.setUserType(request.getUserType());  // 更新用户类型
         }
 
-        baseDao.updatePO(user);
+        // 全量更新：updatePO 默认跳过 null 字段，orgId 等可空字段需通过 ignoreNull=false 才能清空
+        baseDao.updatePO(user, false);
 
         // 重新分配角色
         if (request.getRoleIds() != null) {

@@ -167,7 +167,9 @@ public class DictDataService extends BaseServiceImpl implements IDictDataService
         existingData.setSortOrder(request.getSortOrder());
         existingData.setRemark(request.getRemark());
 
-        baseDao.updatePO(existingData);
+        // 全量更新：updatePO 默认跳过 null 字段，会导致可选字段（dictDescription/cssClass/listClass/remark）
+        // 传 null 时清不掉。这里语义是"前端提交什么就保存什么"，所以强制写入所有字段。
+        baseDao.updatePO(existingData, false);
 
         String oldDictType = existingData.getDictType();
         dictCacheService.deleteDictDataCache(oldDictType);

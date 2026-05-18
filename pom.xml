@@ -37,7 +37,6 @@
         <module>momo-system</module>
         <module>momo-file</module>
         <module>momo-business</module>
-        <module>momo-ai</module>
         <module>momo-boot</module>
     </modules>
 

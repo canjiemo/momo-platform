@@ -159,7 +159,8 @@ public class PlatformOrganizationService extends BaseServiceImpl implements IPla
         org.setStatus(request.getStatus());
 
         TenantContext.withoutTenant(() -> {
-            baseDao.updatePO(org);
+            // 全量更新：leaderId / contactPhone / email 等可空字段通过 ignoreNull=false 才能清空
+            baseDao.updatePO(org, false);
             return null;
         });
 

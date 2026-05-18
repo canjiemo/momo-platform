@@ -144,7 +144,8 @@ public class RoleService extends BaseServiceImpl implements IRoleService {
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
 
-        baseDao.updatePO(role);
+        // 全量更新：description 等可空字段通过 ignoreNull=false 才能清空
+        baseDao.updatePO(role, false);
 
         // 重新分配菜单权限
         if (request.getMenuIds() != null) {

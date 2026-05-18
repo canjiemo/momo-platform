@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %-30logger{30} : %msg%n%ex</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 测试时 myjdbc / spring-jdbc 开 DEBUG，方便定位 SQL 失败的根本原因 -->
+    <logger name="io.github.canjiemo.base.myjdbc" level="DEBUG"/>
+    <logger name="io.github.canjiemo.momo"        level="INFO"/>
+    <logger name="org.springframework.jdbc"       level="DEBUG"/>
+    <logger name="org.springframework.boot.test"  level="WARN"/>
+    <logger name="com.alibaba.druid"              level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

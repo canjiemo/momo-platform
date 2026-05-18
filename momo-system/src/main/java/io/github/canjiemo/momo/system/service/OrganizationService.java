@@ -312,7 +312,8 @@ public class OrganizationService extends BaseServiceImpl implements IOrganizatio
         org.setDescription(request.getDescription());
         org.setStatus(request.getStatus());
 
-        baseDao.updatePO(org);
+        // 全量更新：leaderId / contactPhone / email 等可空字段通过 ignoreNull=false 才能清空
+        baseDao.updatePO(org, false);
 
         log.info("更新组织成功: id={}, orgCode={}, orgName={}", request.getId(), request.getOrgCode(), request.getOrgName());
     }

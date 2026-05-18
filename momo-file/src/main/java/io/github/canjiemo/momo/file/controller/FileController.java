@@ -2,6 +2,7 @@ package io.github.canjiemo.momo.file.controller;
 
 import io.github.canjiemo.base.mymvc.controller.MyBaseController;
 import io.github.canjiemo.base.mymvc.data.MyResponseResult;
+import io.github.canjiemo.momo.file.dto.SysFileBatchDeleteRequest;
 import io.github.canjiemo.momo.file.dto.SysFileDTO;
 import io.github.canjiemo.momo.file.dto.SysFileQueryParam;
 import io.github.canjiemo.momo.file.service.ISysFileService;
@@ -12,6 +13,7 @@ import io.github.canjiemo.mycommon.pager.Pager;
 import io.github.canjiemo.mycommon.pager.PagerHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 @Slf4j
 @RestController
@@ -54,6 +57,12 @@ public class FileController extends MyBaseController {
     public MyResponseResult delete(@PathVariable Long id) throws Exception {
         fileService.delete(id);
         return doJsonDefaultMsg();
+    }
+
+    @PostMapping("/delete-batch")
+    @RequireAuth(permissions = {"file:delete"})
+    public MyResponseResult<Integer> deleteBatch(@Valid @RequestBody SysFileBatchDeleteRequest request) throws Exception {
+        return doJsonOut(fileService.batchDelete(Arrays.asList(request.getIds())));
     }
 
     @PostMapping("/search")

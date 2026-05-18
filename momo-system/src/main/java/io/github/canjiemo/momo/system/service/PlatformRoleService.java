@@ -97,7 +97,8 @@ public class PlatformRoleService extends BaseServiceImpl implements IPlatformRol
         role.setDescription(request.getDescription());
         role.setStatus(request.getStatus());
 
-        baseDao.updatePO(role);
+        // 全量更新：description 等可空字段通过 ignoreNull=false 才能清空
+        baseDao.updatePO(role, false);
 
         if (request.getMenuIds() != null) {
             removeRoleMenus(request.getId());

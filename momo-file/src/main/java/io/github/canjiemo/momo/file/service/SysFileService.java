@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -95,6 +96,33 @@ public class SysFileService extends BaseServiceImpl implements ISysFileService {
         adapter.delete(file.getFileKey());
         baseDao.delByIds(SysFile.class, String.valueOf(id));
         log.info("文件已删除: id={}, key={}", id, file.getFileKey());
+    }
+
+    /**
+     * 批量删除：逐条调用 storage 物理删，再统一逻辑删除 DB 记录，全程一个事务。
+     * 任一物理删除失败会回滚事务（DB 记录不丢），但已物理删除的文件无法恢复 ——
+     * 与单删 delete(Long) 的设计一致。
+     *
+     * @return 实际删除的文件数量
+     */
+    @Override
+    @Transactional
+    public int batchDelete(List<Long> ids) throws Exception {
+        if (ids == null || ids.isEmpty()) throw new BusinessException("删除的文件ID不能为空");
+
+        List<SysFile> files = lambdaQuery(SysFile.class).in(SysFile::getId, ids).list();
+        if (files.isEmpty()) return 0;
+
+        IFileStorageAdapter adapter = fileStorageManager.getActive();
+        for (SysFile f : files) {
+            adapter.delete(f.getFileKey());
+        }
+
+        String[] idArr = files.stream().map(f -> String.valueOf(f.getId())).toArray(String[]::new);
+        baseDao.delByIds(SysFile.class, idArr);
+
+        log.info("批量删除文件成功: count={}, ids={}", files.size(), ids);
+        return files.size();
     }
 
     @Override

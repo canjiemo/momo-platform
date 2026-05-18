@@ -39,7 +39,7 @@ public class SysRoleMenu implements MyTableEntity {
     private Long menuId;
 
     @MyField(fill = AuditFill.CREATE_BY)
-    private Long createdBy;
+    private Long createBy;
 
     @MyField(fill = AuditFill.CREATE_TIME)
     private LocalDateTime createTime;
