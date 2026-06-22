@@ -27,8 +27,8 @@
         <druid.version>1.2.23</druid.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <!-- Spring AI: 使用 M6 里程碑版，GA 版本发布时未上传至 Maven Central -->
-        <spring-ai.version>1.0.0-M6</spring-ai.version>
+        <!-- Spring AI: 2.0.0 正式版（GA），OpenAI 模型底层改用官方 OpenAI Java SDK -->
+        <spring-ai.version>2.0.0</spring-ai.version>
         <pgvector.version>0.1.6</pgvector.version>
     </properties>
 
@@ -37,6 +37,7 @@
         <module>momo-system</module>
         <module>momo-file</module>
         <module>momo-business</module>
+        <module>momo-ai</module>
         <module>momo-boot</module>
     </modules>
 
@@ -143,18 +144,13 @@
                 <version>5.3</version>
             </dependency>
 
-            <!-- Spring AI Ollama（M6 里程碑版，GA 版未发布至 Maven Central） -->
+            <!-- Spring AI BOM：统一管理所有 spring-ai-* 构件版本（2.0.0 GA） -->
             <dependency>
                 <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+                <artifactId>spring-ai-bom</artifactId>
                 <version>${spring-ai.version}</version>
-            </dependency>
-
-            <!-- Spring AI OpenAI（兼容阿里百炼 DashScope OpenAI 协议） -->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- pgvector Java 客户端 -->

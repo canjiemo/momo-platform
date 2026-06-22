@@ -30,6 +30,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- AI 智能查询模块 -->
+        <dependency>
+            <groupId>io.github.canjiemo</groupId>
+            <artifactId>momo-ai</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Spring Boot Web Starter with Undertow -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

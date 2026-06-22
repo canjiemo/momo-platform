@@ -10,14 +10,22 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.OllamaEmbeddingModel;
 import org.springframework.ai.ollama.api.OllamaApi;
-import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.ai.ollama.api.OllamaEmbeddingOptions;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
 import java.util.List;
 
 @Slf4j
 @Component("ollama")
 public class OllamaAiProvider implements IAiChatProvider, IAiEmbeddingProvider {
+
+    /** 连接 / 读超时，防止本地 Ollama 无响应导致请求线程长期挂起 */
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(60);
 
     private volatile OllamaChatModel chatModel;
     private volatile OllamaEmbeddingModel embeddingModel;
@@ -29,14 +37,17 @@ public class OllamaAiProvider implements IAiChatProvider, IAiEmbeddingProvider {
 
     @Override
     public void init(AiProviderConfig config) {
-        OllamaApi api = new OllamaApi(config.getBaseUrl());
+        OllamaApi api = OllamaApi.builder()
+                .baseUrl(config.getBaseUrl())
+                .restClientBuilder(timeoutRestClientBuilder())
+                .build();
         this.chatModel = OllamaChatModel.builder()
                 .ollamaApi(api)
-                .defaultOptions(OllamaOptions.builder().model(config.getChatModel()).build())
+                .options(OllamaChatOptions.builder().model(config.getChatModel()).build())
                 .build();
         this.embeddingModel = OllamaEmbeddingModel.builder()
                 .ollamaApi(api)
-                .defaultOptions(OllamaOptions.builder().model(config.getEmbedModel()).build())
+                .options(OllamaEmbeddingOptions.builder().model(config.getEmbedModel()).build())
                 .build();
         log.info("Ollama Provider 初始化完成: baseUrl={}, chatModel={}, embedModel={}",
                 config.getBaseUrl(), config.getChatModel(), config.getEmbedModel());
@@ -54,5 +65,12 @@ public class OllamaAiProvider implements IAiChatProvider, IAiEmbeddingProvider {
     @Override
     public float[] embed(String text) {
         return embeddingModel.embed(text);
+    }
+
+    private RestClient.Builder timeoutRestClientBuilder() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(CONNECT_TIMEOUT);
+        factory.setReadTimeout(READ_TIMEOUT);
+        return RestClient.builder().requestFactory(factory);
     }
 }

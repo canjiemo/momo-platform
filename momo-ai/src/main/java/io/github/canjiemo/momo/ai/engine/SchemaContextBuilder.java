@@ -4,6 +4,7 @@ import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
 import io.github.canjiemo.momo.ai.provider.AiProviderManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +14,13 @@ import java.util.*;
 @Component
 public class SchemaContextBuilder extends BaseServiceImpl {
 
-    private static final int TOP_K = 10;
+    /** 向量检索返回的最相关字段数量（可经配置覆盖） */
+    @Value("${momo.ai.schema.top-k:10}")
+    private int topK;
     /** 余弦距离阈值（<=> 越小越相似），超过此值视为不相关，不注入 Prompt。
-     *  nomic-embed-text 对中文语义匹配的距离偏高，0.5 是较合适的起点 */
-    private static final double DISTANCE_THRESHOLD = 0.5;
+     *  不同 embedding 模型对中文语义匹配的距离差异较大，故抽为可配置项，默认 0.5 */
+    @Value("${momo.ai.schema.distance-threshold:0.5}")
+    private double distanceThreshold;
 
     @Autowired
     private AiProviderManager providerManager;
@@ -48,7 +52,7 @@ public class SchemaContextBuilder extends BaseServiceImpl {
             LIMIT :topK
             """;
         List<Map<String, Object>> results = jdbcTemplate.queryForList(
-                sql, Map.of("vec", vectorStr, "topK", TOP_K, "threshold", DISTANCE_THRESHOLD));
+                sql, Map.of("vec", vectorStr, "topK", topK, "threshold", distanceThreshold));
 
         log.info("[Schema] 向量检索完成 | 命中字段数={}", results.size());
         if (results.isEmpty()) {
@@ -57,7 +61,7 @@ public class SchemaContextBuilder extends BaseServiceImpl {
                     "SELECT COUNT(*) FROM ai_field_catalog WHERE is_enabled = 1 AND embed_vector IS NOT NULL",
                     Map.of(), Long.class) > 0;
             if (hasVectors) {
-                log.warn("[Schema] 向量全部低相关（distance >= {}），问题与数据无关", DISTANCE_THRESHOLD);
+                log.warn("[Schema] 向量全部低相关（distance >= {}），问题与数据无关", distanceThreshold);
             } else {
                 log.warn("[Schema] 向量库为空，尚未完成向量同步");
             }

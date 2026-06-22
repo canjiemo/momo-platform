@@ -60,6 +60,20 @@ spring:
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
 
+  # Spring AI：模型由 momo-ai 的 Provider 手动构建（运行时从 DB 配置热加载），
+  # 禁用官方自动配置，避免缺少 api-key 时启动失败
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+      - org.springframework.ai.model.ollama.autoconfigure.OllamaApiAutoConfiguration
+      - org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration
+      - org.springframework.ai.model.ollama.autoconfigure.OllamaEmbeddingAutoConfiguration
+
 # Server Configuration
 server:
   port: 8070
@@ -82,5 +96,14 @@ myjdbc:
   tenant:
     enabled: true                        # 启用租户隔离，自动注入 tenant_id 条件
     column: tenant_id                    # 租户字段名
+
+# AI 智能查询模块配置
+momo:
+  ai:
+    # API Key 加密密钥（AES-256）。生产环境务必通过环境变量 MOMO_AI_SECRET_KEY 注入，切勿提交明文！
+    secret-key: ${MOMO_AI_SECRET_KEY:}
+    schema:
+      top-k: 10                   # 向量检索返回的最相关字段数
+      distance-threshold: 0.5     # 余弦距离阈值（越小越相似，超过则视为与数据无关）
 
 

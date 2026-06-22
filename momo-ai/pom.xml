@@ -39,16 +39,24 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring AI Ollama（版本由根 pom 统一管理，使用 M6 里程碑版） -->
+        <!-- Spring AI Ollama（2.0.0 GA，版本由根 pom 的 spring-ai-bom 统一管理） -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
         </dependency>
 
-        <!-- Spring AI OpenAI（兼容阿里百炼 DashScope OpenAI 协议） -->
+        <!-- Spring AI OpenAI（兼容阿里百炼 DashScope OpenAI 协议，底层为官方 OpenAI SDK） -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
+        <!-- 官方 OpenAI Java SDK 的 OkHttp 实现（提供 OpenAIOkHttpClient，
+             spring-ai 仅传递 openai-java-core，需显式引入实现模块；版本对齐 core 4.39.1） -->
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java-client-okhttp</artifactId>
+            <version>4.39.1</version>
         </dependency>
 
         <!-- pgvector Java 客户端（版本由根 pom 统一管理） -->

@@ -1,6 +1,7 @@
 package io.github.canjiemo.momo.ai.provider.service;
 
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.momo.ai.config.AiSecretCipher;
 import io.github.canjiemo.momo.ai.provider.AiProviderManager;
 import io.github.canjiemo.momo.ai.provider.entity.AiProviderConfig;
 import io.github.canjiemo.mycommon.exception.BusinessException;
@@ -20,16 +21,23 @@ public class AiProviderConfigService extends BaseServiceImpl implements IAiProvi
     @Autowired
     private AiProviderManager providerManager;
 
+    @Autowired
+    private AiSecretCipher secretCipher;
+
     public List<AiProviderConfig> list() {
-        return lambdaQuery(AiProviderConfig.class)
+        List<AiProviderConfig> configs = lambdaQuery(AiProviderConfig.class)
                 .orderByDesc(AiProviderConfig::getCreateTime)
                 .list();
+        // 响应脱敏：API Key 仅回显末 4 位，避免明文外泄
+        configs.forEach(c -> c.setApiKey(secretCipher.mask(c.getApiKey())));
+        return configs;
     }
 
     @Transactional
     public void create(AiProviderConfig config) {
         config.setIsActive(0);
         config.setDeleteFlag(0);
+        config.setApiKey(secretCipher.encrypt(config.getApiKey()));
         baseDao.insertPO(config, true);
     }
 
@@ -41,7 +49,11 @@ public class AiProviderConfigService extends BaseServiceImpl implements IAiProvi
         if (request.getChatModel()   != null) config.setChatModel(request.getChatModel());
         if (request.getEmbedModel()  != null) config.setEmbedModel(request.getEmbedModel());
         if (request.getBaseUrl()     != null) config.setBaseUrl(request.getBaseUrl());
-        if (request.getApiKey()      != null) config.setApiKey(request.getApiKey());
+        // 仅当传入了新的、非脱敏占位的 Key 时才更新（前端回显的是脱敏值，原样提交则保留旧 Key）
+        String reqKey = request.getApiKey();
+        if (reqKey != null && !reqKey.isBlank() && !secretCipher.isMasked(reqKey)) {
+            config.setApiKey(secretCipher.encrypt(reqKey));
+        }
         if (request.getConfig()      != null) config.setConfig(request.getConfig());
         if (request.getRemark()      != null) config.setRemark(request.getRemark());
         // isActive 不允许通过 update 接口修改，必须通过 activate 接口切换，以确保同时只有一个激活配置

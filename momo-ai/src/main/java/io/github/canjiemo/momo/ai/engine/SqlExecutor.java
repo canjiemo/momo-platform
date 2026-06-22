@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 public class SqlExecutor {
 
-    private static final int MAX_ROWS = 1000;
+    public static final int MAX_ROWS = 1000;
 
     @Autowired
     private IBaseDao baseDao;

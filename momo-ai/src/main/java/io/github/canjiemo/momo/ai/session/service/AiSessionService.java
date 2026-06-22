@@ -36,10 +36,13 @@ public class AiSessionService extends BaseServiceImpl implements IAiSessionServi
 
     @Override
     public List<AiSessionDTO> listByUser(Long userId, Long tenantId) {
-        return lambdaQuery(AiSession.class, AiSessionDTO.class)
-                .eq(AiSession::getUserId, userId)
-                .orderByDesc(AiSession::getUpdateTime)
-                .list();
+        // 租户隔离：补充 tenant_id 过滤，避免不同租户下相同 user_id 串数据
+        var query = lambdaQuery(AiSession.class, AiSessionDTO.class)
+                .eq(AiSession::getUserId, userId);
+        query = tenantId != null
+                ? query.eq(AiSession::getTenantId, tenantId)
+                : query.isNull(AiSession::getTenantId);
+        return query.orderByDesc(AiSession::getUpdateTime).list();
     }
 
     @Override

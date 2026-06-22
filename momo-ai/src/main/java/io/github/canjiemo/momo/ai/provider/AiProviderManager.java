@@ -1,6 +1,7 @@
 package io.github.canjiemo.momo.ai.provider;
 
 import io.github.canjiemo.base.myjdbc.service.impl.BaseServiceImpl;
+import io.github.canjiemo.momo.ai.config.AiSecretCipher;
 import io.github.canjiemo.momo.ai.provider.entity.AiProviderConfig;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,16 +18,19 @@ public class AiProviderManager extends BaseServiceImpl {
 
     private final Map<String, IAiChatProvider> chatProviders;
     private final Map<String, IAiEmbeddingProvider> embedProviders;
+    private final AiSecretCipher secretCipher;
 
     private volatile IAiChatProvider activeChat;
     private volatile IAiEmbeddingProvider activeEmbed;
 
     public AiProviderManager(List<IAiChatProvider> chatList,
-                             List<IAiEmbeddingProvider> embedList) {
+                             List<IAiEmbeddingProvider> embedList,
+                             AiSecretCipher secretCipher) {
         this.chatProviders = chatList.stream()
                 .collect(Collectors.toMap(IAiChatProvider::getProvider, Function.identity()));
         this.embedProviders = embedList.stream()
                 .collect(Collectors.toMap(IAiEmbeddingProvider::getProvider, Function.identity()));
+        this.secretCipher = secretCipher;
     }
 
     public IAiChatProvider getActiveChat() {
@@ -67,6 +71,8 @@ public class AiProviderManager extends BaseServiceImpl {
             throw new BusinessException("不支持的 AI Provider: " + config.getProvider());
         }
 
+        // 解密 API Key 后再交给 Provider 初始化（DB 中为密文）
+        config.setApiKey(secretCipher.decrypt(config.getApiKey()));
         chat.init(config);
         if (chat != embed) embed.init(config);
         this.activeChat = chat;

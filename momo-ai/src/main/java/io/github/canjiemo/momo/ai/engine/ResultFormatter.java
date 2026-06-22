@@ -57,6 +57,8 @@ public class ResultFormatter {
         AiQueryResponse.TableData tableData = new AiQueryResponse.TableData();
         tableData.setColumns(columns);
         tableData.setRows(tableRows);
+        // 命中行数上限，结果可能被截断，提示前端
+        tableData.setTruncated(rows.size() >= SqlExecutor.MAX_ROWS);
         response.setTable(tableData);
 
         // 有结果：LLM 润色摘要

@@ -10,7 +10,7 @@
 | 数据层 | PostgreSQL、MyJDBC（多租户 ORM）、Druid 连接池、Flyway 迁移 |
 | 缓存 | Redis、Caffeine 本地缓存 |
 | 认证 | JWT（JJWT 0.11）|
-| AI | Spring AI 1.0.0-M6、Ollama、OpenAI 协议（DashScope 兼容）、pgvector |
+| AI | Spring AI 2.0.0、Ollama、OpenAI 协议（DashScope 兼容）、pgvector |
 | 文件存储 | MinIO 对象存储 |
 | 工具库 | Lombok、FastJSON2、Guava |
 | Web 层 | MyMVC（统一响应、参数绑定） |
@@ -51,11 +51,10 @@ momo-platform
 - 文件上传、下载、删除
 - 平台级文件配置管理
 
-### momo-ai
-- **多 Provider**：统一管理 Ollama、OpenAI 协议的多个 AI 提供商，支持运行时切换
-- **会话管理**：多轮对话，上下文保持
-- **NL2SQL 引擎**：自然语言转 SQL，含 Schema 上下文构建和 SQL 合法性校验
-- **数据目录**：管理可供 AI 查询的数据源元信息
+- **多 Provider**：统一管理 Ollama、OpenAI 协议（DashScope）的多个 AI 提供商，基于数据库配置运行时热切换；API Key 采用 AES-256-GCM 加密存储、接口响应脱敏
+- **会话管理**：多轮对话、上下文保持，对话历史游标分页
+- **NL2SQL 引擎**：自然语言转 SQL 全流程——pgvector 向量检索构建 Schema 上下文 → LLM 生成 SQL → JSQLParser 合法性校验（仅 SELECT + 表白名单）→ myjdbc 执行（自动租户隔离）→ LLM 摘要 + 图表推断；异步任务 + Redis 结果轮询
+- **数据目录**：管理可供 AI 查询的表/字段元信息，字段描述向量化用于 RAG 检索
 
 ## 快速启动
 
@@ -95,6 +94,9 @@ Flyway 会在启动时自动执行 `momo-boot/src/main/resources/db/migration/` 
 | `myjdbc.tenant.enabled` | 是否开启多租户隔离 |
 | `myjdbc.show-sql.enabled` | 是否打印 SQL 调试日志 |
 | `spring.flyway.enabled` | 是否启用 Flyway 自动迁移 |
+| `momo.ai.secret-key` | AI Provider API Key 的 AES 加密密钥，**生产环境务必通过环境变量 `MOMO_AI_SECRET_KEY` 注入** |
+| `momo.ai.schema.top-k` | 向量检索返回的最相关字段数（默认 10） |
+| `momo.ai.schema.distance-threshold` | 余弦距离阈值，越小越相似（默认 0.5） |
 
 ## 项目信息
 

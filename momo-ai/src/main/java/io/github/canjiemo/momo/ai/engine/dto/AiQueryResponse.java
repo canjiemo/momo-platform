@@ -18,6 +18,8 @@ public class AiQueryResponse {
     public static class TableData {
         private List<String> columns;
         private List<List<Object>> rows;
+        /** 结果是否可能被行数上限截断（命中 MAX_ROWS 时为 true），供前端提示用户 */
+        private boolean truncated;
     }
 
     @Data
