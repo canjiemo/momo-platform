@@ -95,6 +95,7 @@ Flyway 会在启动时自动执行 `momo-boot/src/main/resources/db/migration/` 
 | `myjdbc.show-sql.enabled` | 是否打印 SQL 调试日志 |
 | `spring.flyway.enabled` | 是否启用 Flyway 自动迁移 |
 | `momo.ai.secret-key` | AI Provider API Key 的 AES 加密密钥，**生产环境务必通过环境变量 `MOMO_AI_SECRET_KEY` 注入** |
+| `momo.ai.activate.validate` | 激活 Provider 前是否做连通性校验（默认 true，失败则取消切换） |
 | `momo.ai.schema.top-k` | 向量检索返回的最相关字段数（默认 10） |
 | `momo.ai.schema.distance-threshold` | 余弦距离阈值，越小越相似（默认 0.5） |
 

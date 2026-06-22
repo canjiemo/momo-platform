@@ -100,20 +100,22 @@ public class ResultFormatter {
         if (columns.size() < 2) return "none";
 
         String firstCol = columns.get(0).toLowerCase();
-        String secondCol = columns.get(1).toLowerCase();
-
         boolean firstIsTime = TIME_KEYWORDS.stream().anyMatch(firstCol::contains);
         boolean firstIsGroup = GROUP_KEYWORDS.stream().anyMatch(firstCol::contains);
+        boolean firstIsNumeric = isNumericColumn(rows, columns.get(0));
         boolean secondIsNumeric = isNumericColumn(rows, columns.get(1));
 
+        // 次列非数值，无法绘制数值图形
         if (!secondIsNumeric) return "none";
 
-        if (firstIsTime) return "line";
-        if (firstIsGroup) return "bar";
-        // 2列数值型、行数适合展示占比
-        if (columns.size() == 2 && rows.size() <= 10) return "pie";
+        if (firstIsTime) return "line";                              // 时间序列 → 折线
+        if (firstIsGroup) return "bar";                              // 命中分组关键字 → 柱状
+        if (columns.size() == 2 && rows.size() <= 10) return "pie";  // 两列小数据集 → 占比饼图
+        // 兜底：类别型（非数值）首列 + 数值次列 → 柱状图
+        // （此前关键字未命中时会误判为 none，导致"各部门人数"等明显可绘图的结果不出图）
+        if (!firstIsNumeric) return "bar";
 
-        return "none";
+        return "none";                                               // 数值-数值等无明确图形语义
     }
 
     private boolean isNumericColumn(List<Map<String, Object>> rows, String col) {

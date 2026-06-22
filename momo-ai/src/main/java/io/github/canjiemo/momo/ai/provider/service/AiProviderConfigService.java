@@ -7,6 +7,7 @@ import io.github.canjiemo.momo.ai.provider.entity.AiProviderConfig;
 import io.github.canjiemo.mycommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,10 @@ public class AiProviderConfigService extends BaseServiceImpl implements IAiProvi
 
     @Autowired
     private AiSecretCipher secretCipher;
+
+    /** 激活 Provider 前是否做连通性校验（默认开启），失败则取消切换 */
+    @Value("${momo.ai.activate.validate:true}")
+    private boolean validateOnActivate;
 
     public List<AiProviderConfig> list() {
         List<AiProviderConfig> configs = lambdaQuery(AiProviderConfig.class)
@@ -79,6 +84,17 @@ public class AiProviderConfigService extends BaseServiceImpl implements IAiProvi
         target.setUpdateTime(null);
         baseDao.updatePO(target);
         providerManager.invalidate();
+
+        if (validateOnActivate) {
+            try {
+                // 触发按新配置重新加载，并做一次最小连通性探测（读取的是本事务内未提交的 is_active=1）
+                providerManager.getActiveEmbed().embed("connectivity check");
+            } catch (Exception e) {
+                // 校验失败：清除半切换的缓存，抛异常触发事务回滚，保持旧配置
+                providerManager.invalidate();
+                throw new BusinessException("目标 Provider 连通性校验失败，已取消切换：" + e.getMessage());
+            }
+        }
         log.info("AI Provider 已激活: id={}, provider={}", id, target.getProvider());
     }
 

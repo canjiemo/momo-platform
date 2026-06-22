@@ -18,4 +18,5 @@ public class AiConversation implements MyTableEntity {
     private String generatedSql;
     private Integer execRows;
     private LocalDateTime createTime;
+    private Integer deleteFlag;
 }

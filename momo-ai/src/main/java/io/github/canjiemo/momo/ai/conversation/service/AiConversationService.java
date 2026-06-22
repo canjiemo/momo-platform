@@ -27,6 +27,7 @@ public class AiConversationService extends BaseServiceImpl implements IAiConvers
         conv.setRole("user");
         conv.setContent(question);
         conv.setCreateTime(LocalDateTime.now());
+        conv.setDeleteFlag(0);
         baseDao.insertPO(conv, true);
     }
 
@@ -43,6 +44,7 @@ public class AiConversationService extends BaseServiceImpl implements IAiConvers
         conv.setGeneratedSql(sql);
         conv.setExecRows(rows);
         conv.setCreateTime(LocalDateTime.now());
+        conv.setDeleteFlag(0);
         baseDao.insertPO(conv, true);
     }
 
